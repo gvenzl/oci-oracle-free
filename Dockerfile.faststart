@@ -1,0 +1,48 @@
+#
+# Since: April, 2023
+# Author: gvenzl
+# Name: Dockerfile.faststart
+# Description: Dockerfile to build Oracle DB Free with ready-to-go database files.
+#
+# Copyright 2022 Gerald Venzl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+ARG BASE_IMAGE
+
+FROM ${BASE_IMAGE} as base
+
+FROM base as cdb_pdb_seed
+
+# Extract all files except system*.dbf and sysaux*.dbf
+
+RUN unzip "${ORACLE_BASE}"/"${ORACLE_SID}".zip -x "${ORACLE_SID}/system*.dbf" "${ORACLE_SID}/sysaux*.dbf" -d "${ORACLE_BASE}"/oradata/ 1> /dev/null
+RUN rm "${ORACLE_SID}.zip"
+
+FROM cdb_pdb_seed as cdb_sysaux
+
+COPY --from=base "${ORACLE_BASE}"/"${ORACLE_SID}".zip "${ORACLE_BASE}"/"${ORACLE_SID}".zip
+
+# Extract sysaux*.dbf
+RUN unzip "${ORACLE_BASE}"/"${ORACLE_SID}".zip "${ORACLE_SID}/sysaux*.dbf" -d "${ORACLE_BASE}"/oradata/ 1> /dev/null
+RUN rm "${ORACLE_SID}.zip"
+
+FROM cdb_sysaux as cdb_system
+
+COPY --from=base "${ORACLE_BASE}"/"${ORACLE_SID}".zip "${ORACLE_BASE}"/"${ORACLE_SID}".zip
+
+# Extract system*.dbf
+RUN unzip "${ORACLE_BASE}"/"${ORACLE_SID}".zip "${ORACLE_SID}/system*.dbf" -d "${ORACLE_BASE}"/oradata/ 1> /dev/null
+RUN rm "${ORACLE_SID}.zip"
+
+LABEL org.opencontainers.image.source https://github.com/gvenzl/oci-oracle-free
