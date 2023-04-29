@@ -22,17 +22,27 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-ORACLE_CDB=${1:-}
+# Check whether PDB is open
+#  Either the PDB passed on as $ORACLE_DATABASE or the default "FREEPDB1"
+DATABASE=${1:-${ORACLE_DATABASE:-FREEPDB1}}
 
 db_status=$(sqlplus -s / << EOF
    set heading off;
    set pagesize 0;
-   SELECT status FROM v\$instance;
+   SELECT 'READY'
+    FROM (
+      SELECT name, open_mode
+       FROM v\$pdbs
+      UNION ALL
+      SELECT name, open_mode
+       FROM v\$database) dbs
+     WHERE dbs.name = '${DATABASE}'
+      AND dbs.open_mode = 'READ WRITE';
    exit;
 EOF
 )
 
-if [ "${db_status}" == "OPEN" ]; then
+if [ "${db_status}" == "READY" ]; then
    exit 0;
 else
    exit 1;

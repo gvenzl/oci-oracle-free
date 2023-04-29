@@ -248,6 +248,7 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- Setup healthcheck user
    CREATE USER OPS\$ORACLE IDENTIFIED EXTERNALLY;
    GRANT CONNECT, SELECT_CATALOG_ROLE TO OPS\$ORACLE;
+   ALTER USER OPS\$ORACLE SET CONTAINER_DATA = ALL CONTAINER = CURRENT;
 
    exit;
 EOF
