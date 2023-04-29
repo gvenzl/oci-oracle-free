@@ -6,6 +6,7 @@ Oracle Database Free Container / Docker images.
 # Supported tags and respective `Dockerfile` links
 
 * [`latest`, `23`, `23.2`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.232), [`latest-faststart`, `23-faststart`, `23.2-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
+* [`slim`, `23-slim`, `23.2-slim`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.232), [`slim-faststart`, `23-slim-faststart`, `23.2-slim-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
 * [`full`, `23-full`, `23.2-full`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.232), [`full-faststart`, `23-full-faststart`, `23.2-full-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
 
 # Quick Start
