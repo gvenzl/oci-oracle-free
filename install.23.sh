@@ -241,6 +241,9 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- beyond 2GB RAM, which cannot be set on FREE.
    ALTER SYSTEM SET CPU_COUNT=2 SCOPE=SPFILE;
 
+   -- Set max job_queue_processes to 1
+   ALTER SYSTEM SET JOB_QUEUE_PROCESSES=1;
+
    -- Reboot of DB
    SHUTDOWN IMMEDIATE;
    STARTUP;
@@ -1891,6 +1894,16 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove lib/*.jar files
   rm "${ORACLE_HOME}"/lib/*.jar
 
+  # Remove unnecessary timezone information
+  rm    "${ORACLE_HOME}"/oracore/zoneinfo/readme.txt
+  rm    "${ORACLE_HOME}"/oracore/zoneinfo/timezdif.csv
+  rm -r "${ORACLE_HOME}"/oracore/zoneinfo/big
+  rm -r "${ORACLE_HOME}"/oracore/zoneinfo/little
+  rm    "${ORACLE_HOME}"/oracore/zoneinfo/timezone*
+  mv    "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg_40.dat "${ORACLE_HOME}"/oracore/zoneinfo/current.dat
+  rm    "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg*
+  mv    "${ORACLE_HOME}"/oracore/zoneinfo/current.dat "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg_40.dat
+
   # Remove Multimedia
   rm -r "${ORACLE_HOME}"/ord/im
 
@@ -1944,7 +1957,7 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm "${ORACLE_HOME}"/bin/amdu        # ASM Disk Utility
   rm "${ORACLE_HOME}"/bin/dg4*        # Database Gateway
   rm "${ORACLE_HOME}"/bin/dgmgrl      # Data Guard Manager CLI
-  rm "${ORACLE_HOME}"/bin/dbnest      # DataBase NEST
+  rm "${ORACLE_HOME}"/bin/dbnest*     # DataBase NEST
   rm "${ORACLE_HOME}"/bin/orion       # ORacle IO Numbers benchmark tool
   rm "${ORACLE_HOME}"/bin/oms_daemon  # Oracle Memory Speed (PMEM support) daemon
   rm "${ORACLE_HOME}"/bin/omsfscmds   # Oracle Memory Speed command line utility
