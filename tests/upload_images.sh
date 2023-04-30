@@ -25,7 +25,7 @@ set -Eeuo pipefail
 # Log into Docker Hub before anything else so that one does not have to
 # wait for the backup to be finished)
 echo "Login to Docker Hub:"
-podman login
+podman login docker.io
 
 # Ensure all tags are in place
 ./all_tag_images.sh
@@ -42,16 +42,24 @@ fi;
 
 # Upload images
 
+echo ""
+echo "Starting upload..."
+echo ""
 
 # Upload 23c FULL images
 echo "Upload 23.2-full-faststart"
 podman push localhost/gvenzl/oracle-free:23.2-full-faststart     docker.io/gvenzl/oracle-free:23.2-full-faststart
 echo "Upload 23-full-faststart"
 podman push localhost/gvenzl/oracle-free:23-full-faststart       docker.io/gvenzl/oracle-free:23-full-faststart
+echo "Upload full-faststart"
+podman push localhost/gvenzl/oracle-free:full-faststart            docker.io/gvenzl/oracle-free:full-faststart
+
 echo "Upload 23.2-full"
 podman push localhost/gvenzl/oracle-free:23.2-full               docker.io/gvenzl/oracle-free:23.2-full
 echo "Upload 23-full"
 podman push localhost/gvenzl/oracle-free:23-full                 docker.io/gvenzl/oracle-free:23-full
+echo "Upload full"
+podman push localhost/gvenzl/oracle-free:full                      docker.io/gvenzl/oracle-free:full
 
 
 # Upload 23c images
@@ -59,6 +67,7 @@ echo "Upload 23.2-faststart"
 podman push localhost/gvenzl/oracle-free:23.2-faststart          docker.io/gvenzl/oracle-free:23.2-faststart
 echo "Upload 23-faststart"
 podman push localhost/gvenzl/oracle-free:23-faststart            docker.io/gvenzl/oracle-free:23-faststart
+
 echo "Upload 23.2"
 podman push localhost/gvenzl/oracle-free:23.2                    docker.io/gvenzl/oracle-free:23.2
 echo "Upload 23"
@@ -70,31 +79,15 @@ echo "Upload 23.2-slim-faststart"
 podman push localhost/gvenzl/oracle-free:23.2-slim-faststart     docker.io/gvenzl/oracle-free:23.2-slim-faststart
 echo "Upload 23-slim-faststart"
 podman push localhost/gvenzl/oracle-free:23-slim-faststart       docker.io/gvenzl/oracle-free:23-slim-faststart
+echo "Upload slim-faststart"
+podman push localhost/gvenzl/oracle-free:slim-faststart            docker.io/gvenzl/oracle-free:slim-faststart
+
 echo "Upload 23.2-slim"
 podman push localhost/gvenzl/oracle-free:23.2-slim               docker.io/gvenzl/oracle-free:23.2-slim
 echo "Upload 23-slim"
 podman push localhost/gvenzl/oracle-free:23-slim                 docker.io/gvenzl/oracle-free:23-slim
-
-
-
-
-
-# Upload FULL images
-echo "Upload full-faststart"
-podman push localhost/gvenzl/oracle-free:full-faststart            docker.io/gvenzl/oracle-free:full-faststart
-echo "Upload full"
-podman push localhost/gvenzl/oracle-free:full                      docker.io/gvenzl/oracle-free:full
-
-
-
-
-# Upload SLIM images
-echo "Upload slim-faststart"
-podman push localhost/gvenzl/oracle-free:slim-faststart            docker.io/gvenzl/oracle-free:slim-faststart
 echo "Upload slim"
 podman push localhost/gvenzl/oracle-free:slim                      docker.io/gvenzl/oracle-free:slim
-
-
 
 
 # Upload latest
