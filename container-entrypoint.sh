@@ -220,7 +220,7 @@ function run_custom_scripts {
 
     echo -e "\nCONTAINER: Executing user-defined scripts..."
 
-    run_custom_scripts_recursive ${SCRIPTS_ROOT}
+    run_custom_scripts_recursive "${SCRIPTS_ROOT}"
 
     echo -e "CONTAINER: DONE: Executing user-defined scripts.\n"
 
@@ -369,8 +369,8 @@ sqlplus -s / as sysdba << EOF
 EOF
 echo ""
 
-# Check whether database did come up successfully
-if healthcheck.sh; then
+# Check whether instance database did come up successfully
+if healthcheck.sh "${ORACLE_SID}"; then
 
   # First database startup / initialization
   if [ -z "${DATABASE_ALREADY_EXISTS:-}" ]; then
@@ -398,9 +398,13 @@ if healthcheck.sh; then
     fi;
 
     # Check whether user PDB should be created
-    # setup_env_vars has already validated >=18c requirement
     if [ -n "${ORACLE_DATABASE:-}" ]; then
       create_database
+      if ! healthcheck.sh "${ORACLE_DATABASE}"; then
+         echo "CONTAINER: application database not ready for service, aborting!"
+         echo "Please report a bug at https://github.com/gvenzl/oci-oracle-free/issues with your environment details."
+         exit 1;
+      fi;
     fi;
 
     # Check whether app user should be created
