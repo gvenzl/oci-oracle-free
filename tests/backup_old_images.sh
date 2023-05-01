@@ -1,4 +1,5 @@
 #!/bin/bash
+#
 # Since: April 2023
 # Author: gvenzl
 # Name: backup_old_images.sh
