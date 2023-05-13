@@ -52,10 +52,10 @@ echo "BUILDER: Installing OS dependencies"
 
 # Install installation dependencies
 microdnf -y install bc binutils file compat-openssl10 elfutils-libelf ksh sysstat \
-                    procps-ng smartmontools make hostname xz
+                    procps-ng smartmontools make hostname
 
 # Install runtime dependencies
-microdnf -y install libnsl glibc glibc-devel libaio libgcc libstdc++
+microdnf -y install libnsl glibc glibc-devel libaio libgcc libstdc++ xz
 
 # Install fortran runtime for libora_netlib.so (so that the Intel Math Kernel libraries are no longer needed)
 if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
@@ -1791,9 +1791,9 @@ su -p oracle -c "lsnrctl stop"
 echo "BUILDER: compressing database data files"
 
 cd "${ORACLE_BASE}"/oradata
-7zzs a "${ORACLE_SID}".zip "${ORACLE_SID}"
-chown oracle:dba "${ORACLE_SID}".zip
-mv "${ORACLE_SID}".zip "${ORACLE_BASE}"/
+7zzs a "${ORACLE_SID}".7z "${ORACLE_SID}"
+chown oracle:dba "${ORACLE_SID}".7z
+mv "${ORACLE_SID}".7z "${ORACLE_BASE}"/
 # Delete database files but not directory structure,
 # that way external mount can mount just a sub directory
 find "${ORACLE_SID}" -type f -exec rm "{}" \;

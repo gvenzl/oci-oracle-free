@@ -36,7 +36,7 @@ db_status=$(sqlplus -s / << EOF
       UNION ALL
       SELECT name, open_mode
        FROM v\$database) dbs
-     WHERE dbs.name = '${DATABASE}'
+     WHERE dbs.name = UPPER('${DATABASE}')
       AND dbs.open_mode = 'READ WRITE';
    exit;
 EOF
