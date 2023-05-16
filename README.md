@@ -79,7 +79,7 @@ The images can be used as a [Service Container](https://docs.github.com/en/actio
         env:
           ORACLE_RANDOM_PASSWORD: true
           APP_USER: my_user
-          APP_USER_PASSWORD: my_password_which_I_really_should_change
+          APP_USER_PASSWORD: password_i_should_change
 
         # Forward Oracle port
         ports:
@@ -101,7 +101,7 @@ After your service is created, you can connect to it via the following propertie
 * Port: `1521`
 * Service name: `FREEPDB1`
 * Database App User: `my_user`
-* Database App Password: `my_password_which_I_really_should_change`
+* Database App Password: `password_i_should_change`
 
 If you amend the variables above, here is some more useful info:
 
