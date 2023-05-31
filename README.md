@@ -39,6 +39,10 @@ Fortunately, there are other technologies that can spin up `x86_64` software on 
 
 # Users of these images
 
+We are proud of the following users of these images:
+
+* [Ibis](https://ibis-project.org/) [[`b568a81`](https://github.com/ibis-project/ibis/pull/6126/commits/b568a8152ff1ad1724d374e35bde4907fd7e6ea4)]
+
 If you are using these images and would like to be listed as well, please open an [issue on GitHub](https://github.com/gvenzl/oci-oracle-free/issues) or reach out on [Twitter](https://twitter.com/geraldvenzl).
 
 # How to use this image
