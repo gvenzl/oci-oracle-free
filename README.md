@@ -42,6 +42,7 @@ Fortunately, there are other technologies that can spin up `x86_64` software on 
 We are proud of the following users of these images:
 
 * [Ibis](https://ibis-project.org/) [[`b568a81`](https://github.com/ibis-project/ibis/pull/6126/commits/b568a8152ff1ad1724d374e35bde4907fd7e6ea4)]
+* [Quarkus](https://quarkus.io/) [[`546922c`](https://github.com/quarkusio/quarkus/commit/546922cf13b4de2d84966550577c0f22ef27000c)]
 
 If you are using these images and would like to be listed as well, please open an [issue on GitHub](https://github.com/gvenzl/oci-oracle-free/issues) or reach out on [Twitter](https://twitter.com/geraldvenzl).
 
