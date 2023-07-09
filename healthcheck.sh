@@ -3,6 +3,7 @@
 # Author: gvenzl
 # Name: healthcheck.sh
 # Description: Checks the health of the database
+#              Parameter 1: the PDB name to check for
 #
 # Copyright 2023 Gerald Venzl
 #
