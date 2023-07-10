@@ -139,6 +139,7 @@ function create_dbconfig() {
      EXTRACT_DURATION=$(( EXTRACT_END_TMS - EXTRACT_START_TMS ))
      echo "CONTAINER: done uncompressing database data files, duration: ${EXTRACT_DURATION} seconds."
      rm "${ORACLE_BASE}"/"${ORACLE_SID}".7z
+     export createFREEPDB1="true";
   fi;
 
   mkdir -p "${ORACLE_BASE}/oradata/dbconfig/${ORACLE_SID}"
@@ -395,6 +396,14 @@ if healthcheck.sh "${ORACLE_SID}"; then
       echo "SCRIPT ERROR: Unspecified password!"
       echo "Please report a bug at https://github.com/gvenzl/oci-oracle-free/issues with your environment details."
       exit 1;
+    fi;
+
+    # Create FREEPDB1 if needed
+    if [ "${createFREEPDB1}" == "true" ]; then
+      old="${ORACLE_DATABASE}"
+      export ORACLE_DATABASE="FREEPDB1"
+      create_database
+      export ORACLE_DATABASE="${old}"
     fi;
 
     # Check whether user PDB should be created
