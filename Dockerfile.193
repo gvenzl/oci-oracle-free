@@ -1,0 +1,204 @@
+#
+# Since: September, 2023
+# Author: mochoa
+# Name: Dockerfile.193
+# Description: Dockerfile to build Oracle DB 23c Free
+#
+# Copyright 2023 Marcelo Ochoa
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+FROM oracle/database:19.3.0-ee as builder
+
+ARG BUILD_MODE
+
+ENV ORACLE_BASE=/opt/oracle \
+    ORACLE_HOME=/opt/oracle/product/19c/dbhome_1 \
+    INSTALL_DIR=/opt/install \
+    INSTALL_FILE_1=$INSTALL_FILE_1 \
+    INSTALL_RSP="db_inst.rsp" \
+    CONFIG_RSP="dbca.rsp.tmpl" \
+    PWD_FILE="setPassword.sh" \
+    RUN_FILE="runOracle.sh" \
+    START_FILE="startDB.sh" \
+    CREATE_DB_FILE="createDB.sh" \
+    CREATE_OBSERVER_FILE="createObserver.sh" \
+    SETUP_LINUX_FILE="setupLinuxEnv.sh" \
+    CHECK_SPACE_FILE="checkSpace.sh" \
+    CHECK_DB_FILE="checkDBStatus.sh" \
+    USER_SCRIPTS_FILE="runUserScripts.sh" \
+    INSTALL_DB_BINARIES_FILE="installDBBinaries.sh" \
+    RELINK_BINARY_FILE="relinkOracleBinary.sh" \
+    CONFIG_TCPS_FILE="configTcps.sh" \
+    SLIMMING=$SLIMMING \
+    ENABLE_ARCHIVELOG=false \
+    ARCHIVELOG_DIR_NAME=archive_logs \
+    # To clone a database referred by PRIMARY_DB_CONN_STR
+    CLONE_DB=false \
+    # To create a standby database referred by PRIMARY_DB_CONN_STR
+    STANDBY_DB=false \
+    # Env var below should be in <HOST>:<PORT>/<SERVICE_NAME> format
+    PRIMARY_DB_CONN_STR="" \
+    # For creating dataguard observer
+    DG_OBSERVER_ONLY=false \
+    DG_OBSERVER_NAME="" \
+    CHECKPOINT_FILE_EXTN=".created" \
+    # Directory for keeping Oracle Wallet
+    WALLET_DIR="" \
+    ORACLE_PWD=Oracle_2023 \
+    ORACLE_SID=ORCLCDB \
+    ORACLE_PDB=ORCLPDB1 \
+    ALLOCATED_MEMORY=0
+
+ENV PATH=$ORACLE_HOME/bin:$ORACLE_HOME/OPatch/:/usr/sbin:$PATH \
+    LD_LIBRARY_PATH=$ORACLE_HOME/lib:/usr/lib \
+    CLASSPATH=$ORACLE_HOME/jlib:$ORACLE_HOME/rdbms/jlib
+
+COPY --chown=oracle:oinstall install.19c.sh runOracle.sh "$ORACLE_BASE"/
+
+RUN chmod +x  "$ORACLE_BASE"/install.19c.sh "$ORACLE_BASE"/"$RUN_FILE" && \
+    "$ORACLE_BASE"/"$CREATE_DB_FILE" "$ORACLE_SID" "$ORACLE_PDB" "$ORACLE_PWD" && \
+    "$ORACLE_BASE"/install.19c.sh "${BUILD_MODE}" > "$ORACLE_BASE"/slim.out 2> "$ORACLE_BASE"/slim.err
+
+RUN mkdir -p "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/ && \
+    date -Iseconds > "$ORACLE_BASE"/oradata/."${ORACLE_SID}""${CHECKPOINT_FILE_EXTN}" && \
+    mv "$ORACLE_HOME"/dbs/spfile"$ORACLE_SID".ora "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/ && \
+    mv "$ORACLE_HOME"/dbs/orapw"$ORACLE_SID" "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/ && \
+    mv "$ORACLE_HOME"/network/admin/sqlnet.ora "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/ && \
+    mv "$ORACLE_HOME"/network/admin/listener.ora "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/ && \
+    mv "$ORACLE_HOME"/network/admin/tnsnames.ora "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/ && \
+    echo > "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/.docker_enterprise && \
+    cp /etc/oratab "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/ && \
+    sed -i s/'$OLD_ORACLE_BASE != $ORACLE_BASE'/'$OLD_ORACLE_BASE != "$ORACLE_BASE"'/g "$ORACLE_HOME"/bin/oraenv && \
+    ln -s "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/spfile"$ORACLE_SID".ora "$ORACLE_HOME"/dbs/spfile"$ORACLE_SID".ora && \
+    ln -s "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/orapw"$ORACLE_SID" "$ORACLE_HOME"/dbs/orapw"$ORACLE_SID" && \
+    ln -s "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/sqlnet.ora "$ORACLE_HOME"/network/admin/sqlnet.ora && \
+    ln -s "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/listener.ora "$ORACLE_HOME"/network/admin/listener.ora && \
+    ln -s "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/tnsnames.ora "$ORACLE_HOME"/network/admin/tnsnames.ora
+
+##########################################################################################
+### Layer 1 --> Core OS
+##########################################################################################
+
+FROM oraclelinux:8-slim as os_layer
+
+# Redefine environment variables, etc. as we copied everything from an empty image (scratch)
+ENV ORACLE_BASE=/opt/oracle \
+    ORACLE_HOME=/opt/oracle/product/19c/dbhome_1 \
+    INSTALL_DIR=/opt/install \
+    INSTALL_FILE_1=$INSTALL_FILE_1 \
+    INSTALL_RSP="db_inst.rsp" \
+    CONFIG_RSP="dbca.rsp.tmpl" \
+    PWD_FILE="setPassword.sh" \
+    RUN_FILE="runOracle.sh" \
+    START_FILE="startDB.sh" \
+    CREATE_DB_FILE="createDB.sh" \
+    CREATE_OBSERVER_FILE="createObserver.sh" \
+    SETUP_LINUX_FILE="setupLinuxEnv.sh" \
+    CHECK_SPACE_FILE="checkSpace.sh" \
+    CHECK_DB_FILE="checkDBStatus.sh" \
+    USER_SCRIPTS_FILE="runUserScripts.sh" \
+    INSTALL_DB_BINARIES_FILE="installDBBinaries.sh" \
+    RELINK_BINARY_FILE="relinkOracleBinary.sh" \
+    CONFIG_TCPS_FILE="configTcps.sh" \
+    SLIMMING=$SLIMMING \
+    ENABLE_ARCHIVELOG=false \
+    ARCHIVELOG_DIR_NAME=archive_logs \
+    # To clone a database referred by PRIMARY_DB_CONN_STR
+    CLONE_DB=false \
+    # To create a standby database referred by PRIMARY_DB_CONN_STR
+    STANDBY_DB=false \
+    # Env var below should be in <HOST>:<PORT>/<SERVICE_NAME> format
+    PRIMARY_DB_CONN_STR="" \
+    # For creating dataguard observer
+    DG_OBSERVER_ONLY=false \
+    DG_OBSERVER_NAME="" \
+    CHECKPOINT_FILE_EXTN=".created" \
+    # Directory for keeping Oracle Wallet
+    WALLET_DIR="" \
+    ORACLE_PWD=Oracle_2023 \
+    ORACLE_SID=ORCLCDB \
+    ORACLE_PDB=ORCLPDB1 \
+    ALLOCATED_MEMORY=0
+
+ENV PATH=$ORACLE_HOME/bin:$ORACLE_HOME/OPatch/:/usr/sbin:$PATH \
+    LD_LIBRARY_PATH=$ORACLE_HOME/lib:/usr/lib \
+    CLASSPATH=$ORACLE_HOME/jlib:$ORACLE_HOME/rdbms/jlib
+
+COPY $SETUP_LINUX_FILE $INSTALL_DIR/
+COPY $RUN_FILE $ORACLE_BASE/
+
+RUN chmod ug+x $INSTALL_DIR/*.sh && \
+    sync && \
+    $INSTALL_DIR/$SETUP_LINUX_FILE && \
+    rm -rf $INSTALL_DIR
+
+##########################################################################################
+### Layer 2 --> Oracle Home without bin/oracle, lib, rdbms, and FREE.7z
+##########################################################################################
+
+FROM os_layer as oracle_home
+
+COPY --from=builder --chown=oracle:oinstall "${ORACLE_BASE}" "${ORACLE_BASE}"
+
+RUN rm    "${ORACLE_HOME}"/bin/oracle
+RUN rm -r "${ORACLE_HOME}"/lib
+RUN rm -r "${ORACLE_HOME}"/rdbms
+RUN rm    "${ORACLE_BASE}"/"${ORACLE_SID}".7z
+
+
+##########################################################################################
+### Layer 3 --> Oracle binary (bin/oracle)
+##########################################################################################
+
+FROM oracle_home as oracle_binary
+
+COPY --from=builder --chown=oracle:oinstall "${ORACLE_HOME}"/bin/oracle "${ORACLE_HOME}"/bin/oracle
+
+##########################################################################################
+### Layer 4 --> Oracle lib
+##########################################################################################
+
+FROM oracle_binary as oracle_lib
+
+COPY --from=builder --chown=oracle:oinstall "${ORACLE_HOME}"/lib "${ORACLE_HOME}"/lib
+
+##########################################################################################
+### Layer 5 --> Oracle lib
+##########################################################################################
+
+FROM oracle_lib as oracle_rdbms
+
+COPY --from=builder --chown=oracle:oinstall "${ORACLE_HOME}"/rdbms "${ORACLE_HOME}"/rdbms
+
+##########################################################################################
+### Layer 6 --> Oracle (compressed) db files
+##########################################################################################
+
+FROM oracle_rdbms as db_files
+
+COPY --from=builder --chown=oracle:oinstall "${ORACLE_BASE}"/"${ORACLE_SID}".7z  "${ORACLE_BASE}"/
+COPY --from=builder --chown=oracle:oinstall /etc/oratab /etc/oratab
+
+LABEL org.opencontainers.image.source https://github.com/gvenzl/oci-oracle-free
+
+USER oracle
+WORKDIR $ORACLE_BASE
+
+RUN echo 'ORACLE_SID=${ORACLE_SID:-ORCLCDB}; export ORACLE_SID=${ORACLE_SID^^}' > .bashrc
+
+HEALTHCHECK --interval=1m --start-period=5m --timeout=30s \
+   CMD "$ORACLE_BASE/$CHECK_DB_FILE" >/dev/null || exit 1
+
+# Define default command to start Oracle Database. 
+CMD [ "/bin/bash", "-c", "exec $ORACLE_BASE/$RUN_FILE" ]
