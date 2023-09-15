@@ -551,6 +551,20 @@ cd - 1> /dev/null
 
 echo "BUILDER: install operational files"
 
+# Move operational files to ${ORACLE_BASE}
+mv $INSTALL_DIR/container-entrypoint.sh "${ORACLE_BASE}"/
+mv $INSTALL_DIR/healthcheck.sh "${ORACLE_BASE}"/
+mv $INSTALL_DIR/resetPassword "${ORACLE_BASE}"/
+mv $INSTALL_DIR/createAppUser "${ORACLE_BASE}"/
+
+chown oracle:dba "${ORACLE_BASE}"/*.sh \
+                 "${ORACLE_BASE}"/resetPassword \
+                 "${ORACLE_BASE}"/createAppUser
+
+chmod u+x "${ORACLE_BASE}"/*.sh \
+          "${ORACLE_BASE}"/resetPassword \
+          "${ORACLE_BASE}"/createAppUser
+
 #########################
 ####### Cleanup #########
 #########################

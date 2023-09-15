@@ -20,6 +20,14 @@
 
 FROM oracle/database:19.3.0-ee as builder
 
+USER root
+
+RUN mkdir /container-entrypoint-initdb.d && \
+    mkdir /container-entrypoint-startdb.d && \
+    chown oracle:dba /container-entrypoint*
+
+USER oracle
+
 ARG BUILD_MODE
 
 ENV ORACLE_BASE=/opt/oracle \
@@ -60,31 +68,15 @@ ENV ORACLE_BASE=/opt/oracle \
     ORACLE_PDB=ORCLPDB1 \
     ALLOCATED_MEMORY=0
 
-ENV PATH=$ORACLE_HOME/bin:$ORACLE_HOME/OPatch/:/usr/sbin:$PATH \
+ENV PATH=$ORACLE_HOME/bin:$ORACLE_HOME/OPatch/:/usr/sbin:$ORACLE_BASE:$PATH \
     LD_LIBRARY_PATH=$ORACLE_HOME/lib:/usr/lib \
     CLASSPATH=$ORACLE_HOME/jlib:$ORACLE_HOME/rdbms/jlib
 
-COPY --chown=oracle:oinstall install.19c.sh runOracle.sh "$ORACLE_BASE"/
+COPY --chown=oracle:oinstall install.19c.sh container-entrypoint.sh resetPassword createAppUser healthcheck.sh "$INSTALL_DIR"/
 
-RUN chmod +x  "$ORACLE_BASE"/install.19c.sh "$ORACLE_BASE"/"$RUN_FILE" && \
+RUN chmod +x  "$INSTALL_DIR"/install.19c.sh && \
     "$ORACLE_BASE"/"$CREATE_DB_FILE" "$ORACLE_SID" "$ORACLE_PDB" "$ORACLE_PWD" && \
-    "$ORACLE_BASE"/install.19c.sh "${BUILD_MODE}" > "$ORACLE_BASE"/slim.out 2> "$ORACLE_BASE"/slim.err
-
-RUN mkdir -p "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/ && \
-    date -Iseconds > "$ORACLE_BASE"/oradata/."${ORACLE_SID}""${CHECKPOINT_FILE_EXTN}" && \
-    mv "$ORACLE_HOME"/dbs/spfile"$ORACLE_SID".ora "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/ && \
-    mv "$ORACLE_HOME"/dbs/orapw"$ORACLE_SID" "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/ && \
-    mv "$ORACLE_HOME"/network/admin/sqlnet.ora "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/ && \
-    mv "$ORACLE_HOME"/network/admin/listener.ora "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/ && \
-    mv "$ORACLE_HOME"/network/admin/tnsnames.ora "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/ && \
-    echo > "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/.docker_enterprise && \
-    cp /etc/oratab "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/ && \
-    sed -i s/'$OLD_ORACLE_BASE != $ORACLE_BASE'/'$OLD_ORACLE_BASE != "$ORACLE_BASE"'/g "$ORACLE_HOME"/bin/oraenv && \
-    ln -s "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/spfile"$ORACLE_SID".ora "$ORACLE_HOME"/dbs/spfile"$ORACLE_SID".ora && \
-    ln -s "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/orapw"$ORACLE_SID" "$ORACLE_HOME"/dbs/orapw"$ORACLE_SID" && \
-    ln -s "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/sqlnet.ora "$ORACLE_HOME"/network/admin/sqlnet.ora && \
-    ln -s "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/listener.ora "$ORACLE_HOME"/network/admin/listener.ora && \
-    ln -s "$ORACLE_BASE"/oradata/dbconfig/"$ORACLE_SID"/tnsnames.ora "$ORACLE_HOME"/network/admin/tnsnames.ora
+    "$INSTALL_DIR"/install.19c.sh "${BUILD_MODE}"
 
 ##########################################################################################
 ### Layer 1 --> Core OS
@@ -94,6 +86,8 @@ FROM oraclelinux:8-slim as os_layer
 
 # Redefine environment variables, etc. as we copied everything from an empty image (scratch)
 ENV ORACLE_BASE=/opt/oracle \
+    ORACLE_BASE_CONFIG=/opt/oracle/product/19c/dbhome_1 \
+    ORACLE_BASE_HOME=/opt/oracle/product/19c/dbhome_1 \
     ORACLE_HOME=/opt/oracle/product/19c/dbhome_1 \
     INSTALL_DIR=/opt/install \
     INSTALL_FILE_1=$INSTALL_FILE_1 \
@@ -131,17 +125,22 @@ ENV ORACLE_BASE=/opt/oracle \
     ORACLE_PDB=ORCLPDB1 \
     ALLOCATED_MEMORY=0
 
-ENV PATH=$ORACLE_HOME/bin:$ORACLE_HOME/OPatch/:/usr/sbin:$PATH \
+ENV PATH=$ORACLE_HOME/bin:$ORACLE_HOME/OPatch/:/usr/sbin:$ORACLE_BASE:$PATH \
     LD_LIBRARY_PATH=$ORACLE_HOME/lib:/usr/lib \
     CLASSPATH=$ORACLE_HOME/jlib:$ORACLE_HOME/rdbms/jlib
 
-COPY $SETUP_LINUX_FILE $INSTALL_DIR/
-COPY $RUN_FILE $ORACLE_BASE/
-
-RUN chmod ug+x $INSTALL_DIR/*.sh && \
-    sync && \
-    $INSTALL_DIR/$SETUP_LINUX_FILE && \
-    rm -rf $INSTALL_DIR
+RUN mkdir -p "$ORACLE_BASE"/scripts/setup && \
+    mkdir "$ORACLE_BASE"/scripts/startup && \
+    mkdir -p "$ORACLE_BASE"/scripts/extensions/setup && \
+    mkdir "$ORACLE_BASE"/scripts/extensions/startup && \
+    ln -s "$ORACLE_BASE"/scripts /docker-entrypoint-initdb.d && \
+    mkdir "$ORACLE_BASE"/oradata && \
+    mkdir -p "$ORACLE_HOME" && \
+    microdnf -y install oracle-database-preinstall-19c openssl hostname && \
+    microdnf clean all && \
+    ln -s "$ORACLE_BASE"/"$PWD_FILE" /home/oracle/ && \
+    echo oracle:oracle | chpasswd && \
+    chown -R oracle:dba "$ORACLE_BASE"
 
 ##########################################################################################
 ### Layer 2 --> Oracle Home without bin/oracle, lib, rdbms, and FREE.7z
@@ -197,8 +196,6 @@ WORKDIR $ORACLE_BASE
 
 RUN echo 'ORACLE_SID=${ORACLE_SID:-ORCLCDB}; export ORACLE_SID=${ORACLE_SID^^}' > .bashrc
 
-HEALTHCHECK --interval=1m --start-period=5m --timeout=30s \
-   CMD "$ORACLE_BASE/$CHECK_DB_FILE" >/dev/null || exit 1
+HEALTHCHECK CMD "${ORACLE_BASE}"/healthcheck.sh >/dev/null || exit 1
 
-# Define default command to start Oracle Database. 
-CMD [ "/bin/bash", "-c", "exec $ORACLE_BASE/$RUN_FILE" ]
+ENTRYPOINT ["container-entrypoint.sh"]
