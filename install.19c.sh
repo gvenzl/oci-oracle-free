@@ -100,7 +100,7 @@ EOF
      ALTER SESSION SET CONTAINER=PDB\$SEED;
      ALTER PROFILE DEFAULT LIMIT FAILED_LOGIN_ATTEMPTS UNLIMITED PASSWORD_LIFE_TIME UNLIMITED;
 
-     ALTER SESSION SET CONTAINER=ORCLPDB1;
+     ALTER SESSION SET CONTAINER=FREEPDB1;
      ALTER PROFILE DEFAULT LIMIT FAILED_LOGIN_ATTEMPTS UNLIMITED PASSWORD_LIFE_TIME UNLIMITED;
 
      exit;
@@ -131,11 +131,16 @@ EOF
     echo "BUILDER: Removing Oracle JServer JAVA Virtual Machine"
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_remove_jvm -d "${ORACLE_HOME}"/javavm/install rmjvm.sql
 
+    # https://mikedietrichde.com/2017/08/07/javavm-xml-clean-oracle-database-11-2-12-2/
+    echo "BUILDER: BUG 30779964 – RMJVM.SQL BROKEN"
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -S -n 1 -b drop_from_pdbs -d "${ORACLE_HOME}"/rdbms/admin drop_from_pdbs.sql
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -c 'CDB$ROOT PDB$SEED' -n 1 -b drop_from_cdb -d "${ORACLE_HOME}"/rdbms/admin drop_from_cdb.sql
+
     # Remove Oracle OLAP API
     echo "BUILDER: Removing  Oracle OLAP API"
     # Needs to be done one by one, otherwise there is a ORA-65023: active transaction exists in container PDB\$SEED
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'PDB$SEED' -b builder_remove_olap_api_pdbseed_2 -d "${ORACLE_HOME}"/olap/admin/ catnoxoq.sql
-    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'ORCLPDB1' -b builder_remove_olap_api_ORCLPDB1_2 -d "${ORACLE_HOME}"/olap/admin/ catnoxoq.sql
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'FREEPDB1' -b builder_remove_olap_api_FREEPDB1_2 -d "${ORACLE_HOME}"/olap/admin/ catnoxoq.sql
     # Remove it from the CDB
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'CDB$ROOT' -b builder_remove_olap_api_cdb_2 -d "${ORACLE_HOME}"/olap/admin/ catnoxoq.sql
 
@@ -143,7 +148,7 @@ EOF
     echo "BUILDER: Removing OLAP Analytic Workspace"
     # Needs to be done one by one, otherwise there is a ORA-65023: active transaction exists in container PDB\$SEED
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'PDB$SEED' -b builder_remove_olap_workspace_pdb_seed -d "${ORACLE_HOME}"/olap/admin/ catnoaps.sql
-    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'ORCLPDB1' -b builder_remove_olap_workspace_ORCLPDB1 -d "${ORACLE_HOME}"/olap/admin/ catnoaps.sql
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'FREEPDB1' -b builder_remove_olap_workspace_FREEPDB1 -d "${ORACLE_HOME}"/olap/admin/ catnoaps.sql
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'CDB$ROOT' -b builder_remove_olap_workspace_cdb -d "${ORACLE_HOME}"/olap/admin/ catnoaps.sql
 
     # Recompile
@@ -212,7 +217,7 @@ EOF
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE XDB.DBMS_XDBT');
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE SYS.VALIDATE_CONTEXT');
 
-       ALTER SESSION SET CONTAINER=ORCLPDB1;
+       ALTER SESSION SET CONTAINER=FREEPDB1;
 
        -- Oracle Text leftovers
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE XDB.XDB_DATASTORE_PROC');
@@ -311,10 +316,10 @@ EOF
      ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/sysaux01.dbf'
         AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
-     -- ORCLPDB1
-     ALTER SESSION SET CONTAINER=ORCLPDB1;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/ORCLPDB1/sysaux01.dbf' RESIZE ${SYSAUX_SIZE_PDB}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/ORCLPDB1/sysaux01.dbf'
+     -- FREEPDB1
+     ALTER SESSION SET CONTAINER=FREEPDB1;
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/sysaux01.dbf' RESIZE ${SYSAUX_SIZE_PDB}M;
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/sysaux01.dbf'
         AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
      ALTER SESSION SET CONTAINER=CDB\$ROOT;
@@ -334,10 +339,10 @@ EOF
      ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/system01.dbf'
         AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
-     -- ORCLPDB1
-     ALTER SESSION SET CONTAINER=ORCLPDB1;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/ORCLPDB1/system01.dbf' RESIZE ${SYSTEM_SIZE_PDB}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/ORCLPDB1/system01.dbf'
+     -- FREEPDB1
+     ALTER SESSION SET CONTAINER=FREEPDB1;
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/system01.dbf' RESIZE ${SYSTEM_SIZE_PDB}M;
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/system01.dbf'
         AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
      ALTER SESSION SET CONTAINER=CDB\$ROOT;
@@ -360,11 +365,11 @@ EOF
      -- ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/temp01.dbf'
      --    AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
-     -- ORCLPDB1
-     ALTER SESSION SET CONTAINER=ORCLPDB1;
+     -- FREEPDB1
+     ALTER SESSION SET CONTAINER=FREEPDB1;
      ALTER TABLESPACE TEMP SHRINK SPACE;
-     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/ORCLPDB1/temp01.dbf' RESIZE ${TEMP_SIZE}M;
-     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/ORCLPDB1/temp01.dbf'
+     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/temp01.dbf' RESIZE ${TEMP_SIZE}M;
+     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/temp01.dbf'
         AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
      ALTER SESSION SET CONTAINER=CDB\$ROOT;
@@ -377,9 +382,9 @@ EOF
      ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/users01.dbf'
      AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
-     ALTER SESSION SET CONTAINER=ORCLPDB1;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/ORCLPDB1/users01.dbf' RESIZE ${USERS_SIZE}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/ORCLPDB1/users01.dbf'
+     ALTER SESSION SET CONTAINER=FREEPDB1;
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/users01.dbf' RESIZE ${USERS_SIZE}M;
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/users01.dbf'
      AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
      ALTER SESSION SET CONTAINER=CDB\$ROOT;
@@ -433,11 +438,11 @@ EOF
      DROP TABLESPACE UNDO_TMP INCLUDING CONTENTS AND DATAFILES;
 
      -----------------------------------
-     ALTER SESSION SET CONTAINER=ORCLPDB1;
+     ALTER SESSION SET CONTAINER=FREEPDB1;
      -----------------------------------
 
      -- Create new temporary UNDO tablespace
-     CREATE UNDO TABLESPACE UNDO_TMP DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/ORCLPDB1/undotbs_tmp.dbf'
+     CREATE UNDO TABLESPACE UNDO_TMP DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/undotbs_tmp.dbf'
         SIZE 1M AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
      -- Use new temporary UNDO tablespace (so that old one can be deleted)
@@ -448,7 +453,7 @@ EOF
      DROP TABLESPACE UNDOTBS1 INCLUDING CONTENTS AND DATAFILES;
 
      -- Recreate old UNDO tablespace with 1M size and AUTOEXTEND
-     CREATE UNDO TABLESPACE UNDOTBS1 DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/ORCLPDB1/undotbs01.dbf'
+     CREATE UNDO TABLESPACE UNDOTBS1 DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/undotbs01.dbf'
         SIZE 1M AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
      -- Use newly created UNDO tablespace

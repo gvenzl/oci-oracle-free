@@ -64,8 +64,8 @@ ENV ORACLE_BASE=/opt/oracle \
     # Directory for keeping Oracle Wallet
     WALLET_DIR="" \
     ORACLE_PWD=Oracle_2023 \
-    ORACLE_SID=ORCLCDB \
-    ORACLE_PDB=ORCLPDB1 \
+    ORACLE_SID=FREE \
+    ORACLE_PDB=FREEPDB1 \
     ALLOCATED_MEMORY=0
 
 ENV PATH=$ORACLE_HOME/bin:$ORACLE_HOME/OPatch/:/usr/sbin:$ORACLE_BASE:$PATH \
@@ -73,9 +73,10 @@ ENV PATH=$ORACLE_HOME/bin:$ORACLE_HOME/OPatch/:/usr/sbin:$ORACLE_BASE:$PATH \
     CLASSPATH=$ORACLE_HOME/jlib:$ORACLE_HOME/rdbms/jlib
 
 COPY --chown=oracle:oinstall install.19c.sh container-entrypoint.sh resetPassword createAppUser healthcheck.sh "$INSTALL_DIR"/
+COPY --chown=oracle:oinstall drop_from_pdbs.sql drop_from_cdb.sql "$ORACLE_HOME"/rdbms/admin/
 
 RUN chmod +x  "$INSTALL_DIR"/install.19c.sh && \
-    "$ORACLE_BASE"/"$CREATE_DB_FILE" "$ORACLE_SID" "$ORACLE_PDB" "$ORACLE_PWD" && \
+    "$ORACLE_BASE"/"$CREATE_DB_FILE" "$ORACLE_SID" "$ORACLE_PDB" && \
     "$INSTALL_DIR"/install.19c.sh "${BUILD_MODE}"
 
 ##########################################################################################
@@ -121,8 +122,8 @@ ENV ORACLE_BASE=/opt/oracle \
     # Directory for keeping Oracle Wallet
     WALLET_DIR="" \
     ORACLE_PWD=Oracle_2023 \
-    ORACLE_SID=ORCLCDB \
-    ORACLE_PDB=ORCLPDB1 \
+    ORACLE_SID=FREE \
+    ORACLE_PDB=FREEPDB1 \
     ALLOCATED_MEMORY=0
 
 ENV PATH=$ORACLE_HOME/bin:$ORACLE_HOME/OPatch/:/usr/sbin:$ORACLE_BASE:$PATH \
@@ -194,7 +195,7 @@ LABEL org.opencontainers.image.source https://github.com/gvenzl/oci-oracle-free
 USER oracle
 WORKDIR $ORACLE_BASE
 
-RUN echo 'ORACLE_SID=${ORACLE_SID:-ORCLCDB}; export ORACLE_SID=${ORACLE_SID^^}' > .bashrc
+RUN echo 'ORACLE_SID=${ORACLE_SID:-FREE}; export ORACLE_SID=${ORACLE_SID^^}' > .bashrc
 
 HEALTHCHECK CMD "${ORACLE_BASE}"/healthcheck.sh >/dev/null || exit 1
 
