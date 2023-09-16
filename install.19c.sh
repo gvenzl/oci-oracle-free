@@ -48,6 +48,8 @@ if [ "${BUILD_MODE}" == "SLIM" ]; then
   TEMP_SIZE=10
 fi;
 
+echo "BUILDER: Installing OS dependencies"
+
 # Install 7zip
 mkdir /tmp/7z
 cd /tmp/7z
@@ -56,6 +58,72 @@ tar xf 7z*xz
 mv 7zzs ${ORACLE_HOME}/bin
 cd - 1> /dev/null
 rm -rf /tmp/7z
+
+##############################################
+###### Install and configure Database ########
+##############################################
+
+echo "BUILDER: configuring database"
+
+# Set random password
+ORACLE_PWD=$(date '+%s' | sha256sum | base64 | head -c 8)
+
+"$ORACLE_BASE"/"$CREATE_DB_FILE" "$ORACLE_SID" "$ORACLE_PDB"
+
+# Perform further Database setup operations
+echo "BUILDER: changing database configuration and parameters for all images"
+sqlplus -s / as sysdba << EOF
+
+   -- Exit on any errors
+   WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+   -- Enable remote HTTP access
+   EXEC DBMS_XDB.SETLISTENERLOCALACCESS(FALSE);
+
+   -- Enable Tuning and Diag packs
+   ALTER SYSTEM SET CONTROL_MANAGEMENT_PACK_ACCESS='DIAGNOSTIC+TUNING' SCOPE=SPFILE;
+
+   -- Disable auditing
+   ALTER SYSTEM SET AUDIT_TRAIL=NONE SCOPE=SPFILE;
+   ALTER SYSTEM SET AUDIT_SYS_OPERATIONS=FALSE SCOPE=SPFILE;
+
+   -- Disable common_user_prefix (needed for OS authenticated user)
+   ALTER SYSTEM SET COMMON_USER_PREFIX='' SCOPE=SPFILE;
+
+   -- Remove local_listener entry (using default 1521)
+   ALTER SYSTEM SET LOCAL_LISTENER='';
+   
+   -- Explicitly set CPU_COUNT=2 to avoid memory miscalculation (#64)
+   --
+   -- This will cause the CPU_COUNT=2 to be written to the SPFILE and then
+   -- during memory requirement calculation, which happens before the
+   -- hard coding of CPU_COUNT=2, taken as the base input value.
+   -- Otherwise, CPU_COUNT is not present, which means it defaults to 0
+   -- which will cause the memory requirement calculations to look at the available
+   -- CPUs on the system (host instead of container) and derive a wrong value.
+   -- On hosts with many CPUs, this could lead to estimate SGA requirements
+   -- beyond 2GB RAM, which cannot be set on FREE.
+   ALTER SYSTEM SET CPU_COUNT=2 SCOPE=SPFILE;
+
+   -- Set max job_queue_processes to 1
+   ALTER SYSTEM SET JOB_QUEUE_PROCESSES=1;
+
+   -- Reboot of DB
+   SHUTDOWN IMMEDIATE;
+   STARTUP;
+
+   -- Setup healthcheck user
+   -- CREATE USER OPS\$ORACLE IDENTIFIED EXTERNALLY;
+   GRANT CONNECT, SELECT_CATALOG_ROLE TO OPS\$ORACLE;
+   -- Permissions to see entries in v\$pdbs
+   ALTER USER OPS\$ORACLE SET CONTAINER_DATA = ALL CONTAINER = CURRENT;
+
+   exit;
+EOF
+
+###################################
+######## FULL INSTALL DONE ########
+###################################
 
 # If not building the FULL image, remove and shrink additional components
 if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
@@ -131,11 +199,6 @@ EOF
     echo "BUILDER: Removing Oracle JServer JAVA Virtual Machine"
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_remove_jvm -d "${ORACLE_HOME}"/javavm/install rmjvm.sql
 
-    # https://mikedietrichde.com/2017/08/07/javavm-xml-clean-oracle-database-11-2-12-2/
-    echo "BUILDER: BUG 30779964 – RMJVM.SQL BROKEN"
-    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -S -n 1 -b drop_from_pdbs -d "${ORACLE_HOME}"/rdbms/admin drop_from_pdbs.sql
-    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -c 'CDB$ROOT PDB$SEED' -n 1 -b drop_from_cdb -d "${ORACLE_HOME}"/rdbms/admin drop_from_cdb.sql
-
     # Remove Oracle OLAP API
     echo "BUILDER: Removing  Oracle OLAP API"
     # Needs to be done one by one, otherwise there is a ORA-65023: active transaction exists in container PDB\$SEED
@@ -154,6 +217,12 @@ EOF
     # Recompile
     echo "BUILDER: Recompiling database objects"
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_recompile_all_objects -d "${ORACLE_HOME}"/rdbms/admin utlrp.sql
+
+    # https://mikedietrichde.com/2017/08/07/javavm-xml-clean-oracle-database-11-2-12-2/
+    echo "BUILDER: BUG 30779964 – RMJVM.SQL BROKEN"
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'PDB$SEED' -b drop_from_pdbs -d "${ORACLE_HOME}"/rdbms/admin drop_from_pdbs.sql
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'FREEPDB1' -b drop_from_pdbs -d "${ORACLE_HOME}"/rdbms/admin drop_from_pdbs.sql
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'CDB$ROOT' -b drop_from_cdb -d "${ORACLE_HOME}"/rdbms/admin drop_from_cdb.sql
 
     # Remove all log files
     rm "${ORACLE_HOME}"/rdbms/admin/builder_*
@@ -281,7 +350,6 @@ EOF
   # Shrink actual data files #
   ############################
   echo "BUILDER: Shrink actual data files"
-  du -ah "${ORACLE_BASE}"/oradata/
   
   sqlplus -s / as sysdba << EOF
 
@@ -539,7 +607,6 @@ lsnrctl stop
 
 echo "BUILDER: compressing database data files"
 rm -f "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/pdbseed/temp01*.dbf
-du -ah "${ORACLE_BASE}"/oradata/
 
 cd "${ORACLE_BASE}"/oradata
 7zzs a "${ORACLE_SID}".7z "${ORACLE_SID}"
