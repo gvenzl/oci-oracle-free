@@ -307,7 +307,7 @@ EOF
   #######################################################
   # Clean additional DB components to shrink data files #
   #######################################################
-  echo "BUILDER: Clean additional DB components to shrink data files"
+  
   sqlplus -s / as sysdba <<EOF
 
      -- Exit on any error
@@ -349,8 +349,6 @@ EOF
   ############################
   # Shrink actual data files #
   ############################
-  echo "BUILDER: Shrink actual data files"
-  
   sqlplus -s / as sysdba << EOF
 
      -- Exit on any error
@@ -426,7 +424,7 @@ EOF
         AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
      
-     -- SEED
+     -- SEED (created on runtime)
      -- ALTER SESSION SET CONTAINER=PDB\$SEED;
      -- ALTER TABLESPACE TEMP SHRINK SPACE;
      -- ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/temp01.dbf' RESIZE ${TEMP_SIZE}M;
