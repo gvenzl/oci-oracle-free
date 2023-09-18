@@ -1,6 +1,6 @@
 #
 # Since: September, 2023
-# Author: mochoa
+# Author: marcelo-ochoa
 # Name: Dockerfile.193
 # Description: Dockerfile to build Oracle DB 23c Free
 #
@@ -188,7 +188,7 @@ FROM oracle_rdbms as db_files
 COPY --from=builder --chown=oracle:oinstall "${ORACLE_BASE}"/"${ORACLE_SID}".7z  "${ORACLE_BASE}"/
 COPY --from=builder --chown=oracle:oinstall /etc/oratab /etc/oratab
 
-LABEL org.opencontainers.image.source https://github.com/mochoa/oci-oracle-free
+LABEL org.opencontainers.image.source https://github.com/marcelo-ochoa/oci-oracle-free
 
 USER oracle
 WORKDIR $ORACLE_BASE
