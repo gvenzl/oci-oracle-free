@@ -154,7 +154,7 @@ function create_dbconfig() {
 
 # Remove the existing config files inside the image
 function remove_config_files()  {
-  
+
   if [ -f "${ORACLE_BASE_CONFIG}"/dbs/spfile"${ORACLE_SID}".ora ]; then
     rm "${ORACLE_BASE_CONFIG}"/dbs/spfile"${ORACLE_SID}".ora
   fi;
@@ -442,6 +442,14 @@ if healthcheck.sh "${ORACLE_SID}"; then
   echo "#########################"
   echo "DATABASE IS READY TO USE!"
   echo "#########################"
+
+  if [[ $(cat /etc/oci-image-version) == "23.2" ]]; then
+    echo ""
+    echo "################################################"
+    echo "NOTICE: YOU ARE USING AN OLD IMAGE VERSION $(cat /etc/oci-image-version)!"
+    echo "PLEASE CONSIDER UPGRADING TO THE LATEST VERSION!"
+    echo "################################################"
+  fi;
 
 else
   echo "############################################"
