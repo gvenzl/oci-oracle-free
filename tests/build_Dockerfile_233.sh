@@ -1,8 +1,8 @@
 #!/bin/bash
-# Since: April, 2023
+# Since: September, 2023
 # Author: gvenzl
-# Name: build_Dockerfile_232.sh
-# Description: Build test scripts for Oracle DB Free 23.2
+# Name: build_Dockerfile_233.sh
+# Description: Build test scripts for Oracle DB Free 23.3
 #
 # Copyright 2023 Gerald Venzl
 #
@@ -27,27 +27,27 @@ CURRENT_DIR=${PWD}
 cd ../
 
 echo "TEST: Building 23.2 FULL image"
-./buildContainerImage.sh -i -v 23.2 -f
+./buildContainerImage.sh -i -v 23.3 -f
 echo "DONE: Building 23.2 FULL image"
 
 echo "TEST: Building 23.2 FULL FASTSTART image"
-./buildContainerImage.sh -i -v 23.2 -f -x -i
+./buildContainerImage.sh -i -v 23.3 -f -x -i
 echo "DONE: Building 23.2 FULL FASTSTART image"
 
 echo "TEST: Building 23.2 REGULAR image"
-./buildContainerImage.sh -i -v 23.2
+./buildContainerImage.sh -i -v 23.3
 echo "DONE: Building 23.2 REGULAR image"
 
 echo "TEST: Building 23.2 REGULAR FASTSTART image"
-./buildContainerImage.sh -i -v 23.2 -x -i
+./buildContainerImage.sh -i -v 23.3 -x -i
 echo "DONE: Building 23.2 REGULAR FASTSTART image"
 
 echo "TEST: Building 23.2 SLIM image"
-./buildContainerImage.sh -i -v 23.2 -s
+./buildContainerImage.sh -i -v 23.3 -s
 echo "DONE: Building 23.2 SLIM image"
 
 echo "TEST: Building 23.2 SLIM FASTSTART image"
-./buildContainerImage.sh -i -v 23.2 -s -x -i
+./buildContainerImage.sh -i -v 23.3 -s -x -i
 echo "DONE: Building 23.2 SLIM FASTSTART image"
 
 cd "${CURRENT_DIR}"

@@ -23,4 +23,4 @@
 set -Eeuo pipefail
 
 ./tag_image_latest.sh
-./tag_images_232.sh
+./tag_images_23.sh

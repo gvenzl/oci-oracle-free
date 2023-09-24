@@ -23,7 +23,7 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-VERSION="23.2"
+VERSION="23.3"
 FLAVOR="REGULAR"
 IMAGE_NAME="gvenzl/oracle-free"
 SKIP_CHECKSUM="false"
@@ -42,7 +42,7 @@ Parameters:
    -s: creates a 'slim' image
    -x: creates a 'faststart' image
    -v: version of Oracle Database Free to build
-       Choose one of: 23.2
+       Choose one of: 23.3, 23.2
    -i: ignores checksum test
    -o: passes on container build option
 
@@ -99,9 +99,10 @@ if [ "${SKIP_CHECKSUM}" == "false" ]; then
 
   echo "BUILDER: verifying checksum of rpm file - please wait..."
 
-  SHASUM_RET=$(shasum -a 256 oracle*free*"${VERSION%%.*}"*.rpm)
+  SHASUM_RET=$(shasum -a 256 oracle*free*"${VERSION}"*.rpm)
 
-  if [[ ( "${VERSION}" == "23.2"  &&  "${SHASUM_RET%% *}" != "63b6c0ec9464682cfd9814e7e2a5d533139e5c6aeb9d3e7997a5f976d6677ca6" ) ]]; then
+  if [[ ( "${VERSION}" == "23.2"  &&  "${SHASUM_RET%% *}" != "63b6c0ec9464682cfd9814e7e2a5d533139e5c6aeb9d3e7997a5f976d6677ca6" ) ||
+        ( "${VERSION}" == "23.3"  &&  "${SHASUM_RET%% *}" != "1319bcd7cb706cb727501cbd98abf3f3980a4fdabeb613a1abffc756925c7374" ) ]]; then
     echo "BUILDER: WARNING! SHA sum of RPM does not match with what's expected!"
     echo "BUILDER: WARNING! Verify that the .rpm file is not corrupt!"
   fi;
@@ -112,7 +113,7 @@ else
 fi;
 
 # Set Dockerfile name
-DOCKER_FILE="Dockerfile.${VERSION//./}"
+DOCKER_FILE="Dockerfile.${VERSION%??}"
 
 # Give image base tag
 IMAGE_NAME="${IMAGE_NAME}:${VERSION}"
@@ -133,7 +134,7 @@ echo "BUILDER: building image $IMAGE_NAME"
 
 BUILD_START_TMS=$(date '+%s')
 
-buildah bud -f "$DOCKER_FILE" -t "${IMAGE_NAME}" --build-arg BUILD_MODE="${FLAVOR}" --build-arg BASE_IMAGE="${BASE_IMAGE}"
+buildah bud -f "$DOCKER_FILE" -t "${IMAGE_NAME}" --build-arg BUILD_MODE="${FLAVOR}" --build-arg BASE_IMAGE="${BASE_IMAGE}" --build-arg BUILD_VERSION="${VERSION}"
 
 BUILD_END_TMS=$(date '+%s')
 BUILD_DURATION=$(( BUILD_END_TMS - BUILD_START_TMS ))

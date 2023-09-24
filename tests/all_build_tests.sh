@@ -23,4 +23,5 @@
 set -Eeuo pipefail
 
 # In order of newest to latest
+./build_Dockerfile_233.sh
 ./build_Dockerfile_232.sh

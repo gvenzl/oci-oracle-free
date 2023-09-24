@@ -32,9 +32,9 @@ echo "BUILDER: BUILD_MODE=${BUILD_MODE}"
 
 # Set data file sizes (only executed for REGULAR and SLIM)
 SYSAUX_SIZE_CDB=536
-SYSAUX_SIZE_SEED=302
-SYSAUX_SIZE_PDB=307
-SYSTEM_SIZE_CDB=928
+SYSAUX_SIZE_SEED=304
+SYSAUX_SIZE_PDB=327
+SYSTEM_SIZE_CDB=1052
 SYSTEM_SIZE_SEED=276
 SYSTEM_SIZE_PDB=277
 REDO_SIZE=20
@@ -84,7 +84,7 @@ rm -rf /tmp/7z
 echo "BUILDER: installing database binaries"
 
 # Install Oracle Free
-rpm -iv --nodeps /install/oracle-database-free-23c-1.0-1.el8.x86_64.rpm
+rpm -iv --nodeps /install/oracle-database-free-23c*1.0-1.el8.x86_64.rpm
 
 # Set 'oracle' user home directory to ${ORACE_BASE}
 usermod -d ${ORACLE_BASE} oracle
@@ -205,6 +205,10 @@ chown oracle:dba "${ORACLE_BASE}"/.bash_profile
 mkdir /container-entrypoint-initdb.d
 mkdir /container-entrypoint-startdb.d
 chown oracle:dba /container-entrypoint*
+
+# Store image information
+echo "${OCI_IMAGE_VERSION}" > /etc/oci-image-version
+echo "${OCI_IMAGE_FLAVOR}"  > /etc/oci-image-flavor
 
 # Perform further Database setup operations
 echo "BUILDER: changing database configuration and parameters for all images"
@@ -1472,13 +1476,20 @@ EOF
 
     # Change configuration for SLIM image
     echo "BUILDER: Change configuration for SLIM image"
+
+    if [[ "$(cat /etc/oci-image-version)" ==  "23.2" ]]; then
+      MLE_PARAM="MULTILINGUAL_ENGINE=DISABLE"
+    else
+      MLE_PARAM="MLE_PROG_LANGUAGES=OFF"
+    fi;
+
     su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
        -- Exit on any errors
        WHENEVER SQLERROR EXIT SQL.SQLCODE
 
        -- Disable Multilingual Engine
-       ALTER SYSTEM SET MULTILINGUAL_ENGINE=DISABLE;
+       ALTER SYSTEM SET ${MLE_PARAM};
 
        exit;
 EOF
@@ -1866,7 +1877,7 @@ rm    "${ORACLE_BASE}"/diag/rdbms/free/"${ORACLE_SID}"/alert/log.xml
 rm -r "${ORACLE_BASE}"/diag/rdbms/free/"${ORACLE_SID}"/incident/*
 rm    "${ORACLE_BASE}"/diag/rdbms/free/"${ORACLE_SID}"/lck/*
 rm    "${ORACLE_BASE}"/diag/rdbms/free/"${ORACLE_SID}"/log/debug/log.xml
-rm    "${ORACLE_BASE}"/diag/rdbms/free/"${ORACLE_SID}"/log/debug.log
+rm -f "${ORACLE_BASE}"/diag/rdbms/free/"${ORACLE_SID}"/log/debug.log
 rm    "${ORACLE_BASE}"/diag/rdbms/free/"${ORACLE_SID}"/metadata/*
 rm    "${ORACLE_BASE}"/diag/rdbms/free/"${ORACLE_SID}"/stage/*
 rm -f "${ORACLE_BASE}"/diag/rdbms/free/"${ORACLE_SID}"/sweep/*
