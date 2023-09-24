@@ -1804,13 +1804,19 @@ cd - 1> /dev/null
 ### Install run file ###
 ########################
 
-echo "BUILDER: install operational files"
+echo "BUILDER: installing operational files"
 
 # Move operational files to ${ORACLE_BASE}
 mv /install/container-entrypoint.sh "${ORACLE_BASE}"/
 mv /install/healthcheck.sh "${ORACLE_BASE}"/
 mv /install/resetPassword "${ORACLE_BASE}"/
 mv /install/createAppUser "${ORACLE_BASE}"/
+
+################################
+### Setting file permissions ###
+################################
+
+echo "BUILDER: setting file permissions"
 
 chown oracle:dba "${ORACLE_BASE}"/*.sh \
                  "${ORACLE_BASE}"/resetPassword \
@@ -1819,6 +1825,10 @@ chown oracle:dba "${ORACLE_BASE}"/*.sh \
 chmod u+x "${ORACLE_BASE}"/*.sh \
           "${ORACLE_BASE}"/resetPassword \
           "${ORACLE_BASE}"/createAppUser
+
+# Setting permissions for all folders so that they can be mounted on tmpfs
+# (see https://github.com/gvenzl/oci-oracle-xe/issues/202)
+chmod a+rwx -R "${ORACLE_BASE}"/oradata
 
 #########################
 ####### Cleanup #########

@@ -154,7 +154,7 @@ function create_dbconfig() {
 
 # Remove the existing config files inside the image
 function remove_config_files()  {
-  
+
   if [ -f "${ORACLE_BASE_CONFIG}"/dbs/spfile"${ORACLE_SID}".ora ]; then
     rm "${ORACLE_BASE_CONFIG}"/dbs/spfile"${ORACLE_SID}".ora
   fi;
