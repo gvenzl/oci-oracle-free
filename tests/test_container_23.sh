@@ -302,3 +302,65 @@ unset EXPECTED_RESULT
 unset APP_USER
 unset APP_USER_PASSWORD
 unset ORACLE_DATABASE
+
+################################################
+##### Test for timezone file failure (#23) #####
+################################################
+
+# Tell test method not to tear down container
+NO_TEAR_DOWN="true"
+# Let's keep the container name in a var to keep it simple
+CONTAINER_NAME="timezone-test"
+# Let's keep the test name in a var to keep it simple too
+TEST_NAME="TIMEZONE TEST"
+# This is what we want to have back from the SQL statement
+EXPECTED_RESULT="Hi from your Oracle PDB"
+# App user
+APP_USER="my_test_user"
+# App user password
+APP_USER_PASSWORD="ThatAppUserPassword1"
+# Oracle PDB
+ORACLE_DATABASE="timezone_pdb"
+
+# Spin up container
+runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-free:23.3-slim-faststart"
+
+# Test the random password, if it works we will get "OK" back from the SQL statement
+result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${APP_USER}"/"${APP_USER_PASSWORD}"@//localhost/"${ORACLE_DATABASE}" <<EOF
+   whenever sqlerror exit sql.sqlcode;
+   set heading off;
+   set echo off;
+   set pagesize 0;
+   CREATE TABLE FOO (id INT);
+   INSERT INTO FOO VALUES (1);
+
+   -- This should NOT throw:
+   -- ORA-04088: error during execution of trigger 'SYS.DELETE_ENTRIES'
+   -- ORA-00604: Error occurred at recursive SQL level 1. Check subsequent errors.
+   -- ORA-01804: failure to initialize timezone information
+   DROP TABLE FOO;
+   SELECT '${EXPECTED_RESULT}' FROM dual;
+   exit;
+EOF
+)
+
+# See whether we got "OK" back from our test
+if [ "${result}" == "${EXPECTED_RESULT}" ]; then
+  echo "TEST ${TEST_NAME}: OK";
+  echo "";
+else
+  echo "TEST ${TEST_NAME}: FAILED!";
+  exit 1;
+fi;
+
+# Tear down the container, no longer needed
+tear_down_container "${CONTAINER_NAME}"
+
+# Clean up environment variables, all tests should remain self-contained
+unset CONTAINER_NAME
+unset NO_TEAR_DOWN
+unset TEST_NAME
+unset EXPECTED_RESULT
+unset APP_USER
+unset APP_USER_PASSWORD
+unset ORACLE_DATABASE

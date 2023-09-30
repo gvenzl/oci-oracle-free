@@ -1917,14 +1917,17 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm "${ORACLE_HOME}"/lib/*.jar
 
   # Remove unnecessary timezone information
-  rm    "${ORACLE_HOME}"/oracore/zoneinfo/readme.txt
-  rm    "${ORACLE_HOME}"/oracore/zoneinfo/timezdif.csv
-  rm -r "${ORACLE_HOME}"/oracore/zoneinfo/big
-  rm -r "${ORACLE_HOME}"/oracore/zoneinfo/little
-  rm    "${ORACLE_HOME}"/oracore/zoneinfo/timezone*
-  mv    "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg_40.dat "${ORACLE_HOME}"/oracore/zoneinfo/current.dat
-  rm    "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg*
-  mv    "${ORACLE_HOME}"/oracore/zoneinfo/current.dat "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg_40.dat
+  # Create temporary folder
+  mkdir "${ORACLE_HOME}"/oracore/tmp_current_tz
+  # Move timelrg*.dat with the highest number to temporary folder
+  mv    $(ls -v "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg* | tail -n 1) \
+           "${ORACLE_HOME}"/oracore/tmp_current_tz/
+  # Delete all remaining folders and files in "zoneinfo"
+  rm -r "${ORACLE_HOME}"/oracore/zoneinfo/*
+  # Move current timelrg*.dat file back into place
+  mv    "${ORACLE_HOME}"/oracore/tmp_current_tz/* "${ORACLE_HOME}"/oracore/zoneinfo/
+  # Remove temporary folder
+  rm -r "${ORACLE_HOME}"/oracore/tmp_current_tz
 
   # Remove Multimedia
   rm -r "${ORACLE_HOME}"/ord/im
