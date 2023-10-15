@@ -462,9 +462,9 @@ fi;
 if ! [ "${NOWAIT}" == "--nowait" ]; then
 
   echo ""
-  echo "##################################################################"
+  echo "####################################################################"
   echo "CONTAINER: The following output is now from the alert_${ORACLE_SID}.log file:"
-  echo "##################################################################"
+  echo "####################################################################"
 
   tail -f "${ORACLE_BASE}"/diag/rdbms/*/"${ORACLE_SID}"/trace/alert_"${ORACLE_SID}".log &
   childPID=$!

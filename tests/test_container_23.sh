@@ -330,6 +330,7 @@ result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${APP_USER}"/"${APP_USER_P
    whenever sqlerror exit sql.sqlcode;
    set heading off;
    set echo off;
+   set feedback off;
    set pagesize 0;
    CREATE TABLE FOO (id INT);
    INSERT INTO FOO VALUES (1);
