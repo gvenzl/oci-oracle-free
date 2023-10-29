@@ -30,7 +30,7 @@ docker exec <container name|id> resetPassword <your password>
 ```
 
 ## Oracle Database Free on Apple M chips
-Currently, there is no Oracle Database port for ARM chips, hence Oracle Database Free images cannot run on the new Apple M chips via Docker Desktop.  
+Currently, there is no Oracle Database Free port for ARM chips, hence Oracle Database Free images cannot run on the new Apple M chips via Docker Desktop.  
 Fortunately, there are other technologies that can spin up `x86_64` software on Apple M chips, such as [colima](https://github.com/abiosoft/colima). To run these Oracle Database Free images on Apple M hardware, follow these simple steps:
 
 * Install colima ([instructions](https://github.com/abiosoft/colima#installation))
