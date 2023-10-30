@@ -1,0 +1,55 @@
+#!/bin/bash
+#
+# Since: October, 2023
+# Author: gvenzl
+# Name: createDatabase
+# Description: Creates a new pluggable database.
+#              Parameter 1: The pluggable database to create
+#
+# Copyright 2023 Gerald Venzl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Exit on errors
+# Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+set -Eeuo pipefail
+
+NEW_PDB="${1:-}"
+
+if [ -n "${NEW_PDB}" ]; then
+
+  RANDOM_PDBADIN_PASSWORD=$(date +%s | sha256sum | base64 | head -c 8)
+
+  sqlplus -s / as sysdba <<EOF
+     -- Exit on any errors
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+     CREATE PLUGGABLE DATABASE ${NEW_PDB} \
+      ADMIN USER PDBADMIN IDENTIFIED BY "${RANDOM_PDBADIN_PASSWORD}" \
+       FILE_NAME_CONVERT=('pdbseed','${NEW_PDB}') \
+        DEFAULT TABLESPACE USERS \
+         DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/${NEW_PDB}/users01.dbf' \
+          SIZE 1m AUTOEXTEND ON NEXT 10m MAXSIZE UNLIMITED;
+
+     -- Open PDB and save state
+     ALTER PLUGGABLE DATABASE ${NEW_PDB} OPEN READ WRITE;
+     ALTER PLUGGABLE DATABASE ${NEW_PDB} SAVE STATE;
+
+     -- Register new database with listener
+     ALTER SYSTEM REGISTER;
+     exit;
+EOF
+
+  unset RANDOM_PDBADIN_PASSWORD
+
+fi;

@@ -264,42 +264,6 @@ function run_custom_scripts_recursive {
   done
 }
 
-# Create pluggable database
-function create_database {
-
-  echo "CONTAINER: Creating pluggable database."
-
-  RANDOM_PDBADIN_PASSWORD=$(date +%s | sha256sum | base64 | head -c 8)
-
-  PDB_CREATE_START_TMS=$(date '+%s')
-
-  sqlplus -s / as sysdba <<EOF
-     -- Exit on any errors
-     WHENEVER SQLERROR EXIT SQL.SQLCODE
-
-     CREATE PLUGGABLE DATABASE ${ORACLE_DATABASE} \
-      ADMIN USER PDBADMIN IDENTIFIED BY "${RANDOM_PDBADIN_PASSWORD}" \
-       FILE_NAME_CONVERT=('pdbseed','${ORACLE_DATABASE}') \
-        DEFAULT TABLESPACE USERS \
-         DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/${ORACLE_DATABASE}/users01.dbf' \
-          SIZE 1m AUTOEXTEND ON NEXT 10m MAXSIZE UNLIMITED;
-
-     -- Open PDB and save state
-     ALTER PLUGGABLE DATABASE ${ORACLE_DATABASE} OPEN READ WRITE;
-     ALTER PLUGGABLE DATABASE ${ORACLE_DATABASE} SAVE STATE;
-
-     -- Register new database with listener
-     ALTER SYSTEM REGISTER;
-     exit;
-EOF
-
-  PDB_CREATE_END_TMS=$(date '+%s')
-  PDB_CREATE_DURATION=$(( PDB_CREATE_END_TMS - PDB_CREATE_START_TMS ))
-  echo "CONTAINER: DONE: Creating pluggable database, duration: ${PDB_CREATE_DURATION} seconds."
-
-  unset RANDOM_PDBADIN_PASSWORD
-}
-
 # Check minimum memory requirements
 function check_minimum_memory {
 
@@ -399,23 +363,63 @@ if healthcheck.sh "${ORACLE_SID}"; then
 
     # Check whether user PDB should be created
     if [ -n "${ORACLE_DATABASE:-}" ]; then
-      create_database
-      if ! healthcheck.sh "${ORACLE_DATABASE}"; then
-         echo "CONTAINER: application database not ready for service, aborting!"
-         echo "Please report a bug at https://github.com/gvenzl/oci-oracle-free/issues with your environment details."
-         exit 1;
-      fi;
+
+      OIFS="${IFS}"
+      IFS=","
+
+      # No "" around ${ORACLE_DATABASE} as that would prevent word splitting
+      for new_pdb in ${ORACLE_DATABASE}; do
+        echo "CONTAINER: Creating pluggable database '${new_pdb}'."
+
+        PDB_CREATE_START_TMS=$(date '+%s')
+
+        createDatabase "${new_pdb}"
+
+        PDB_CREATE_END_TMS=$(date '+%s')
+        PDB_CREATE_DURATION=$(( PDB_CREATE_END_TMS - PDB_CREATE_START_TMS ))
+
+        echo "CONTAINER: DONE: Creating pluggable database '${new_pdb}', duration: ${PDB_CREATE_DURATION} seconds."
+
+        if ! healthcheck.sh "${new_pdb}"; then
+           echo "CONTAINER: pluggable database not ready for service, aborting container start!"
+           echo "Please report a bug at https://github.com/gvenzl/oci-oracle-free/issues with your environment details."
+           exit 1;
+        fi;
+      done
+
+      IFS="${OIFS}"
+      unset OIFS
+
     fi;
 
     # Check whether app user should be created
     # setup_env_vars has already validated environment variables
     if [ -n "${APP_USER:-}" ]; then
+
+      echo "CONTAINER: Creating app user for default pluggable database."
       # Create app user for default database
-      ./createAppUser "${APP_USER}" "${APP_USER_PASSWORD}"
-        # If ORACLE_DATABASE is specified, also create user in app PDB (only applicable >=18c)
+      createAppUser "${APP_USER}" "${APP_USER_PASSWORD}"
+      echo "CONTAINER: DONE: Creating app user for default pluggable database."
+
+      # If ORACLE_DATABASE is specified, also create user in app PDB (only applicable >=18c)
       if [ -n "${ORACLE_DATABASE:-}" ]; then
-        ./createAppUser "${APP_USER}" "${APP_USER_PASSWORD}" "${ORACLE_DATABASE}"
+
+        OIFS="${IFS}"
+        IFS=","
+
+        # Create new app user in each PDB
+        # No "" around ${ORACLE_DATABASE} as that would prevent word splitting
+        for new_pdb in ${ORACLE_DATABASE}; do
+          echo "CONTAINER: Creating app user for pluggable database '${new_pdb}'."
+          createAppUser "${APP_USER}" "${APP_USER_PASSWORD}" "${new_pdb}"
+          echo "CONTAINER: DONE: Creating app user fro pluggable database '${new_pdb}'."
+        done;
+
+        IFS="${OIFS}"
+        unset OIFS
+
       fi;
+
     fi;
 
     # Running custom database initialization scripts
@@ -462,9 +466,9 @@ fi;
 if ! [ "${NOWAIT}" == "--nowait" ]; then
 
   echo ""
-  echo "##################################################################"
+  echo "####################################################################"
   echo "CONTAINER: The following output is now from the alert_${ORACLE_SID}.log file:"
-  echo "##################################################################"
+  echo "####################################################################"
 
   tail -f "${ORACLE_BASE}"/diag/rdbms/*/"${ORACLE_SID}"/trace/alert_"${ORACLE_SID}".log &
   childPID=$!

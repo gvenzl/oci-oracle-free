@@ -223,10 +223,6 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- Enable Tuning and Diag packs
    ALTER SYSTEM SET CONTROL_MANAGEMENT_PACK_ACCESS='DIAGNOSTIC+TUNING' SCOPE=SPFILE;
 
-   -- Disable auditing
-   ALTER SYSTEM SET AUDIT_TRAIL=NONE SCOPE=SPFILE;
-   ALTER SYSTEM SET AUDIT_SYS_OPERATIONS=FALSE SCOPE=SPFILE;
-
    -- Disable common_user_prefix (needed for OS authenticated user)
    ALTER SYSTEM SET COMMON_USER_PREFIX='' SCOPE=SPFILE;
 
@@ -259,6 +255,68 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    ALTER USER OPS\$ORACLE SET CONTAINER_DATA = ALL CONTAINER = CURRENT;
 
    exit;
+EOF
+
+# Disable unified auditing
+su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+   -- Exit on any errors
+   WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+   -- Disable unified auditing in the CDB\$ROOT
+   BEGIN
+     FOR cur IN (SELECT CONCAT('NOAUDIT POLICY ', policy_name) AS stmt FROM audit_unified_enabled_policies) LOOP
+       EXECUTE IMMEDIATE cur.stmt;
+     END LOOP;
+   END;
+   /
+
+   -- Disable unified auditing in the PDB\$SEED
+
+   -- Open PDB\$SEED to READ WRITE mode
+   ALTER PLUGGABLE DATABASE PDB\$SEED CLOSE;
+   ALTER PLUGGABLE DATABASE PDB\$SEED OPEN READ WRITE;
+
+   ALTER SESSION SET CONTAINER=PDB\$SEED;
+   BEGIN
+     FOR cur IN (SELECT CONCAT('NOAUDIT POLICY ', policy_name) AS stmt FROM audit_unified_enabled_policies) LOOP
+       EXECUTE IMMEDIATE cur.stmt;
+     END LOOP;
+   END;
+   /
+
+   -- Disable unified auditing in the FREEPDB1
+        ALTER SESSION SET CONTAINER=FREEPDB1;
+   BEGIN
+     FOR cur IN (SELECT CONCAT('NOAUDIT POLICY ', policy_name) AS stmt FROM audit_unified_enabled_policies) LOOP
+       EXECUTE IMMEDIATE cur.stmt;
+     END LOOP;
+   END;
+   /
+
+   exit;
+EOF
+
+# Clean Audit Trail and reinstantiate PDB\$SEED
+su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+   -- Exit on any errors
+   WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+   -- Purge all audit trails
+   BEGIN
+     DBMS_AUDIT_MGMT.CLEAN_AUDIT_TRAIL(
+       audit_trail_type => DBMS_AUDIT_MGMT.AUDIT_TRAIL_UNIFIED,
+       use_last_arch_timestamp => FALSE,
+       container => DBMS_AUDIT_MGMT.CONTAINER_ALL
+     );
+   END;
+   /
+
+   -- Reinstantiate PDB\$SEED state
+   ALTER PLUGGABLE DATABASE PDB\$SEED CLOSE;
+   ALTER PLUGGABLE DATABASE PDB\$SEED OPEN READ ONLY;
+
 EOF
 
 ###################################
@@ -1822,6 +1880,7 @@ mv /install/container-entrypoint.sh "${ORACLE_BASE}"/
 mv /install/healthcheck.sh "${ORACLE_BASE}"/
 mv /install/resetPassword "${ORACLE_BASE}"/
 mv /install/createAppUser "${ORACLE_BASE}"/
+mv /install/createDatabase "${ORACLE_BASE}"/
 
 ################################
 ### Setting file permissions ###
@@ -1831,11 +1890,13 @@ echo "BUILDER: setting file permissions"
 
 chown oracle:dba "${ORACLE_BASE}"/*.sh \
                  "${ORACLE_BASE}"/resetPassword \
-                 "${ORACLE_BASE}"/createAppUser
+                 "${ORACLE_BASE}"/createAppUser \
+                 "${ORACLE_BASE}"/createDatabase
 
 chmod u+x "${ORACLE_BASE}"/*.sh \
           "${ORACLE_BASE}"/resetPassword \
-          "${ORACLE_BASE}"/createAppUser
+          "${ORACLE_BASE}"/createAppUser \
+          "${ORACLE_BASE}"/createDatabase
 
 # Setting permissions for all folders so that they can be mounted on tmpfs
 # (see https://github.com/gvenzl/oci-oracle-xe/issues/202)
@@ -1917,14 +1978,17 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm "${ORACLE_HOME}"/lib/*.jar
 
   # Remove unnecessary timezone information
-  rm    "${ORACLE_HOME}"/oracore/zoneinfo/readme.txt
-  rm    "${ORACLE_HOME}"/oracore/zoneinfo/timezdif.csv
-  rm -r "${ORACLE_HOME}"/oracore/zoneinfo/big
-  rm -r "${ORACLE_HOME}"/oracore/zoneinfo/little
-  rm    "${ORACLE_HOME}"/oracore/zoneinfo/timezone*
-  mv    "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg_40.dat "${ORACLE_HOME}"/oracore/zoneinfo/current.dat
-  rm    "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg*
-  mv    "${ORACLE_HOME}"/oracore/zoneinfo/current.dat "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg_40.dat
+  # Create temporary folder
+  mkdir "${ORACLE_HOME}"/oracore/tmp_current_tz
+  # Move timelrg*.dat with the highest number to temporary folder
+  mv    $(ls -v "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg* | tail -n 1) \
+           "${ORACLE_HOME}"/oracore/tmp_current_tz/
+  # Delete all remaining folders and files in "zoneinfo"
+  rm -r "${ORACLE_HOME}"/oracore/zoneinfo/*
+  # Move current timelrg*.dat file back into place
+  mv    "${ORACLE_HOME}"/oracore/tmp_current_tz/* "${ORACLE_HOME}"/oracore/zoneinfo/
+  # Remove temporary folder
+  rm -r "${ORACLE_HOME}"/oracore/tmp_current_tz
 
   # Remove Multimedia
   rm -r "${ORACLE_HOME}"/ord/im

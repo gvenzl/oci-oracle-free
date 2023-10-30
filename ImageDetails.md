@@ -13,8 +13,6 @@ A couple of modifications have been performed to make the installation more suit
 
 * `DBMS_XDB.SETLISTENERLOCALACCESS(FALSE)`
 * `ALTER SYSTEM SET CONTROL_MANAGEMENT_PACK_ACCESS='DIAGNOSTIC+TUNING'` (see https://github.com/gvenzl/oci-oracle-xe/issues/112)
-* `ALTER SYSTEM SET AUDIT_TRAIL=NONE SCOPE=SPFILE;`
-* `ALTER SYSTEM SET AUDIT_SYS_OPERATIONS=FALSE SCOPE=SPFILE;`
 * `COMMON_USER_PREFIX=''`
 * `LOCAL_LISTENER=''`
 * `CPU_COUNT=2` (see https://github.com/gvenzl/oci-oracle-xe/issues/64 and https://github.com/gvenzl/oci-oracle-xe/pull/107)
@@ -22,6 +20,7 @@ A couple of modifications have been performed to make the installation more suit
 * `DISABLE_OOB=ON` in `sqlnet.ora` (see https://github.com/gvenzl/oci-oracle-xe/issues/43)
 * `BREAK_POLL_SKIP=1000` in `sqlnet.ora` (see https://github.com/gvenzl/oci-oracle-xe/issues/43)
 * `NLS_LANG=.AL32UTF8` set for `oracle` user to run client sessions on DB server in UTF-8 (see https://github.com/gvenzl/oci-oracle-xe/issues/109)
+* Unified Auditing is disabled for CDB and all PDBs (`NOAUDIT POLICY ...`)
 
 #### Operating system
 

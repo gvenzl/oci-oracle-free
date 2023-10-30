@@ -30,7 +30,7 @@ docker exec <container name|id> resetPassword <your password>
 ```
 
 ## Oracle Database Free on Apple M chips
-Currently, there is no Oracle Database port for ARM chips, hence Oracle Database Free images cannot run on the new Apple M chips via Docker Desktop.  
+Currently, there is no Oracle Database Free port for ARM chips, hence Oracle Database Free images cannot run on the new Apple M chips via Docker Desktop.  
 Fortunately, there are other technologies that can spin up `x86_64` software on Apple M chips, such as [colima](https://github.com/abiosoft/colima). To run these Oracle Database Free images on Apple M hardware, follow these simple steps:
 
 * Install colima ([instructions](https://github.com/abiosoft/colima#installation))
@@ -46,6 +46,7 @@ We are proud of the following users of these images:
 * [Ibis](https://ibis-project.org/) [[`b568a81`](https://github.com/ibis-project/ibis/pull/6126/commits/b568a8152ff1ad1724d374e35bde4907fd7e6ea4)]
 * [jOOQ](https://www.jooq.org/) [[`Twitter`](https://twitter.com/lukaseder/status/1695419767652229268)]
 * [Quarkus](https://quarkus.io/) [[`546922c`](https://github.com/quarkusio/quarkus/commit/546922cf13b4de2d84966550577c0f22ef27000c)]
+* [Ruby on Rails ActiveRecord adapter](https://github.com/rsim/oracle-enhanced) [[`deb214d`](https://github.com/rsim/oracle-enhanced/commit/deb214decc3799608c8be386e91c6c7531c59793)]
 * [Spring Data](https://spring.io/projects/spring-data) [[`3cac9d1`](https://github.com/spring-projects/spring-data-relational/commit/3cac9d145618a073736393b62961c94dae77117f)]
 
 If you are using these images and would like to be listed as well, please open an [issue on GitHub](https://github.com/gvenzl/oci-oracle-free/issues) or reach out on [Twitter](https://twitter.com/geraldvenzl).
@@ -63,8 +64,9 @@ This variable is mandatory for the first container startup and specifies the pas
 This is an optional variable. Set this variable to a non-empty value, like `yes`, to generate a random initial password for the `SYS` and `SYSTEM` users. The generated password will be printed to stdout (`ORACLE PASSWORD FOR SYS AND SYSTEM: ...`).
 
 ### `ORACLE_DATABASE`
-This is an optional variable. Set this variable to a non-empty string to create a new pluggable database with the name specified in this variable.  
-**Note:** creating a new database will add to the initial container startup time. If you do not want that additional startup time, use the already existing `FREEPDB1` database instead.
+This is an optional variable. Set this variable to a non-empty string to create a new pluggable database with the name specified in this variable. Multiple pluggable databases are created when separating multiple names with a comma, for example, `ORACLE_DATABASE=PDB1,PDB2,PDB3`.
+
+**Note:** creating a new pluggable database will add to the initial container startup time. If you do not want that additional startup time, use the already existing `FREEPDB1` database instead.
 
 ### `APP_USER`
 This is an optional variable. Set this variable to a non-empty string to create a new database schema user with the name specified in this variable. For 18c and onwards, the user will be created in the default `FREEPDB1` pluggable database. If `ORACLE_DATABASE` has been specified, the user will also be created in that pluggable database. This variable requires `APP_USER_PASSWORD` or `APP_USER_PASSWORD_FILE` to be specified as well.
