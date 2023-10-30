@@ -64,8 +64,9 @@ This variable is mandatory for the first container startup and specifies the pas
 This is an optional variable. Set this variable to a non-empty value, like `yes`, to generate a random initial password for the `SYS` and `SYSTEM` users. The generated password will be printed to stdout (`ORACLE PASSWORD FOR SYS AND SYSTEM: ...`).
 
 ### `ORACLE_DATABASE`
-This is an optional variable. Set this variable to a non-empty string to create a new pluggable database with the name specified in this variable.  
-**Note:** creating a new database will add to the initial container startup time. If you do not want that additional startup time, use the already existing `FREEPDB1` database instead.
+This is an optional variable. Set this variable to a non-empty string to create a new pluggable database with the name specified in this variable. Multiple pluggable databases are created when separating multiple names with a comma, for example, `ORACLE_DATABASE=PDB1,PDB2,PDB3`.
+
+**Note:** creating a new pluggable database will add to the initial container startup time. If you do not want that additional startup time, use the already existing `FREEPDB1` database instead.
 
 ### `APP_USER`
 This is an optional variable. Set this variable to a non-empty string to create a new database schema user with the name specified in this variable. For 18c and onwards, the user will be created in the default `FREEPDB1` pluggable database. If `ORACLE_DATABASE` has been specified, the user will also be created in that pluggable database. This variable requires `APP_USER_PASSWORD` or `APP_USER_PASSWORD_FILE` to be specified as well.

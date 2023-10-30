@@ -303,6 +303,106 @@ unset APP_USER
 unset APP_USER_PASSWORD
 unset ORACLE_DATABASE
 
+#################################################
+##### Oracle Database PDBs + APP_USER test ######
+#################################################
+
+# Tell test method not to tear down container
+NO_TEAR_DOWN="true"
+# Let's keep the container name in a var to keep it simple
+CONTAINER_NAME="23-oracle-db-pdbs"
+# Let's keep the test name in a var to keep it simple too
+TEST_NAME="23.3 MULTIPLE PDBs & APP_USER"
+# This is what we want to have back from the SQL statement
+EXPECTED_RESULT="Hi from your Oracle PDB"
+# App user
+APP_USER="pdb_app_user"
+# App user password
+APP_USER_PASSWORD="AnotherAppUserPassword1"
+# Oracle PDB
+ORACLE_DATABASE="test_pdb1,TEST_PDB2,PDB3"
+
+# Spin up container
+runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-free:23.3-slim-faststart"
+
+##################
+# PDB: test_pdb1 #
+##################
+# Test the random password, if it works we will get "OK" back from the SQL statement
+result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${APP_USER}"/"${APP_USER_PASSWORD}"@//localhost/test_pdb1 <<EOF
+   set heading off;
+   set echo off;
+   set pagesize 0;
+   SELECT '${EXPECTED_RESULT}' FROM dual;
+   exit;
+EOF
+)
+
+# See whether we got "OK" back from our test
+if [ "${result}" == "${EXPECTED_RESULT}" ]; then
+  echo "TEST ${TEST_NAME}: OK";
+  echo "";
+else
+  echo "TEST ${TEST_NAME}: FAILED!";
+  exit 1;
+fi;
+
+##################
+# PDB: test_pdb2 #
+##################
+# Test the random password, if it works we will get "OK" back from the SQL statement
+result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${APP_USER}"/"${APP_USER_PASSWORD}"@//localhost/test_pdb2 <<EOF
+   set heading off;
+   set echo off;
+   set pagesize 0;
+   SELECT '${EXPECTED_RESULT}' FROM dual;
+   exit;
+EOF
+)
+
+# See whether we got "OK" back from our test
+if [ "${result}" == "${EXPECTED_RESULT}" ]; then
+  echo "TEST ${TEST_NAME}: OK";
+  echo "";
+else
+  echo "TEST ${TEST_NAME}: FAILED!";
+  exit 1;
+fi;
+
+##################
+# PDB: pdb3      #
+##################
+# Test the random password, if it works we will get "OK" back from the SQL statement
+result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${APP_USER}"/"${APP_USER_PASSWORD}"@//localhost/pdb3 <<EOF
+   set heading off;
+   set echo off;
+   set pagesize 0;
+   SELECT '${EXPECTED_RESULT}' FROM dual;
+   exit;
+EOF
+)
+
+# See whether we got "OK" back from our test
+if [ "${result}" == "${EXPECTED_RESULT}" ]; then
+  echo "TEST ${TEST_NAME}: OK";
+  echo "";
+else
+  echo "TEST ${TEST_NAME}: FAILED!";
+  exit 1;
+fi;
+
+# Tear down the container, no longer needed
+tear_down_container "${CONTAINER_NAME}"
+
+# Clean up environment variables, all tests should remain self-contained
+unset CONTAINER_NAME
+unset NO_TEAR_DOWN
+unset TEST_NAME
+unset EXPECTED_RESULT
+unset APP_USER
+unset APP_USER_PASSWORD
+unset ORACLE_DATABASE
+
 ################################################
 ##### Test for timezone file failure (#23) #####
 ################################################

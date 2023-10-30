@@ -1880,6 +1880,7 @@ mv /install/container-entrypoint.sh "${ORACLE_BASE}"/
 mv /install/healthcheck.sh "${ORACLE_BASE}"/
 mv /install/resetPassword "${ORACLE_BASE}"/
 mv /install/createAppUser "${ORACLE_BASE}"/
+mv /install/createDatabase "${ORACLE_BASE}"/
 
 ################################
 ### Setting file permissions ###
@@ -1889,11 +1890,13 @@ echo "BUILDER: setting file permissions"
 
 chown oracle:dba "${ORACLE_BASE}"/*.sh \
                  "${ORACLE_BASE}"/resetPassword \
-                 "${ORACLE_BASE}"/createAppUser
+                 "${ORACLE_BASE}"/createAppUser \
+                 "${ORACLE_BASE}"/createDatabase
 
 chmod u+x "${ORACLE_BASE}"/*.sh \
           "${ORACLE_BASE}"/resetPassword \
-          "${ORACLE_BASE}"/createAppUser
+          "${ORACLE_BASE}"/createAppUser \
+          "${ORACLE_BASE}"/createDatabase
 
 # Setting permissions for all folders so that they can be mounted on tmpfs
 # (see https://github.com/gvenzl/oci-oracle-xe/issues/202)
