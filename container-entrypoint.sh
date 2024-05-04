@@ -447,7 +447,7 @@ if healthcheck.sh "${ORACLE_SID}"; then
   echo "DATABASE IS READY TO USE!"
   echo "#########################"
 
-  if [[ $(cat /etc/oci-image-version) == "23.2" ]]; then
+  if [[ $(cat /etc/oci-image-version) == "23.2" || $(cat /etc/oci-image-version) == "23.3" ]]; then
     echo ""
     echo "################################################"
     echo "NOTICE: YOU ARE USING AN OLD IMAGE VERSION $(cat /etc/oci-image-version)!"

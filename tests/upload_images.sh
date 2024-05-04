@@ -47,7 +47,9 @@ echo ""
 echo "Starting upload..."
 echo ""
 
-# Upload 23c FULL images
+# Upload 23 FULL images
+echo "Upload 23.4-full-faststart"
+podman push localhost/gvenzl/oracle-free:23.4-full-faststart     docker.io/gvenzl/oracle-free:23.4-full-faststart
 echo "Upload 23.3-full-faststart"
 podman push localhost/gvenzl/oracle-free:23.3-full-faststart     docker.io/gvenzl/oracle-free:23.3-full-faststart
 echo "Upload 23.2-full-faststart"
@@ -57,6 +59,8 @@ podman push localhost/gvenzl/oracle-free:23-full-faststart       docker.io/gvenz
 echo "Upload full-faststart"
 podman push localhost/gvenzl/oracle-free:full-faststart          docker.io/gvenzl/oracle-free:full-faststart
 
+echo "Upload 23.4-full"
+podman push localhost/gvenzl/oracle-free:23.4-full               docker.io/gvenzl/oracle-free:23.4-full
 echo "Upload 23.3-full"
 podman push localhost/gvenzl/oracle-free:23.3-full               docker.io/gvenzl/oracle-free:23.3-full
 echo "Upload 23.2-full"
@@ -66,7 +70,9 @@ podman push localhost/gvenzl/oracle-free:23-full                 docker.io/gvenz
 echo "Upload full"
 podman push localhost/gvenzl/oracle-free:full                    docker.io/gvenzl/oracle-free:full
 
-# Upload 23c images
+# Upload 23 images
+echo "Upload 23.4-faststart"
+podman push localhost/gvenzl/oracle-free:23.4-faststart          docker.io/gvenzl/oracle-free:23.4-faststart
 echo "Upload 23.3-faststart"
 podman push localhost/gvenzl/oracle-free:23.3-faststart          docker.io/gvenzl/oracle-free:23.3-faststart
 echo "Upload 23.2-faststart"
@@ -74,6 +80,8 @@ podman push localhost/gvenzl/oracle-free:23.2-faststart          docker.io/gvenz
 echo "Upload 23-faststart"
 podman push localhost/gvenzl/oracle-free:23-faststart            docker.io/gvenzl/oracle-free:23-faststart
 
+echo "Upload 23.4"
+podman push localhost/gvenzl/oracle-free:23.4                    docker.io/gvenzl/oracle-free:23.4
 echo "Upload 23.3"
 podman push localhost/gvenzl/oracle-free:23.3                    docker.io/gvenzl/oracle-free:23.3
 echo "Upload 23.2"
@@ -82,7 +90,9 @@ echo "Upload 23"
 podman push localhost/gvenzl/oracle-free:23                      docker.io/gvenzl/oracle-free:23
 
 
-# Upload 23c SLIM images
+# Upload 23 SLIM images
+echo "Upload 23.4-slim-faststart"
+podman push localhost/gvenzl/oracle-free:23.4-slim-faststart     docker.io/gvenzl/oracle-free:23.4-slim-faststart
 echo "Upload 23.3-slim-faststart"
 podman push localhost/gvenzl/oracle-free:23.3-slim-faststart     docker.io/gvenzl/oracle-free:23.3-slim-faststart
 echo "Upload 23.2-slim-faststart"
@@ -92,6 +102,8 @@ podman push localhost/gvenzl/oracle-free:23-slim-faststart       docker.io/gvenz
 echo "Upload slim-faststart"
 podman push localhost/gvenzl/oracle-free:slim-faststart          docker.io/gvenzl/oracle-free:slim-faststart
 
+echo "Upload 23.4-slim"
+podman push localhost/gvenzl/oracle-free:23.4-slim               docker.io/gvenzl/oracle-free:23.4-slim
 echo "Upload 23.3-slim"
 podman push localhost/gvenzl/oracle-free:23.3-slim               docker.io/gvenzl/oracle-free:23.3-slim
 echo "Upload 23.2-slim"

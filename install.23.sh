@@ -3,7 +3,7 @@
 # Since: April, 2023
 # Author: gvenzl
 # Name: install.2320.sh
-# Description: Install script for Oracle DB 23c Free
+# Description: Install script for Oracle Database 23 Free
 #
 # Copyright 2023 Gerald Venzl
 #
@@ -43,9 +43,7 @@ TEMP_SIZE=10
 # Overwrite REGULAR with SLIM sizes
 if [ "${BUILD_MODE}" == "SLIM" ]; then
   REDO_SIZE=10
-  USERS_SIZE=2
   SYSAUX_SIZE_CDB=560
-  TEMP_SIZE=10
 fi;
 
 echo "BUILDER: Installing OS dependencies"
@@ -84,14 +82,14 @@ rm -rf /tmp/7z
 echo "BUILDER: installing database binaries"
 
 # Install Oracle Free
-rpm -iv --nodeps /install/oracle-database-free-23c*1.0-1.el8.x86_64.rpm
+rpm -iv --nodeps /install/oracle-database-free-23*1.0-1.el8.x86_64.rpm
 
 # Set 'oracle' user home directory to ${ORACE_BASE}
-usermod -d ${ORACLE_BASE} oracle
+usermod -d "${ORACLE_BASE}" oracle
 
 # Add listener port and skip validations to conf file
-sed -i "s/LISTENER_PORT=/LISTENER_PORT=1521/g" /etc/sysconfig/oracle-free-23c.conf
-sed -i "s/SKIP_VALIDATIONS=false/SKIP_VALIDATIONS=true/g" /etc/sysconfig/oracle-free-23c.conf
+sed -i "s/LISTENER_PORT=/LISTENER_PORT=1521/g" /etc/sysconfig/oracle-free-23*.conf
+sed -i "s/SKIP_VALIDATIONS=false/SKIP_VALIDATIONS=true/g" /etc/sysconfig/oracle-free-23*.conf
 
 # Disable netca to avoid "No IP address found" issue
 mv "${ORACLE_HOME}"/bin/netca "${ORACLE_HOME}"/bin/netca.bak
@@ -102,7 +100,7 @@ echo "BUILDER: configuring database"
 
 # Set random password
 ORACLE_PASSWORD=$(date '+%s' | sha256sum | base64 | head -c 8)
-(echo "${ORACLE_PASSWORD}"; echo "${ORACLE_PASSWORD}";) | /etc/init.d/oracle-free-23c configure 
+(echo "${ORACLE_PASSWORD}"; echo "${ORACLE_PASSWORD}";) | /etc/init.d/oracle-free-23* configure
 
 # Stop unconfigured listener
 su -p oracle -c "lsnrctl stop"
@@ -1601,118 +1599,156 @@ EOF
 
 EOF
 
+  ##############################
+  ## Shrink actual data files ##
+  ##############################
+
+
+  ##############################
+  ## Shrink SYSAUX tablespace ##
+  ##############################
+
+  if [[ "$(cat /etc/oci-image-version)" ==  "23.2" ||
+        "$(cat /etc/oci-image-version)" ==  "23.3" ]]; then
+
+    su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+       -- Exit on any error
+       WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+       -- CDB
+       ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux01.dbf' RESIZE ${SYSAUX_SIZE_CDB}M;
+
+       -- SEED
+       ALTER SESSION SET CONTAINER=PDB\$SEED;
+       ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/sysaux01.dbf' RESIZE ${SYSAUX_SIZE_SEED}M;
+
+       -- FREEPDB1
+       ALTER SESSION SET CONTAINER=FREEPDB1;
+       ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/sysaux01.dbf' RESIZE ${SYSAUX_SIZE_PDB}M;
+
+       exit;
+EOF
+
+  # 23.4 and higher
+  else
+    su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+       -- Exit on any error
+       WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+       -- CDB
+       exec DBMS_SPACE.SHRINK_TABLESPACE('SYSAUX');
+
+       -- SEED
+       ALTER SESSION SET CONTAINER=PDB\$SEED;
+       exec DBMS_SPACE.SHRINK_TABLESPACE('SYSAUX');
+
+       -- FREEPDB1
+       ALTER SESSION SET CONTAINER=FREEPDB1;
+       exec DBMS_SPACE.SHRINK_TABLESPACE('SYSAUX');
+
+       exit;
+EOF
+  fi;
+
+  ##############################
+  ## Shrink SYSTEM tablespace ##
+  ##############################
+
+  if [[ "$(cat /etc/oci-image-version)" ==  "23.2" ||
+        "$(cat /etc/oci-image-version)" ==  "23.3" ]]; then
+
+    su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+       -- Exit on any error
+       WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+       -- CDB
+       ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/system01.dbf' RESIZE ${SYSTEM_SIZE_CDB}M;
+
+       -- SEED
+       ALTER SESSION SET CONTAINER=PDB\$SEED;
+       ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/system01.dbf' RESIZE ${SYSTEM_SIZE_SEED}M;
+
+       -- FREEPDB1
+       ALTER SESSION SET CONTAINER=FREEPDB1;
+       ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/system01.dbf' RESIZE ${SYSTEM_SIZE_PDB}M;
+
+       exit;
+EOF
+
+  # 23.4 and higher
+  else
+    su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+       -- Exit on any error
+       WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+       -- CDB
+       exec DBMS_SPACE.SHRINK_TABLESPACE('SYSTEM');
+
+       -- SEED
+       ALTER SESSION SET CONTAINER=PDB\$SEED;
+       exec DBMS_SPACE.SHRINK_TABLESPACE('SYSTEM');
+
+       -- FREEPDB1
+       ALTER SESSION SET CONTAINER=FREEPDB1;
+       exec DBMS_SPACE.SHRINK_TABLESPACE('SYSTEM');
+
+       exit;
+EOF
+  fi;
+
   ############################
-  # Shrink actual data files #
+  ## Shrink TEMP tablespace ##
   ############################
+
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
      -- Exit on any error
      WHENEVER SQLERROR EXIT SQL.SQLCODE
 
-     ----------------------------
-     -- Shrink SYSAUX tablespaces
-     ----------------------------
-
-     -- Create new temporary SYSAUX tablespace
-     --CREATE TABLESPACE SYSAUX_TEMP DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux_temp.dbf'
-     --SIZE 250M AUTOEXTEND ON NEXT 1M MAXSIZE UNLIMITED;
-
-     -- Move tables to temporary SYSAUX tablespace
-     --#TODO
-     --BEGIN
-     --   FOR cur IN (SELECT  owner || '.' || table_name AS name FROM all_tables WHERE tablespace_name = 'SYSAUX') LOOP
-     --      EXECUTE IMMEDIATE 'ALTER TABLE ' || cur.name || ' MOVE TABLESPACE SYSAUX_TEMP';
-     --   END LOOP;
-     --END;
-     --/
-
-     -- CDB
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux01.dbf' RESIZE ${SYSAUX_SIZE_CDB}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux01.dbf'
-        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
-
-     -- SEED
-     ALTER SESSION SET CONTAINER=PDB\$SEED;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/sysaux01.dbf' RESIZE ${SYSAUX_SIZE_SEED}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/sysaux01.dbf'
-        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
-
-     -- FREEPDB1
-     ALTER SESSION SET CONTAINER=FREEPDB1;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/sysaux01.dbf' RESIZE ${SYSAUX_SIZE_PDB}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/sysaux01.dbf'
-        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
-
-     ALTER SESSION SET CONTAINER=CDB\$ROOT;
-
-     ----------------------------
-     -- Shrink SYSTEM tablespaces
-     ----------------------------
-
-     -- CDB
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/system01.dbf' RESIZE ${SYSTEM_SIZE_CDB}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/system01.dbf'
-     AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
-
-     -- SEED
-     ALTER SESSION SET CONTAINER=PDB\$SEED;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/system01.dbf' RESIZE ${SYSTEM_SIZE_SEED}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/system01.dbf'
-        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
-
-     -- FREEPDB1
-     ALTER SESSION SET CONTAINER=FREEPDB1;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/system01.dbf' RESIZE ${SYSTEM_SIZE_PDB}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/system01.dbf'
-        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
-
-     ALTER SESSION SET CONTAINER=CDB\$ROOT;
-
-     --------------------------
-     -- Shrink TEMP tablespaces
-     --------------------------
-
-     -- CDB
-     ALTER TABLESPACE TEMP SHRINK SPACE;
-     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp01.dbf' RESIZE ${TEMP_SIZE}M;
-     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp01.dbf'
-        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
-
+      -- CDB
+      ALTER TABLESPACE TEMP SHRINK SPACE;
+      ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp01.dbf' RESIZE ${TEMP_SIZE}M;
      
-     -- SEED
-     ALTER SESSION SET CONTAINER=PDB\$SEED;
-     ALTER TABLESPACE TEMP SHRINK SPACE;
-     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/temp01.dbf' RESIZE ${TEMP_SIZE}M;
-     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/temp01.dbf'
-        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+      -- SEED
+      ALTER SESSION SET CONTAINER=PDB\$SEED;
+      ALTER TABLESPACE TEMP SHRINK SPACE;
+      ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/temp01.dbf' RESIZE ${TEMP_SIZE}M;
 
-    -- FREEDPB1
-     ALTER SESSION SET CONTAINER=FREEPDB1;
-     ALTER TABLESPACE TEMP SHRINK SPACE;
-     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/temp01.dbf' RESIZE ${TEMP_SIZE}M;
-     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/temp01.dbf'
-        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+      -- FREEDPB1
+      ALTER SESSION SET CONTAINER=FREEPDB1;
+      ALTER TABLESPACE TEMP SHRINK SPACE;
+      ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/temp01.dbf' RESIZE ${TEMP_SIZE}M;
 
-     ALTER SESSION SET CONTAINER=CDB\$ROOT;
+      exit;
+EOF
 
-     ----------------------------
-     -- Shrink USERS tablespaces
-     ----------------------------
+  ##############################
+  ## Shrink USERS tablespaces ##
+  ##############################
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+     -- Exit on any error
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
 
      ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/users01.dbf' RESIZE ${USERS_SIZE}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/users01.dbf'
-     AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
      ALTER SESSION SET CONTAINER=FREEPDB1;
      ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/users01.dbf' RESIZE ${USERS_SIZE}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/users01.dbf'
-     AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
-     ALTER SESSION SET CONTAINER=CDB\$ROOT;
+     exit;
+EOF
 
-     ----------------------------
-     -- Shrink UNDO tablespaces
-     ----------------------------
+  #############################
+  ## Shrink UNDO tablespaces ##
+  #############################
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+     -- Exit on any error
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
 
      -- Create new temporary UNDO tablespace
      CREATE UNDO TABLESPACE UNDO_TMP DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs_tmp.dbf'
@@ -1758,9 +1794,9 @@ EOF
      -- Drop temporary UNDO tablespace
      DROP TABLESPACE UNDO_TMP INCLUDING CONTENTS AND DATAFILES;
 
-     -----------------------------------
+     -------------------------------------
      ALTER SESSION SET CONTAINER=FREEPDB1;
-     -----------------------------------
+     -------------------------------------
 
      -- Create new temporary UNDO tablespace
      CREATE UNDO TABLESPACE UNDO_TMP DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/undotbs_tmp.dbf'
@@ -1784,11 +1820,72 @@ EOF
      -- Drop temporary UNDO tablespace
      DROP TABLESPACE UNDO_TMP INCLUDING CONTENTS AND DATAFILES;
 
-     ---------------------------------
-     -- Shrink REDO log files
-     ---------------------------------
+     exit;
+EOF
 
-     ALTER SESSION SET CONTAINER=CDB\$ROOT;
+  ##################################
+  ## Make data files autoextended ##
+  ##################################
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+     -- Exit on any error
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+     -- SYSAUX
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux01.dbf'
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+     -- SYSTEM
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/system01.dbf'
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+     -- TEMP
+     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp01.dbf'
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+     -- USERS
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/users01.dbf'
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     -- SEED
+     ALTER SESSION SET CONTAINER=PDB\$SEED;
+
+     -- SYSAUX
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/sysaux01.dbf'
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+     -- SYSTEM
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/system01.dbf'
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+     -- TEMP
+     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/temp01.dbf'
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+
+
+     -- FREEDPB1
+     ALTER SESSION SET CONTAINER=FREEPDB1;
+
+     -- SYSAUX
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/sysaux01.dbf'
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+     -- SYSTEM
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/system01.dbf'
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+     -- TEMP
+     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/temp01.dbf'
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+     -- USERS
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/FREEPDB1/users01.dbf'
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+
+     exit;
+EOF
+
+  ###########################
+  ## Shrink REDO log files ##
+  ###########################
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+     -- Exit on any error
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
 
      -- Remove original redo logs and create new ones
      ALTER DATABASE ADD LOGFILE GROUP 4 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo04.log') SIZE ${REDO_SIZE}M;
@@ -1911,11 +2008,11 @@ echo "BUILDER: cleanup"
 # Remove install directory
 rm -r /install
 
-# # Cleanup database files not needed for being in a container but were installed by the rpm
-/sbin/chkconfig --del oracle-free-23c
-rm /etc/init.d/oracle-free-23c
-rm /etc/sysconfig/oracle-free-23c.conf
-rm -r /var/log/oracle-database-free-23c
+# Cleanup database files not needed for being in a container but were installed by the rpm
+#/sbin/chkconfig --del oracle-free-23*
+rm /etc/init.d/oracle-free-23*
+rm /etc/sysconfig/oracle-free-23*.conf
+rm -r /var/log/oracle-database-free-23*
 rm -r /tmp/*
 
 # Remove SYS audit directories and files created during install
@@ -1980,8 +2077,8 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove unnecessary timezone information
   # Create temporary folder
   mkdir "${ORACLE_HOME}"/oracore/tmp_current_tz
-  # Move timelrg*.dat with the highest number to temporary folder
-  mv    $(ls -v "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg* | tail -n 1) \
+  # Copy timelrg*.dat with the highest number to temporary folder (don't "mv" it in case it's a symlink)
+  cp    $(ls -v "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg* | tail -n 1) \
            "${ORACLE_HOME}"/oracore/tmp_current_tz/
   # Delete all remaining folders and files in "zoneinfo"
   rm -r "${ORACLE_HOME}"/oracore/zoneinfo/*
