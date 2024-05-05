@@ -2,7 +2,7 @@
 # Since: April, 2023
 # Author: gvenzl
 # Name: tag_images_23.sh
-# Description: Tag all 23c images
+# Description: Tag all 23 images
 #
 # Copyright 2023 Gerald Venzl
 #
@@ -22,16 +22,16 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-# Tag 23.3 images
-podman tag gvenzl/oracle-free:23.3-full gvenzl/oracle-free:23-full
-podman tag gvenzl/oracle-free:23.3-full gvenzl/oracle-free:full
-podman tag gvenzl/oracle-free:23.3-full-faststart gvenzl/oracle-free:23-full-faststart
-podman tag gvenzl/oracle-free:23.3-full-faststart gvenzl/oracle-free:full-faststart
+# Tag 23.4 images
+podman tag gvenzl/oracle-free:23.4-full gvenzl/oracle-free:23-full
+podman tag gvenzl/oracle-free:23.4-full gvenzl/oracle-free:full
+podman tag gvenzl/oracle-free:23.4-full-faststart gvenzl/oracle-free:23-full-faststart
+podman tag gvenzl/oracle-free:23.4-full-faststart gvenzl/oracle-free:full-faststart
 
-podman tag gvenzl/oracle-free:23.3 gvenzl/oracle-free:23
-podman tag gvenzl/oracle-free:23.3-faststart gvenzl/oracle-free:23-faststart
+podman tag gvenzl/oracle-free:23.4 gvenzl/oracle-free:23
+podman tag gvenzl/oracle-free:23.4-faststart gvenzl/oracle-free:23-faststart
 
-podman tag gvenzl/oracle-free:23.3-slim gvenzl/oracle-free:23-slim
-podman tag gvenzl/oracle-free:23.3-slim gvenzl/oracle-free:slim
-podman tag gvenzl/oracle-free:23.3-slim-faststart gvenzl/oracle-free:23-slim-faststart
-podman tag gvenzl/oracle-free:23.3-slim-faststart gvenzl/oracle-free:slim-faststart
+podman tag gvenzl/oracle-free:23.4-slim gvenzl/oracle-free:23-slim
+podman tag gvenzl/oracle-free:23.4-slim gvenzl/oracle-free:slim
+podman tag gvenzl/oracle-free:23.4-slim-faststart gvenzl/oracle-free:23-slim-faststart
+podman tag gvenzl/oracle-free:23.4-slim-faststart gvenzl/oracle-free:slim-faststart

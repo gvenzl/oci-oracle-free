@@ -2,7 +2,7 @@
 
 Here you can find a full description of all changes that have been made to the Oracle Database and OS installation for the various image flavors.
 
-## 23c FREE
+## Oracle Database 23 Free
 
 ### Full image flavor (`23-full`)
 

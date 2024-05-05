@@ -23,12 +23,13 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-VERSION="23.3"
-FLAVOR="REGULAR"
+VERSION="23.4"
+IMAGE_FLAVOR="REGULAR"
 IMAGE_NAME="gvenzl/oracle-free"
 SKIP_CHECKSUM="false"
 FASTSTART="false"
 BASE_IMAGE=""
+DB_FLAVOR="ai"
 
 function usage() {
     cat << EOF
@@ -42,15 +43,15 @@ Parameters:
    -s: creates a 'slim' image
    -x: creates a 'faststart' image
    -v: version of Oracle Database Free to build
-       Choose one of: 23.3, 23.2
+       Choose one of: 23.4, 23.3, 23.2
    -i: ignores checksum test
    -o: passes on container build option
 
-* select only one flavor: -f, -r, or -s
+* select only one image flavor: -f, -r, or -s
 
 Apache License, Version 2.0
 
-Copyright (c) 2023 Gerald Venzl
+Copyright (c) 2024 Gerald Venzl
 
 EOF
 
@@ -64,15 +65,19 @@ while getopts "hfnsv:io:x" optname; do
       ;;
     "v")
       VERSION="${OPTARG}"
+      # 23.2 and 23.3 are called 23c not 23ai
+      if [[ ("${VERSION}" == "23.2") || ("${VERSION}" == "23.3") ]]; then
+        DB_FLAVOR="c"
+      fi;
       ;;
     "f")
-      FLAVOR="FULL"
+      IMAGE_FLAVOR="FULL"
       ;;
     "r")
-      FLAVOR="REGULAR"
+      IMAGE_FLAVOR="REGULAR"
       ;;
     "s")
-      FLAVOR="SLIM"
+      IMAGE_FLAVOR="SLIM"
       ;;
     "i")
       SKIP_CHECKSUM="true"
@@ -102,7 +107,8 @@ if [ "${SKIP_CHECKSUM}" == "false" ]; then
   SHASUM_RET=$(shasum -a 256 oracle*free*"${VERSION}"*.rpm)
 
   if [[ ( "${VERSION}" == "23.2"  &&  "${SHASUM_RET%% *}" != "63b6c0ec9464682cfd9814e7e2a5d533139e5c6aeb9d3e7997a5f976d6677ca6" ) ||
-        ( "${VERSION}" == "23.3"  &&  "${SHASUM_RET%% *}" != "1319bcd7cb706cb727501cbd98abf3f3980a4fdabeb613a1abffc756925c7374" ) ]]; then
+        ( "${VERSION}" == "23.3"  &&  "${SHASUM_RET%% *}" != "1319bcd7cb706cb727501cbd98abf3f3980a4fdabeb613a1abffc756925c7374" ) ||
+        ( "${VERSION}" == "23.4"  &&  "${SHASUM_RET%% *}" != "e6cccec7f101325c233f374c2aa86f77d62123edd3125450d79404c3eec30b65" ) ]]; then
     echo "BUILDER: WARNING! SHA sum of RPM does not match with what's expected!"
     echo "BUILDER: WARNING! Verify that the .rpm file is not corrupt!"
   fi;
@@ -119,8 +125,8 @@ DOCKER_FILE="Dockerfile.${VERSION%??}"
 IMAGE_NAME="${IMAGE_NAME}:${VERSION}"
 
 # Add image flavor to the tag (regular has no tag)
-if [ "${FLAVOR}" != "REGULAR" ]; then
-  IMAGE_NAME="${IMAGE_NAME}-${FLAVOR,,}"
+if [ "${IMAGE_FLAVOR}" != "REGULAR" ]; then
+  IMAGE_NAME="${IMAGE_NAME}-${IMAGE_FLAVOR,,}"
 fi;
 
 # Add faststart tag to image and set Dockerfile
@@ -134,7 +140,8 @@ echo "BUILDER: building image $IMAGE_NAME"
 
 BUILD_START_TMS=$(date '+%s')
 
-buildah bud -f "$DOCKER_FILE" -t "${IMAGE_NAME}" --build-arg BUILD_MODE="${FLAVOR}" --build-arg BASE_IMAGE="${BASE_IMAGE}" --build-arg BUILD_VERSION="${VERSION}"
+buildah bud -f "$DOCKER_FILE" -t "${IMAGE_NAME}" --build-arg BUILD_MODE="${IMAGE_FLAVOR}" --build-arg BASE_IMAGE="${BASE_IMAGE}" \
+                                                 --build-arg BUILD_VERSION="${VERSION}"   --build-arg DB_FLAVOR="${DB_FLAVOR}"
 
 BUILD_END_TMS=$(date '+%s')
 BUILD_DURATION=$(( BUILD_END_TMS - BUILD_START_TMS ))

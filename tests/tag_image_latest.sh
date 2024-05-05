@@ -23,6 +23,6 @@
 set -Eeuo pipefail
 
 # Tag latest image
-podman tag gvenzl/oracle-free:23.3 gvenzl/oracle-free:latest
+podman tag gvenzl/oracle-free:23.4 gvenzl/oracle-free:latest
 
-podman tag gvenzl/oracle-free:23.3-faststart gvenzl/oracle-free:latest-faststart
+podman tag gvenzl/oracle-free:23.4-faststart gvenzl/oracle-free:latest-faststart
