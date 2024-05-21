@@ -129,7 +129,7 @@ function upload() {
   echo "Upload 23.3-slim"
   podman push localhost/gvenzl/oracle-free:23.3-slim               ghcr.io/gvenzl/oracle-free:23.3-slim
   echo "Upload 23.4-slim"
-  podman push localhost/gvenzl/oracle-free:23.3-slim               ghcr.io/gvenzl/oracle-free:23.4-slim
+  podman push localhost/gvenzl/oracle-free:23.4-slim               ghcr.io/gvenzl/oracle-free:23.4-slim
   echo "Upload 23-slim"
   podman push localhost/gvenzl/oracle-free:23-slim                 ghcr.io/gvenzl/oracle-free:23-slim
   echo "Upload slim"
