@@ -130,6 +130,49 @@ If you amend the variables above, here is some more useful info:
 * Database App User Password: `$APP_USER_PASSWORD`
 * Example JDBC connect string with dynamic port allocation: `jdbc:oracle:thin:@localhost:${{ job.services.oracle.ports[1521] }}/FREEPDB1`
 
+## Docker Compose
+The images can be used in a [Docker Compose](https://docs.docker.com/compose/) setup to provide a local development database or facilitate automated testing. Below is an example service definition for your Docker Compose YAML file:
+
+```yaml
+  version: "3.8"
+  services:
+    # Name of the Docker Compose service
+    oracle:
+      # Docker Hub image (feel free to change the tag "latest" to any other available one)
+      image: gvenzl/oracle-free:latest
+      # Forward Oracle port to localhost
+      ports:
+        - "1521:1521"
+      # Provide passwords and other environment variables to the container
+      environment:
+        ORACLE_PASSWORD: sys_user_password
+        APP_USER: my_user
+        APP_USER_PASSWORD: password_i_should_change
+      # Customize healthcheck script options for startup
+      healthcheck:
+        test: ["CMD", "healthcheck.sh"]
+        interval: 10s
+        timeout: 5s
+        retries: 10
+        start_period: 5s
+        start_interval: 5s
+      # Mount a local SQL file to initialize your schema at startup
+      volumes:
+        - my-init.sql:/container-entrypoint-initdb.d/my-init.sql:ro
+```
+
+After your container is up and running, you can connect to it via the following properties:
+
+* Hostname:
+  * `oracle` (from within another service defined in the compose file)
+  * `localhost` or `127.0.0.1` (from the host directly)
+* Port: `1521`
+* Service name: `FREEPDB1`
+* Database App User: `my_user`
+* Database App Password: `password_i_should_change`
+
+To know more about initialization scripts, please refer to the [Initialization scripts section](#initialization-scripts).
+
 # Image flavors
 
 | Flavor  | Extension | Description                                                                                 | Use cases                                                                                              |
