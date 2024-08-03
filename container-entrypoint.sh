@@ -412,7 +412,7 @@ if healthcheck.sh "${ORACLE_SID}"; then
         for new_pdb in ${ORACLE_DATABASE}; do
           echo "CONTAINER: Creating app user for pluggable database '${new_pdb}'."
           createAppUser "${APP_USER}" "${APP_USER_PASSWORD}" "${new_pdb}"
-          echo "CONTAINER: DONE: Creating app user fro pluggable database '${new_pdb}'."
+          echo "CONTAINER: DONE: Creating app user for pluggable database '${new_pdb}'."
         done;
 
         IFS="${OIFS}"
