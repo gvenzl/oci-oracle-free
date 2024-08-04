@@ -58,6 +58,7 @@ We are proud of the following users of these images:
 * [Ruby on Rails ActiveRecord adapter](https://github.com/rsim/oracle-enhanced) [[`deb214d`](https://github.com/rsim/oracle-enhanced/commit/deb214decc3799608c8be386e91c6c7531c59793)]
 * [Spring Data](https://spring.io/projects/spring-data) [[`3cac9d1`](https://github.com/spring-projects/spring-data-relational/commit/3cac9d145618a073736393b62961c94dae77117f)]
 * [Micronaut](https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/) [[`37882de`](https://github.com/micronaut-projects/micronaut-test-resources/commit/37882dec85657df1a3661f7eea1a8bc0dce124ff)]
+* [utPLSQL](http://utplsql.org/) [[`0497dcf`](https://github.com/utPLSQL/utPLSQL/commit/0497dcfadcac637d186fdbc0aa36338d178f597d)]
 
 If you are using these images and would like to be listed as well, please open an [issue on GitHub](https://github.com/gvenzl/oci-oracle-free/issues) or reach out on [Twitter](https://twitter.com/geraldvenzl).
 
