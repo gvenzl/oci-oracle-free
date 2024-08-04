@@ -5,9 +5,12 @@ Oracle Database Free Container / Docker images.
 
 # Supported tags and respective `Dockerfile` links
 
-* [`latest`, `23`, `23.4`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`latest-faststart`, `23-faststart`, `23.4-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
-* [`slim`, `23-slim`, `23.4-slim`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`slim-faststart`, `23-slim-faststart`, `23.4-slim-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
-* [`full`, `23-full`, `23.4-full`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`full-faststart`, `23-full-faststart`, `23.4-full-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
+* [`latest`, `23`, `23.5`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`latest-faststart`, `23-faststart`, `23.5-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
+* [`slim`, `23-slim`, `23.5-slim`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`slim-faststart`, `23-slim-faststart`, `23.5-slim-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
+* [`full`, `23-full`, `23.5-full`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`full-faststart`, `23-full-faststart`, `23.5-full-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
+* [`23.4`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`23.4-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
+* [`23.4-slim`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`23.4-slim-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
+* [`23.4-full`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`23.4-full-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
 * [`23.3`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`23.3-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
 * [`23.3-slim`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`23.3-slim-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
 * [`23.3-full`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`23.3-full-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)

@@ -23,7 +23,7 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-VERSION="23.4"
+VERSION="23.5"
 IMAGE_FLAVOR="REGULAR"
 IMAGE_NAME="gvenzl/oracle-free"
 SKIP_CHECKSUM="false"
@@ -43,7 +43,7 @@ Parameters:
    -s: creates a 'slim' image
    -x: creates a 'faststart' image
    -v: version of Oracle Database Free to build
-       Choose one of: 23.4, 23.3, 23.2
+       Choose one of: 23.5, 23.4, 23.3, 23.2
    -i: ignores checksum test
    -o: passes on container build option
 
@@ -108,7 +108,8 @@ if [ "${SKIP_CHECKSUM}" == "false" ]; then
 
   if [[ ( "${VERSION}" == "23.2"  &&  "${SHASUM_RET%% *}" != "63b6c0ec9464682cfd9814e7e2a5d533139e5c6aeb9d3e7997a5f976d6677ca6" ) ||
         ( "${VERSION}" == "23.3"  &&  "${SHASUM_RET%% *}" != "1319bcd7cb706cb727501cbd98abf3f3980a4fdabeb613a1abffc756925c7374" ) ||
-        ( "${VERSION}" == "23.4"  &&  "${SHASUM_RET%% *}" != "e6cccec7f101325c233f374c2aa86f77d62123edd3125450d79404c3eec30b65" ) ]]; then
+        ( "${VERSION}" == "23.4"  &&  "${SHASUM_RET%% *}" != "e6cccec7f101325c233f374c2aa86f77d62123edd3125450d79404c3eec30b65" ) ||
+        ( "${VERSION}" == "23.5"  &&  "${SHASUM_RET%% *}" != "80c1ceae3b158cffe71fa4cfa8e4f540161659f79f777bcf48935f79031c054c" ) ]]; then
     echo "BUILDER: WARNING! SHA sum of RPM does not match with what's expected!"
     echo "BUILDER: WARNING! Verify that the .rpm file is not corrupt!"
   fi;

@@ -60,15 +60,15 @@ podman tag  docker.io/gvenzl/oracle-free:23.3-full docker.io/gvenzl/oracle-free:
 podman rmi  docker.io/gvenzl/oracle-free:23.3-full
 
 
-echo "Backup 23.2-full-faststart"
-podman pull docker.io/gvenzl/oracle-free:23.2-full-faststart
-podman tag  docker.io/gvenzl/oracle-free:23.2-full-faststart docker.io/gvenzl/oracle-free:23.2-full-faststart-backup
-podman rmi  docker.io/gvenzl/oracle-free:23.2-full-faststart
+#echo "Backup 23.2-full-faststart"
+#podman pull docker.io/gvenzl/oracle-free:23.2-full-faststart
+#podman tag  docker.io/gvenzl/oracle-free:23.2-full-faststart docker.io/gvenzl/oracle-free:23.2-full-faststart-backup
+#podman rmi  docker.io/gvenzl/oracle-free:23.2-full-faststart
 
-echo "Backup 23.2-full"
-podman pull docker.io/gvenzl/oracle-free:23.2-full
-podman tag  docker.io/gvenzl/oracle-free:23.2-full docker.io/gvenzl/oracle-free:23.2-full-backup
-podman rmi  docker.io/gvenzl/oracle-free:23.2-full
+#echo "Backup 23.2-full"
+#podman pull docker.io/gvenzl/oracle-free:23.2-full
+#podman tag  docker.io/gvenzl/oracle-free:23.2-full docker.io/gvenzl/oracle-free:23.2-full-backup
+#podman rmi  docker.io/gvenzl/oracle-free:23.2-full
 
 
 
@@ -119,15 +119,15 @@ podman tag  docker.io/gvenzl/oracle-free:23.3 docker.io/gvenzl/oracle-free:23.3-
 podman rmi  docker.io/gvenzl/oracle-free:23.3
 
 
-echo "Backup 23.2-faststart"
-podman pull docker.io/gvenzl/oracle-free:23.2-faststart
-podman tag  docker.io/gvenzl/oracle-free:23.2-faststart docker.io/gvenzl/oracle-free:23.2-faststart-backup
-podman rmi  docker.io/gvenzl/oracle-free:23.2-faststart
+#echo "Backup 23.2-faststart"
+#podman pull docker.io/gvenzl/oracle-free:23.2-faststart
+#podman tag  docker.io/gvenzl/oracle-free:23.2-faststart docker.io/gvenzl/oracle-free:23.2-faststart-backup
+#podman rmi  docker.io/gvenzl/oracle-free:23.2-faststart
 
-echo "Backup 23.2"
-podman pull docker.io/gvenzl/oracle-free:23.2
-podman tag  docker.io/gvenzl/oracle-free:23.2 docker.io/gvenzl/oracle-free:23.2-backup
-podman rmi  docker.io/gvenzl/oracle-free:23.2
+#echo "Backup 23.2"
+#podman pull docker.io/gvenzl/oracle-free:23.2
+#podman tag  docker.io/gvenzl/oracle-free:23.2 docker.io/gvenzl/oracle-free:23.2-backup
+#podman rmi  docker.io/gvenzl/oracle-free:23.2
 
 
 
@@ -172,15 +172,15 @@ podman tag  docker.io/gvenzl/oracle-free:23.3-slim docker.io/gvenzl/oracle-free:
 podman rmi  docker.io/gvenzl/oracle-free:23.3-slim
 
 
-echo "Backup 23.2-slim-faststart"
-podman pull docker.io/gvenzl/oracle-free:23.2-slim-faststart
-podman tag  docker.io/gvenzl/oracle-free:23.2-slim-faststart docker.io/gvenzl/oracle-free:23.2-slim-faststart-backup
-podman rmi  docker.io/gvenzl/oracle-free:23.2-slim-faststart
+#echo "Backup 23.2-slim-faststart"
+#podman pull docker.io/gvenzl/oracle-free:23.2-slim-faststart
+#podman tag  docker.io/gvenzl/oracle-free:23.2-slim-faststart docker.io/gvenzl/oracle-free:23.2-slim-faststart-backup
+#podman rmi  docker.io/gvenzl/oracle-free:23.2-slim-faststart
 
-echo "Backup 23.2-slim"
-podman pull docker.io/gvenzl/oracle-free:23.2-slim
-podman tag  docker.io/gvenzl/oracle-free:23.2-slim docker.io/gvenzl/oracle-free:23.2-slim-backup
-podman rmi  docker.io/gvenzl/oracle-free:23.2-slim
+#echo "Backup 23.2-slim"
+#podman pull docker.io/gvenzl/oracle-free:23.2-slim
+#podman tag  docker.io/gvenzl/oracle-free:23.2-slim docker.io/gvenzl/oracle-free:23.2-slim-backup
+#podman rmi  docker.io/gvenzl/oracle-free:23.2-slim
 
 
 
