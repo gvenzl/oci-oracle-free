@@ -23,6 +23,7 @@
 set -Eeuo pipefail
 
 # In order of newest to latest
+./build_Dockerfile.sh "23.5"
 ./build_Dockerfile.sh "23.4"
-./build_Dockerfile.sh "23.3"
-./build_Dockerfile.sh "23.2"
+#./build_Dockerfile.sh "23.3"
+#./build_Dockerfile.sh "23.2"

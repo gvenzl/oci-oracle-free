@@ -22,4 +22,34 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-./test_container_23.sh
+./test_container.sh "gvenzl/oracle-free:23.5-full-faststart"
+./test_container.sh "gvenzl/oracle-free:23.5-faststart"
+./test_container.sh "gvenzl/oracle-free:23.5-slim-faststart"
+
+./test_container.sh "gvenzl/oracle-free:23.5-full"
+./test_container.sh "gvenzl/oracle-free:23.5"
+./test_container.sh "gvenzl/oracle-free:23.5-slim"
+
+./test_container.sh "gvenzl/oracle-free:23.4-full-faststart"
+./test_container.sh "gvenzl/oracle-free:23.4-faststart"
+./test_container.sh "gvenzl/oracle-free:23.4-slim-faststart"
+
+./test_container.sh "gvenzl/oracle-free:23.4-full"
+./test_container.sh "gvenzl/oracle-free:23.4"
+./test_container.sh "gvenzl/oracle-free:23.4-slim"
+
+#./test_container.sh "gvenzl/oracle-free:23.3-full-faststart"
+#./test_container.sh "gvenzl/oracle-free:23.3-faststart"
+#./test_container.sh "gvenzl/oracle-free:23.3-slim-faststart"
+
+#./test_container.sh "gvenzl/oracle-free:23.3-full"
+#./test_container.sh "gvenzl/oracle-free:23.3"
+#./test_container.sh "gvenzl/oracle-free:23.3-slim"
+
+#./test_container.sh "gvenzl/oracle-free:23.2-full-faststart"
+#./test_container.sh "gvenzl/oracle-free:23.2-faststart"
+#./test_container.sh "gvenzl/oracle-free:23.2-slim-faststart"
+
+#./test_container.sh "gvenzl/oracle-free:23.2-full"
+#./test_container.sh "gvenzl/oracle-free:23.2"
+#./test_container.sh "gvenzl/oracle-free:23.2-slim"

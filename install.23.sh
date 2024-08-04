@@ -49,8 +49,8 @@ fi;
 echo "BUILDER: Installing OS dependencies"
 
 # Install installation dependencies
-microdnf -y install bc binutils file compat-openssl10 elfutils-libelf ksh sysstat \
-                    procps-ng smartmontools make hostname
+microdnf -y install bc binutils file compat-openssl10 elfutils-libelf ksh \
+                    sysstat procps-ng smartmontools make hostname passwd
 
 # Install runtime dependencies
 microdnf -y install libnsl glibc glibc-devel libaio libgcc libstdc++ xz
@@ -86,6 +86,9 @@ rpm -iv --nodeps /install/oracle-database-free-23*1.0-1.el8.x86_64.rpm
 
 # Set 'oracle' user home directory to ${ORACE_BASE}
 usermod -d "${ORACLE_BASE}" oracle
+
+# Set 'oracle' user password to 'oracle'
+echo "oracle" | passwd --stdin oracle
 
 # Add listener port and skip validations to conf file
 sed -i "s/LISTENER_PORT=/LISTENER_PORT=1521/g" /etc/sysconfig/oracle-free-23*.conf
@@ -168,7 +171,7 @@ DISABLE_OOB=ON
 BREAK_POLL_SKIP=1000
 " > "${ORACLE_BASE_HOME}"/network/admin/sqlnet.ora
 
-chown -R oracle:dba "${ORACLE_BASE_HOME}"/network/admin
+chown -R oracle:oinstall "${ORACLE_BASE_HOME}"/network/admin
 
 # Start listener
 su -p oracle -c "lsnrctl start"
@@ -190,7 +193,7 @@ export PATH=\${PATH}:\${ORACLE_HOME}/bin:\${ORACLE_BASE}
 # Use UTF-8 by default
 export NLS_LANG=.AL32UTF8
 " >> "${ORACLE_BASE}"/.bash_profile
-chown oracle:dba "${ORACLE_BASE}"/.bash_profile
+chown oracle:oinstall "${ORACLE_BASE}"/.bash_profile
 
 # Create entrypoint folders (#108)
 #
@@ -202,7 +205,7 @@ chown oracle:dba "${ORACLE_BASE}"/.bash_profile
 
 mkdir /container-entrypoint-initdb.d
 mkdir /container-entrypoint-startdb.d
-chown oracle:dba /container-entrypoint*
+chown oracle:oinstall /container-entrypoint*
 
 # Store image information
 echo "${OCI_IMAGE_VERSION}" > /etc/oci-image-version
@@ -1959,7 +1962,7 @@ echo "BUILDER: compressing database data files"
 
 cd "${ORACLE_BASE}"/oradata
 7zzs a "${ORACLE_SID}".7z "${ORACLE_SID}"
-chown oracle:dba "${ORACLE_SID}".7z
+chown oracle:oinstall "${ORACLE_SID}".7z
 mv "${ORACLE_SID}".7z "${ORACLE_BASE}"/
 # Delete database files but not directory structure,
 # that way external mount can mount just a sub directory
@@ -1985,10 +1988,10 @@ mv /install/createDatabase "${ORACLE_BASE}"/
 
 echo "BUILDER: setting file permissions"
 
-chown oracle:dba "${ORACLE_BASE}"/*.sh \
-                 "${ORACLE_BASE}"/resetPassword \
-                 "${ORACLE_BASE}"/createAppUser \
-                 "${ORACLE_BASE}"/createDatabase
+chown oracle:oinstall "${ORACLE_BASE}"/*.sh \
+                      "${ORACLE_BASE}"/resetPassword \
+                      "${ORACLE_BASE}"/createAppUser \
+                      "${ORACLE_BASE}"/createDatabase
 
 chmod u+x "${ORACLE_BASE}"/*.sh \
           "${ORACLE_BASE}"/resetPassword \
@@ -2241,7 +2244,7 @@ fi;
 
 # Remove installation dependencies
 # Use rpm instead of microdnf to allow removing packages regardless of dependencies specified by the Oracle FREE RPM
-rpm -e --nodeps acl bc binutils cryptsetup-libs dbus dbus-common dbus-daemon \
+rpm -e --nodeps acl bc binutils cryptsetup-libs dbus dbus-common dbus-daemon passwd \
                 dbus-libs dbus-tools device-mapper device-mapper-libs diffutils \
                 elfutils-default-yama-scope elfutils-libs file findutils hostname \
                 kmod-libs ksh libfdisk libseccomp libutempter lm_sensors-libs \

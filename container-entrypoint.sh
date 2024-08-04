@@ -412,7 +412,7 @@ if healthcheck.sh "${ORACLE_SID}"; then
         for new_pdb in ${ORACLE_DATABASE}; do
           echo "CONTAINER: Creating app user for pluggable database '${new_pdb}'."
           createAppUser "${APP_USER}" "${APP_USER_PASSWORD}" "${new_pdb}"
-          echo "CONTAINER: DONE: Creating app user fro pluggable database '${new_pdb}'."
+          echo "CONTAINER: DONE: Creating app user for pluggable database '${new_pdb}'."
         done;
 
         IFS="${OIFS}"
@@ -447,7 +447,9 @@ if healthcheck.sh "${ORACLE_SID}"; then
   echo "DATABASE IS READY TO USE!"
   echo "#########################"
 
-  if [[ $(cat /etc/oci-image-version) == "23.2" || $(cat /etc/oci-image-version) == "23.3" ]]; then
+  if [[ $(cat /etc/oci-image-version) == "23.2" ||
+        $(cat /etc/oci-image-version) == "23.3" ||
+        $(cat /etc/oci-image-version) == "23.4" ]]; then
     echo ""
     echo "################################################"
     echo "NOTICE: YOU ARE USING AN OLD IMAGE VERSION $(cat /etc/oci-image-version)!"

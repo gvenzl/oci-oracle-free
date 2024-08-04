@@ -102,6 +102,17 @@ FROM oracle_rdbms as db_files
 
 COPY --from=builder --chown=oracle:oinstall "${ORACLE_BASE}"/"${ORACLE_SID}".7z  "${ORACLE_BASE}"/
 
+##########################################################################################
+### Finalize (reset permissions for root owned files, set label, user, etc.)
+##########################################################################################
+
+RUN chown root "${ORACLE_HOME}"/bin/extjob; \
+    chmod 4750 "${ORACLE_HOME}"/bin/extjob; \
+    chown root "${ORACLE_HOME}"/rdbms/admin/externaljob.ora; \
+    chmod 640 "${ORACLE_HOME}"/rdbms/admin/externaljob.ora; \
+    chown root "${ORACLE_HOME}"/bin/jssu; \
+    chmod 4750 "${ORACLE_HOME}"/bin/jssu
+
 LABEL org.opencontainers.image.source https://github.com/gvenzl/oci-oracle-free
 
 USER oracle
