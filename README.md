@@ -1,4 +1,7 @@
+<!-- markdownlint-disable MD025 -->
+
 # oci-oracle-free
+
 Oracle Database Free Container / Docker images.
 
 **The images are compatible with `podman` and `docker`. You can use `podman` or `docker` interchangeably.**
@@ -39,12 +42,16 @@ docker exec <container name|id> resetPassword <your password>
 ```
 
 ## Oracle Database Free on Apple M chips
-Currently, there is no Oracle Database Free port for ARM chips, hence Oracle Database Free images cannot run on the new Apple M chips via Docker Desktop.  
-Fortunately, there are other technologies that can spin up `x86_64` software on Apple M chips, such as [colima](https://github.com/abiosoft/colima). To run these Oracle Database Free images on Apple M hardware, follow these simple steps:
+
+Beginning with Oracle Database Free 23.5 and later an ARM build is available. The workaround involving `colima` is not needed anymore.
+
+Note that Linux x86-64 images won't run on ARM and Apple M{1,2,3} chips. Fortunately, there are other technologies that can spin up `x86_64` software on Apple M chips, such as [colima](https://github.com/abiosoft/colima). To run these Oracle Database Free images on Apple M hardware, follow these simple steps:
 
 * Install colima ([instructions](https://github.com/abiosoft/colima#installation))
 * Run `colima start --arch x86_64 --memory 4`
 * Start container as usual
+
+The native image should provide much better performance and should be used whenever possible.
 
 # Users of these images
 
@@ -69,23 +76,29 @@ If you are using these images and would like to be listed as well, please open a
 Environment variables allow you to customize your container. Note that these variables will only be considered during the database initialization (first container startup).
 
 ### `ORACLE_PASSWORD`
+
 This variable is mandatory for the first container startup and specifies the password for the Oracle Database `SYS` and `SYSTEM` users.
 
 ### `ORACLE_RANDOM_PASSWORD`
+
 This is an optional variable. Set this variable to a non-empty value, like `yes`, to generate a random initial password for the `SYS` and `SYSTEM` users. The generated password will be printed to stdout (`ORACLE PASSWORD FOR SYS AND SYSTEM: ...`).
 
 ### `ORACLE_DATABASE`
+
 This is an optional variable. Set this variable to a non-empty string to create a new pluggable database with the name specified in this variable. Multiple pluggable databases are created when separating multiple names with a comma, for example, `ORACLE_DATABASE=PDB1,PDB2,PDB3`.
 
 **Note:** creating a new pluggable database will add to the initial container startup time. If you do not want that additional startup time, use the already existing `FREEPDB1` database instead.
 
 ### `APP_USER`
+
 This is an optional variable. Set this variable to a non-empty string to create a new database schema user with the name specified in this variable. For 18c and onwards, the user will be created in the default `FREEPDB1` pluggable database. If `ORACLE_DATABASE` has been specified, the user will also be created in that pluggable database. This variable requires `APP_USER_PASSWORD` or `APP_USER_PASSWORD_FILE` to be specified as well.
 
 ### `APP_USER_PASSWORD`
+
 This is an optional variable. Set this variable to a non-empty string to define a password for the database schema user specified by `APP_USER`. This variable requires `APP_USER` to be specified as well.
 
 ## GitHub Actions
+
 The images can be used as a [Service Container](https://docs.github.com/en/actions/guides/about-service-containers) within a [GitHub Actions](https://docs.github.com/en/actions) workflow. Below is an example service definition for your GitHub Actions YAML file:
 
 ```yaml
@@ -135,6 +148,7 @@ If you amend the variables above, here is some more useful info:
 * Example JDBC connect string with dynamic port allocation: `jdbc:oracle:thin:@localhost:${{ job.services.oracle.ports[1521] }}/FREEPDB1`
 
 ## Docker Compose
+
 The images can be used in a [Docker Compose](https://docs.docker.com/compose/) setup to provide a local development database or facilitate automated testing. Below is an example service definition for your Docker Compose YAML file:
 
 ```yaml
@@ -230,6 +244,7 @@ This mechanism is supported for:
 * [Kubernetes](https://kubernetes.io/docs/concepts/configuration/secret/)
 
 ## Initialization scripts
+
 If you would like to perform additional initialization of the database running in a container, you can add one or more `*.sql`, `*.sql.gz`, `*.sql.zip` or `*.sh` files under `/container-entrypoint-initdb.d` (creating the directory if necessary). After the database setup is completed, these files will be executed automatically in alphabetical order.
 
 The directory can include sub-directories which will be traversed recursively in alphabetical order alongside the files. The container does not give any priority to files or directories, meaning that whatever comes next in alphabetical order will be processed next. If it is a file it will be executed, if it is a directory it will be traversed. To guarantee the order of execution, consider using a clear prefix in your file and directory names like numbers `001_`, `002_`. This will also make it easier for any user to understand which script is supposed to be executed in what order.

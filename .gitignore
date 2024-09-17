@@ -1,3 +1,4 @@
 *.rpm
 *.zip
 assets/
+oracle-database*

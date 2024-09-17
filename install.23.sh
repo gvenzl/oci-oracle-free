@@ -57,7 +57,7 @@ microdnf -y install libnsl glibc glibc-devel libaio libgcc libstdc++ xz
 
 # Install fortran runtime for libora_netlib.so (so that the Intel Math Kernel libraries are no longer needed)
 if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
-  microdnf -y install compat-libgfortran-48
+  microdnf -y install libgfortran
 fi;
 
 # Install container runtime specific packages
@@ -81,8 +81,8 @@ rm -rf /tmp/7z
 
 echo "BUILDER: installing database binaries"
 
-# Install Oracle Free
-rpm -iv --nodeps /install/oracle-database-free-23*1.0-1.el8.x86_64.rpm
+# Install Oracle Free including the preinstall RPM
+rpm -iv --nodeps /install/oracle-database-free-23*1.0-1.el8.*.rpm /install/oracle-database-preinstall-23*.rpm
 
 # Set 'oracle' user home directory to ${ORACE_BASE}
 usermod -d "${ORACLE_BASE}" oracle
@@ -93,6 +93,9 @@ echo "oracle" | passwd --stdin oracle
 # Add listener port and skip validations to conf file
 sed -i "s/LISTENER_PORT=/LISTENER_PORT=1521/g" /etc/sysconfig/oracle-free-23*.conf
 sed -i "s/SKIP_VALIDATIONS=false/SKIP_VALIDATIONS=true/g" /etc/sysconfig/oracle-free-23*.conf
+
+# remove memlock settings, created by the preinstall RPM, that would otherwise prevent /bin/su from working
+sed -i '/oracle.*memlock/d' /etc/security/limits.d/oracle-database-preinstall-23ai.conf 
 
 # Disable netca to avoid "No IP address found" issue
 mv "${ORACLE_HOME}"/bin/netca "${ORACLE_HOME}"/bin/netca.bak
@@ -214,6 +217,7 @@ echo "${OCI_IMAGE_FLAVOR}"  > /etc/oci-image-flavor
 # Perform further Database setup operations
 echo "BUILDER: changing database configuration and parameters for all images"
 su -p oracle -c "sqlplus -s / as sysdba" << EOF
+  set echo on
 
    -- Exit on any errors
    WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -260,6 +264,7 @@ EOF
 
 # Disable unified auditing
 su -p oracle -c "sqlplus -s / as sysdba" << EOF
+  set echo on
 
    -- Exit on any errors
    WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -300,6 +305,7 @@ EOF
 
 # Clean Audit Trail and reinstantiate PDB\$SEED
 su -p oracle -c "sqlplus -s / as sysdba" << EOF
+  set echo on
 
    -- Exit on any errors
    WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -332,6 +338,7 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Open PDB\$SEED to READ/WRITE
   echo "BUILDER: Opening PDB\$SEED in READ/WRITE mode"
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
+    set echo on
 
      -- Exit on any errors
      WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -346,6 +353,7 @@ EOF
   # Change parameters/settings
   echo "BUILDER: changing database configuration and parameters for REGULAR and SLIM images"
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
+    set echo on
 
      -- Exit on any errors
      WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -427,6 +435,7 @@ EOF
   # Drop leftover items
   echo "BUILDER: Dropping leftover Database dictionary objects for REGULAR image"
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
+    set echo on
 
      -- Exit on any errors
      WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -501,6 +510,7 @@ EOF
     # Drop leftover items
     echo "BUILDER: Dropping leftover Database dictionary objects for SLIM image"
     su -p oracle -c "sqlplus -s / as sysdba" << EOF
+      set echo on
 
        -- Exit on any errors
        WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -1543,6 +1553,7 @@ EOF
     fi;
 
     su -p oracle -c "sqlplus -s / as sysdba" << EOF
+      set echo on
 
        -- Exit on any errors
        WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -1565,6 +1576,7 @@ EOF
   #######################################################
 
   su -p oracle -c "sqlplus -s / as sysdba" <<EOF
+    set echo on
 
      -- Exit on any error
      WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -1615,6 +1627,7 @@ EOF
         "$(cat /etc/oci-image-version)" ==  "23.3" ]]; then
 
     su -p oracle -c "sqlplus -s / as sysdba" << EOF
+      set echo on
 
        -- Exit on any error
        WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -1636,6 +1649,7 @@ EOF
   # 23.4 and higher
   else
     su -p oracle -c "sqlplus -s / as sysdba" << EOF
+      set echo on
 
        -- Exit on any error
        WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -1663,6 +1677,7 @@ EOF
         "$(cat /etc/oci-image-version)" ==  "23.3" ]]; then
 
     su -p oracle -c "sqlplus -s / as sysdba" << EOF
+      set echo on
 
        -- Exit on any error
        WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -1684,6 +1699,7 @@ EOF
   # 23.4 and higher
   else
     su -p oracle -c "sqlplus -s / as sysdba" << EOF
+      set echo on
 
        -- Exit on any error
        WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -1708,6 +1724,7 @@ EOF
   ############################
 
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
+    set echo on
 
      -- Exit on any error
      WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -1733,6 +1750,7 @@ EOF
   ## Shrink USERS tablespaces ##
   ##############################
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
+    set echo on
 
      -- Exit on any error
      WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -1749,6 +1767,7 @@ EOF
   ## Shrink UNDO tablespaces ##
   #############################
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
+    set echo on
 
      -- Exit on any error
      WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -1830,6 +1849,7 @@ EOF
   ## Make data files autoextended ##
   ##################################
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
+    set echo on
 
      -- Exit on any error
      WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -1886,6 +1906,7 @@ EOF
   ## Shrink REDO log files ##
   ###########################
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
+    set echo on
 
      -- Exit on any error
      WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -1920,6 +1941,7 @@ EOF
   # Close PDB\$SEED to READ ONLY again
   echo "BUILDER: Opening PDB\$SEED in READ ONLY (default) mode"
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
+    set echo on
 
      -- Exit on any errors
      WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -1941,6 +1963,7 @@ echo "BUILDER: graceful database shutdown"
 
 # Shutdown database gracefully
 su -p oracle -c "sqlplus -s / as sysdba" << EOF
+  set echo on
 
    -- Exit on any errors
    WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -2069,7 +2092,7 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm -r "${ORACLE_HOME}"/ucp
 
   # Remove Intel's Math kernel libraries
-  rm "${ORACLE_HOME}"/lib/libmkl_*
+  rm "${ORACLE_HOME}"/lib/libmkl_* || echo "Intel math kernel libs not present"
 
   # Remove zip artifacts in $ORACLE_HOME/lib
   rm "${ORACLE_HOME}"/lib/*.zip
@@ -2130,26 +2153,26 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm -r "${ORACLE_HOME}"/opmn
 
   # Remove oml4py directory
-  rm -r "${ORACLE_HOME}"/oml4py
+  rm -r "${ORACLE_HOME}"/oml4py || echo "Oracle Machine Learning for Python not present"
 
   # Remove python directory
   rm -r "${ORACLE_HOME}"/python
 
   # Remove unnecessary binaries (see http://yong321.freeshell.org/computer/oraclebin.html)
-  rm "${ORACLE_HOME}"/bin/acfs*       # ACFS File system components
-  rm "${ORACLE_HOME}"/bin/adrci       # Automatic Diagnostic Repository Command Interpreter
-  rm "${ORACLE_HOME}"/bin/agtctl      # Multi-Threaded extproc agent control utility
-  rm "${ORACLE_HOME}"/bin/afd*        # ASM Filter Drive components
-  rm "${ORACLE_HOME}"/bin/amdu        # ASM Disk Utility
-  rm "${ORACLE_HOME}"/bin/dg4*        # Database Gateway
-  rm "${ORACLE_HOME}"/bin/dgmgrl      # Data Guard Manager CLI
-  rm "${ORACLE_HOME}"/bin/dbnest*     # DataBase NEST
-  rm "${ORACLE_HOME}"/bin/orion       # ORacle IO Numbers benchmark tool
-  rm "${ORACLE_HOME}"/bin/oms_daemon  # Oracle Memory Speed (PMEM support) daemon
-  rm "${ORACLE_HOME}"/bin/omsfscmds   # Oracle Memory Speed command line utility
-  rm "${ORACLE_HOME}"/bin/proc        # Pro*C/C++ Precompiler
-  rm "${ORACLE_HOME}"/bin/procob      # Pro COBOL Precompiler
-  rm "${ORACLE_HOME}"/bin/renamedg    # Rename Disk Group binary
+  rm "${ORACLE_HOME}"/bin/acfs*      || echo "file to be removed not present"    # ACFS File system components
+  rm "${ORACLE_HOME}"/bin/adrci      || echo "file to be removed not present"    # Automatic Diagnostic Repository Command Interpreter
+  rm "${ORACLE_HOME}"/bin/agtctl     || echo "file to be removed not present"    # Multi-Threaded extproc agent control utility
+  rm "${ORACLE_HOME}"/bin/afd*       || echo "file to be removed not present"    # ASM Filter Drive components
+  rm "${ORACLE_HOME}"/bin/amdu       || echo "file to be removed not present"    # ASM Disk Utility
+  rm "${ORACLE_HOME}"/bin/dg4*       || echo "file to be removed not present"    # Database Gateway
+  rm "${ORACLE_HOME}"/bin/dgmgrl     || echo "file to be removed not present"    # Data Guard Manager CLI
+  rm "${ORACLE_HOME}"/bin/dbnest*    || echo "file to be removed not present"    # DataBase NEST
+  rm "${ORACLE_HOME}"/bin/orion      || echo "file to be removed not present"    # ORacle IO Numbers benchmark tool
+  rm "${ORACLE_HOME}"/bin/oms_daemon || echo "file to be removed not present"    # Oracle Memory Speed (PMEM support) daemon
+  rm "${ORACLE_HOME}"/bin/omsfscmds  || echo "file to be removed not present"    # Oracle Memory Speed command line utility
+  rm "${ORACLE_HOME}"/bin/proc       || echo "file to be removed not present"    # Pro*C/C++ Precompiler
+  rm "${ORACLE_HOME}"/bin/procob     || echo "file to be removed not present"    # Pro COBOL Precompiler
+  rm "${ORACLE_HOME}"/bin/renamedg   || echo "file to be removed not present"    # Rename Disk Group binary
 
   # Replace `orabase` with static path shell script
   su -p oracle -c "echo 'echo ${ORACLE_BASE}' > ${ORACLE_HOME}/bin/orabase"
@@ -2165,7 +2188,7 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm "${ORACLE_HOME}"/lib/libosbws.so # Oracle Secure Backup Cloud Module
   rm "${ORACLE_HOME}"/lib/libra.so    # Recovery Appliance
 
-  # Remove not needed packages
+  # Remove packages not required for this image
   # Use rpm instad of microdnf to allow removing packages regardless of their dependencies
   rpm -e --nodeps glibc-devel glibc-headers kernel-headers libpkgconf libxcrypt-devel \
                   pkgconf pkgconf-m4 pkgconf-pkg-config
@@ -2215,7 +2238,7 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     rm -r "${ORACLE_HOME}"/ord
 
     # Remove Oracle R
-    rm -r "${ORACLE_HOME}"/R
+    rm -r "${ORACLE_HOME}"/R || echo "file to be removed not present"
 
     # Remove deinstall directory
     rm -r "${ORACLE_HOME}"/deinstall
@@ -2227,16 +2250,16 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     rm -r "${ORACLE_HOME}"/perl
 
     # Remove unnecessary binaries
-    rm "${ORACLE_HOME}"/bin/cursize    # Cursor Size binary
-    rm "${ORACLE_HOME}"/bin/dbfs*      # DataBase File System
-    rm "${ORACLE_HOME}"/bin/ORE        # Oracle R Enterprise
-    rm "${ORACLE_HOME}"/lib/libmle.so  # Multilingual Engine
-    rm "${ORACLE_HOME}"/bin/rman       # Oracle Recovery Manager
-    rm "${ORACLE_HOME}"/bin/wrap       # PL/SQL Wrapper
+    rm "${ORACLE_HOME}"/bin/cursize   || echo "file to be removed did not exist" # Cursor Size binary
+    rm "${ORACLE_HOME}"/bin/dbfs*     || echo "file to be removed did not exist" # DataBase File System
+    rm "${ORACLE_HOME}"/bin/ORE       || echo "file to be removed did not exist" # Oracle R Enterprise
+    rm "${ORACLE_HOME}"/lib/libmle.so || echo "file to be removed did not exist" # Multilingual Engine
+    rm "${ORACLE_HOME}"/bin/rman      || echo "file to be removed did not exist" # Oracle Recovery Manager
+    rm "${ORACLE_HOME}"/bin/wrap      || echo "file to be removed did not exist" # PL/SQL Wrapper
 
     # Remove unnecessary libraries
-    rm "${ORACLE_HOME}"/lib/asm*       # Oracle Automatic Storage Management
-    rm "${ORACLE_HOME}"/lib/ore.so     # Oracle R Enterprise
+    rm "${ORACLE_HOME}"/lib/asm*      || echo "file to be removed did not exist" # Oracle Automatic Storage Management
+    rm "${ORACLE_HOME}"/lib/ore.so    || echo "file to be removed did not exist" # Oracle R Enterprise
 
   fi;
 
