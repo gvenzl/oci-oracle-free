@@ -1,7 +1,7 @@
 #!/bin/bash
 # Since: April, 2023
 # Author: gvenzl
-# Name: tag_images_23.sh
+# Name: tag-images-23.sh
 # Description: Tag all 23 images
 #
 # Copyright 2023 Gerald Venzl

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Since: April, 2023
 # Author: gvenzl
-# Name: tag_image_latest.sh
+# Name: tag-image-latest.sh
 # Description: Tag the latest image
 #
 # Copyright 2023 Gerald Venzl

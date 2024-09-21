@@ -1,7 +1,7 @@
 #!/bin/bash
 # Since: April, 2023
 # Author: gvenzl
-# Name: all_container_tests.sh
+# Name: all-container-tests.sh
 # Description: Script for all run tests for Oracle DB Free
 #
 # Copyright 2023 Gerald Venzl
@@ -24,34 +24,34 @@ set -Eeuo pipefail
 
 source ./functions.sh
 
-./test_container.sh "gvenzl/oracle-free:23.5-full-faststart-$getArch"
-./test_container.sh "gvenzl/oracle-free:23.5-faststart-$getArch"
-./test_container.sh "gvenzl/oracle-free:23.5-slim-faststart-$getArch"
+./test-container.sh "gvenzl/oracle-free:23.5-full-faststart-$getArch"
+./test-container.sh "gvenzl/oracle-free:23.5-faststart-$getArch"
+./test-container.sh "gvenzl/oracle-free:23.5-slim-faststart-$getArch"
 
-./test_container.sh "gvenzl/oracle-free:23.5-full-$getArch"
-./test_container.sh "gvenzl/oracle-free:23.5-$getArch"
-./test_container.sh "gvenzl/oracle-free:23.5-slim-$getArch"
+./test-container.sh "gvenzl/oracle-free:23.5-full-$getArch"
+./test-container.sh "gvenzl/oracle-free:23.5-$getArch"
+./test-container.sh "gvenzl/oracle-free:23.5-slim-$getArch"
 
-#./test_container.sh "gvenzl/oracle-free:23.4-full-faststart"
-#./test_container.sh "gvenzl/oracle-free:23.4-faststart"
-#./test_container.sh "gvenzl/oracle-free:23.4-slim-faststart"
+#./test-container.sh "gvenzl/oracle-free:23.4-full-faststart"
+#./test-container.sh "gvenzl/oracle-free:23.4-faststart"
+#./test-container.sh "gvenzl/oracle-free:23.4-slim-faststart"
 
-#./test_container.sh "gvenzl/oracle-free:23.4-full"
-#./test_container.sh "gvenzl/oracle-free:23.4"
-#./test_container.sh "gvenzl/oracle-free:23.4-slim"
+#./test-container.sh "gvenzl/oracle-free:23.4-full"
+#./test-container.sh "gvenzl/oracle-free:23.4"
+#./test-container.sh "gvenzl/oracle-free:23.4-slim"
 
-#./test_container.sh "gvenzl/oracle-free:23.3-full-faststart"
-#./test_container.sh "gvenzl/oracle-free:23.3-faststart"
-#./test_container.sh "gvenzl/oracle-free:23.3-slim-faststart"
+#./test-container.sh "gvenzl/oracle-free:23.3-full-faststart"
+#./test-container.sh "gvenzl/oracle-free:23.3-faststart"
+#./test-container.sh "gvenzl/oracle-free:23.3-slim-faststart"
 
-#./test_container.sh "gvenzl/oracle-free:23.3-full"
-#./test_container.sh "gvenzl/oracle-free:23.3"
-#./test_container.sh "gvenzl/oracle-free:23.3-slim"
+#./test-container.sh "gvenzl/oracle-free:23.3-full"
+#./test-container.sh "gvenzl/oracle-free:23.3"
+#./test-container.sh "gvenzl/oracle-free:23.3-slim"
 
-#./test_container.sh "gvenzl/oracle-free:23.2-full-faststart"
-#./test_container.sh "gvenzl/oracle-free:23.2-faststart"
-#./test_container.sh "gvenzl/oracle-free:23.2-slim-faststart"
+#./test-container.sh "gvenzl/oracle-free:23.2-full-faststart"
+#./test-container.sh "gvenzl/oracle-free:23.2-faststart"
+#./test-container.sh "gvenzl/oracle-free:23.2-slim-faststart"
 
-#./test_container.sh "gvenzl/oracle-free:23.2-full"
-#./test_container.sh "gvenzl/oracle-free:23.2"
-#./test_container.sh "gvenzl/oracle-free:23.2-slim"
+#./test-container.sh "gvenzl/oracle-free:23.2-full"
+#./test-container.sh "gvenzl/oracle-free:23.2"
+#./test-container.sh "gvenzl/oracle-free:23.2-slim"

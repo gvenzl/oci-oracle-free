@@ -1,7 +1,7 @@
 #!/bin/bash
 # Since: April, 2023
 # Author: gvenzl
-# Name: all_tag_images.sh
+# Name: all-tag-images.sh
 # Description: Tag all images
 #
 # Copyright 2023 Gerald Venzl
@@ -22,5 +22,5 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-./tag_image_latest.sh
-./tag_images_23.sh
+./tag-image-latest.sh
+./tag-images-23.sh

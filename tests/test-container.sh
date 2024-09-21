@@ -1,8 +1,8 @@
 #!/bin/bash
 # Since: April, 2023
 # Author: gvenzl
-# Name: test_container_2330.sh
-# Description: Run container test scripts for Oracle DB Free 23.3
+# Name: test-container.sh
+# Description: Run container test scripts for Oracle DB Free
 #
 # Copyright 2023 Gerald Venzl
 #

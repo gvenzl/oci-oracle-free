@@ -1,7 +1,7 @@
 #!/bin/bash
 # Since: April, 2023
 # Author: gvenzl
-# Name: all_build_tests.sh
+# Name: all-build-tests.sh
 # Description: Script for all build tests for Oracle DB Free
 #
 # Copyright 2023 Gerald Venzl
@@ -23,7 +23,7 @@
 set -Eeuo pipefail
 
 # In order of newest to latest
-./build_Dockerfile.sh "23.5"
-./build_Dockerfile.sh "23.4"
-#./build_Dockerfile.sh "23.3"
-#./build_Dockerfile.sh "23.2"
+./build-image.sh "23.5"
+./build-image.sh "23.4"
+#./build-image.sh "23.3"
+#./build-image.sh "23.2"
