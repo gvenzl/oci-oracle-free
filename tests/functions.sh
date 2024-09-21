@@ -18,6 +18,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Function: getArch
+# Returns the architecture of the current build environment
+
+function getArch {
+
+  ENV_ARCH=$(uname -m)
+  if [ "${ENV_ARCH}" == "x86_64" ]; then
+    echo "amd64";
+  elif [[ "${ENV_ARCH}" == "aarch64" || "${ENV_ARCH}" == "arm64" ]]; then
+    echo "arm64";
+  fi;
+}
+
 # Function: checkDB
 # Checks whether the Oracle DB is up and running.
 #

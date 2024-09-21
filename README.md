@@ -5,18 +5,24 @@ Oracle Database Free Container / Docker images.
 
 # Supported tags and respective `Dockerfile` links
 
-* [`latest`, `23`, `23.5`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`latest-faststart`, `23-faststart`, `23.5-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
-* [`slim`, `23-slim`, `23.5-slim`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`slim-faststart`, `23-slim-faststart`, `23.5-slim-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
-* [`full`, `23-full`, `23.5-full`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`full-faststart`, `23-full-faststart`, `23.5-full-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
-* [`23.4`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`23.4-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
-* [`23.4-slim`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`23.4-slim-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
-* [`23.4-full`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`23.4-full-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
-* [`23.3`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`23.3-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
-* [`23.3-slim`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`23.3-slim-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
-* [`23.3-full`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`23.3-full-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
-* [`23.2`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`23.2-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
-* [`23.2-slim`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`23.3-slim-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
-* [`23.2-full`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.23), [`23.2-full-faststart`](https://github.com/gvenzl/oci-oracle-free/blob/main/Dockerfile.faststart)
+
+| Tag                                                                            | Status              |
+| ------------------------------------------------------------------------------ | ------------------- |
+| `latest[-faststart]`                                                           | 🔵 Always Supported |
+| `slim[-faststart]`                                                             | 🔵 Always Supported |
+| `full[-faststart]`                                                             | 🔵 Always Supported |
+| `23[-faststart]`<br/>`23[-slim][-faststart]`<br/>`23[-full][-faststart]`       | 🔵 Always Supported |
+| `23.5[-faststart]`<br/>`23.5[-slim][-faststart]`<br/>`23.5[-full][-faststart]` | 🟢 Supported        |
+| `23.4[-faststart]`<br/>`23.4[-slim][-faststart]`<br/>`23.4[-full][-faststart]` | 🟡 Deprecated       |
+| `23.3[-faststart]`<br/>`23.3[-slim][-faststart]`<br/>`23.3[-full][-faststart]` | 🔴 Unsupported      |
+| `23.2[-faststart]`<br/>`23.2[-slim][-faststart]`<br/>`23.2[-full][-faststart]` | 🔴 Unsupported      |
+
+Tags in `[]` denote tag options, for example, `23[-slim][-faststart]` means there are the following tags:
+
+* `23`
+* `23-slim`
+* `23-faststart`
+* `23-slim-faststart`
 
 # Quick Start
 
@@ -38,13 +44,9 @@ Reset database `SYS` and `SYSTEM` passwords:
 docker exec <container name|id> resetPassword <your password>
 ```
 
-## Oracle Database Free on Apple M chips
-Currently, there is no Oracle Database Free port for ARM chips, hence Oracle Database Free images cannot run on the new Apple M chips via Docker Desktop.  
-Fortunately, there are other technologies that can spin up `x86_64` software on Apple M chips, such as [colima](https://github.com/abiosoft/colima). To run these Oracle Database Free images on Apple M hardware, follow these simple steps:
+## Oracle Database Free on Apple MacBooks with ARM M-chips
 
-* Install colima ([instructions](https://github.com/abiosoft/colima#installation))
-* Run `colima start --arch x86_64 --memory 4`
-* Start container as usual
+Starting with Oracle Database 23.5 Free, Oracle provides ARM ports for Oracle Database Free. Multi-platform (multi-arch) images are provided starting with 23.5.
 
 # Users of these images
 
@@ -62,7 +64,18 @@ We are proud of the following users of these images:
 
 If you are using these images and would like to be listed as well, please open an [issue on GitHub](https://github.com/gvenzl/oci-oracle-free/issues) or reach out on [Twitter](https://twitter.com/geraldvenzl).
 
-# How to use this image
+# How to use these images
+
+## Image flavors
+
+| Flavor  | Extension | Description                                                                                 | Use cases                                                                                              |
+| --------| --------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------|
+| Slim      | `-slim`       | An image focussed on smallest possible image size instead of additional functionality.      | Wherever small image sizes are important but advanced functionality of Oracle Database is not needed. |
+| Regular   | [None]        | A well-balanced image between image size and functionality. Recommended for most use cases. | Recommended for most use cases.                                                                        |
+| Full      | `-full`       | An image containing all functionality as provided by the Oracle Database installation.      | Best for extensions and/or customizations.                                                             |
+| Faststart | `*-faststart` | The same image flavor as above but with an already expanded and ready-to-go database inside the image. This image trades image size on disk for a faster database startup time. | Best for (automated) test scenarios where the image is pulled once and many containers are started and torn down with no need for persistence (container volumes). |
+
+For a full list of changes that have been made to the Oracle Database and OS installation in each individual image flavor, please see [ImageDetails.md](https://github.com/gvenzl/oci-oracle-free/blob/main/ImageDetails.md).
 
 ## Environment variables
 
@@ -176,17 +189,6 @@ After your container is up and running, you can connect to it via the following 
 * Database App Password: `password_i_should_change`
 
 To know more about initialization scripts, please refer to the [Initialization scripts section](#initialization-scripts).
-
-# Image flavors
-
-| Flavor  | Extension | Description                                                                                 | Use cases                                                                                              |
-| --------| --------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------|
-| Slim      | `-slim`       | An image focussed on smallest possible image size instead of additional functionality.      | Wherever small image sizes are important but advanced functionality of Oracle Database is not needed. |
-| Regular   | [None]        | A well-balanced image between image size and functionality. Recommended for most use cases. | Recommended for most use cases.                                                                        |
-| Full      | `-full`       | An image containing all functionality as provided by the Oracle Database installation.      | Best for extensions and/or customizations.                                                             |
-| Faststart | `*-faststart` | The same image flavor as above but with an already expanded and ready-to-go database inside the image. This image trades image size on disk for a faster database startup time. | Best for (automated) test scenarios where the image is pulled once and many containers are started and torn down with no need for persistence (container volumes). |
-
-For a full list of changes that have been made to the Oracle Database and OS installation in each individual image flavor, please see [ImageDetails.md](https://github.com/gvenzl/oci-oracle-free/blob/main/ImageDetails.md).
 
 ## Database users
 

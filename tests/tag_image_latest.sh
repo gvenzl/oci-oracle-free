@@ -22,7 +22,9 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-# Tag latest image
-podman tag gvenzl/oracle-free:23.5           gvenzl/oracle-free:latest
+source ./functions.sh
 
-podman tag gvenzl/oracle-free:23.5-faststart gvenzl/oracle-free:latest-faststart
+# Tag latest image
+podman tag gvenzl/oracle-free:23.5-$getArch           gvenzl/oracle-free:latest-$getArch
+
+podman tag gvenzl/oracle-free:23.5-faststart-$getArch gvenzl/oracle-free:latest-faststart-$getArch

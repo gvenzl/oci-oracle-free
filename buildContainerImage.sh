@@ -30,6 +30,7 @@ SKIP_CHECKSUM="false"
 FASTSTART="false"
 BASE_IMAGE=""
 DB_FLAVOR="ai"
+BUILDER_ARCH=$(uname -m)
 
 function usage() {
     cat << EOF
@@ -104,12 +105,17 @@ if [ "${SKIP_CHECKSUM}" == "false" ]; then
 
   echo "BUILDER: verifying checksum of rpm file - please wait..."
 
-  SHASUM_RET=$(shasum -a 256 oracle*free*"${VERSION}"*.rpm)
+  SHASUM_RET=$(sha256sum oracle*free*"${VERSION}"*.rpm)
 
-  if [[ ( "${VERSION}" == "23.2"  &&  "${SHASUM_RET%% *}" != "63b6c0ec9464682cfd9814e7e2a5d533139e5c6aeb9d3e7997a5f976d6677ca6" ) ||
-        ( "${VERSION}" == "23.3"  &&  "${SHASUM_RET%% *}" != "1319bcd7cb706cb727501cbd98abf3f3980a4fdabeb613a1abffc756925c7374" ) ||
-        ( "${VERSION}" == "23.4"  &&  "${SHASUM_RET%% *}" != "e6cccec7f101325c233f374c2aa86f77d62123edd3125450d79404c3eec30b65" ) ||
-        ( "${VERSION}" == "23.5"  &&  "${SHASUM_RET%% *}" != "80c1ceae3b158cffe71fa4cfa8e4f540161659f79f777bcf48935f79031c054c" ) ]]; then
+  if [[ ( "${VERSION}" == "23.2"  &&   "${SHASUM_RET%% *}" != "63b6c0ec9464682cfd9814e7e2a5d533139e5c6aeb9d3e7997a5f976d6677ca6" ) ||
+        ( "${VERSION}" == "23.3"  &&   "${SHASUM_RET%% *}" != "1319bcd7cb706cb727501cbd98abf3f3980a4fdabeb613a1abffc756925c7374" ) ||
+        ( "${VERSION}" == "23.4"  &&   "${SHASUM_RET%% *}" != "e6cccec7f101325c233f374c2aa86f77d62123edd3125450d79404c3eec30b65" ) ||
+        ( "${VERSION}" == "23.5"  &&   "${BUILDER_ARCH}" == "x86_64"  && "${SHASUM_RET%% *}" != "80c1ceae3b158cffe71fa4cfa8e4f540161659f79f777bcf48935f79031c054c" ) ||
+        ( "${VERSION}" == "23.5"  &&
+          ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) &&
+          "${SHASUM_RET%% *}" != "9f82f22217db7c760d25956ca1590be996dbbe1ea397949726c68065524f69af"
+        )
+      ]]; then
     echo "BUILDER: WARNING! SHA sum of RPM does not match with what's expected!"
     echo "BUILDER: WARNING! Verify that the .rpm file is not corrupt!"
   fi;
@@ -130,19 +136,38 @@ if [ "${IMAGE_FLAVOR}" != "REGULAR" ]; then
   IMAGE_NAME="${IMAGE_NAME}-${IMAGE_FLAVOR,,}"
 fi;
 
+# Decide on the architecture
+if [ "${BUILDER_ARCH}" == "x86_64" ]; then
+  ARCH="amd64"
+  RPM_ARCH="x86_64"
+# Could be reported as 'aarch64' or 'arm64' (ubuntu, etc.)
+else
+  ARCH="arm64"
+  RPM_ARCH="aarch64"
+fi;
+
 # Add faststart tag to image and set Dockerfile
 if [ "${FASTSTART}" == "true" ]; then
-  BASE_IMAGE="${IMAGE_NAME}"
-  IMAGE_NAME="${IMAGE_NAME}-faststart"
+  BASE_IMAGE="${IMAGE_NAME}-${ARCH}"
+  IMAGE_NAME="${IMAGE_NAME}-faststart-${ARCH}"
   DOCKER_FILE="Dockerfile.faststart"
+else
+  IMAGE_NAME="${IMAGE_NAME}-${ARCH}"
 fi;
 
 echo "BUILDER: building image $IMAGE_NAME"
 
 BUILD_START_TMS=$(date '+%s')
 
-buildah bud -f "$DOCKER_FILE" -t "${IMAGE_NAME}" --build-arg BUILD_MODE="${IMAGE_FLAVOR}" --build-arg BASE_IMAGE="${BASE_IMAGE}" \
-                                                 --build-arg BUILD_VERSION="${VERSION}"   --build-arg DB_FLAVOR="${DB_FLAVOR}"
+buildah bud -f "$DOCKER_FILE" \
+            -t "${IMAGE_NAME}" \
+            --platform "linux/${ARCH}" \
+            --build-arg BUILD_MODE="${IMAGE_FLAVOR}" \
+            --build-arg BASE_IMAGE="${BASE_IMAGE}"   \
+            --build-arg BUILD_VERSION="${VERSION}"   \
+            --build-arg DB_FLAVOR="${DB_FLAVOR}"     \
+            --build-arg ARCH="${ARCH}"               \
+            --build-arg RPM_ARCH="${RPM_ARCH}"
 
 BUILD_END_TMS=$(date '+%s')
 BUILD_DURATION=$(( BUILD_END_TMS - BUILD_START_TMS ))

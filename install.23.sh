@@ -55,9 +55,14 @@ microdnf -y install bc binutils file compat-openssl10 elfutils-libelf ksh \
 # Install runtime dependencies
 microdnf -y install libnsl glibc glibc-devel libaio libgcc libstdc++ xz
 
-# Install fortran runtime for libora_netlib.so (so that the Intel Math Kernel libraries are no longer needed)
-if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+# Install Fortran runtime for libora_netlib.so (so that the Intel Math Kernel libraries are no longer needed, Intel only)
+if [[ "${ARCH}" == "amd64"  && ( "${BUILD_MODE}" == "REGULAR" || "${BUILD_MODE}" == "SLIM") ]]; then
   microdnf -y install compat-libgfortran-48
+fi;
+
+# ARM related packages
+if [ "${ARCH}" == "arm64" ]; then
+  microdnf -y install libgfortran
 fi;
 
 # Install container runtime specific packages
@@ -68,7 +73,14 @@ microdnf -y install zip unzip gzip
 # Install 7zip
 mkdir /tmp/7z
 cd /tmp/7z
-curl -s -L -O https://www.7-zip.org/a/7z2201-linux-x64.tar.xz
+
+if [ "${ARCH}" == "arm64" ]; then
+  download_location="https://7zip.org/a/7z2408-linux-arm64.tar.xz"
+else
+  download_location="https://7zip.org/a/7z2408-linux-x64.tar.xz"
+fi;
+
+curl -s -L -k -O "${download_location}"
 tar xf 7z*xz
 mv 7zzs /usr/bin/
 mv License.txt /usr/share/
@@ -82,7 +94,7 @@ rm -rf /tmp/7z
 echo "BUILDER: installing database binaries"
 
 # Install Oracle Free
-rpm -iv --nodeps /install/oracle-database-free-23*1.0-1.el8.x86_64.rpm
+rpm -iv --nodeps /install/oracle-database-free-23*.rpm
 
 # Set 'oracle' user home directory to ${ORACE_BASE}
 usermod -d "${ORACLE_BASE}" oracle
@@ -1860,8 +1872,6 @@ EOF
      ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/temp01.dbf'
         AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
-
-
      -- FREEDPB1
      ALTER SESSION SET CONTAINER=FREEPDB1;
 
@@ -2068,8 +2078,8 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm -r "${ORACLE_HOME}"/jlib
   rm -r "${ORACLE_HOME}"/ucp
 
-  # Remove Intel's Math kernel libraries
-  rm "${ORACLE_HOME}"/lib/libmkl_*
+  # Remove Intel's Math kernel libraries (Intel only)
+  rm -f "${ORACLE_HOME}"/lib/libmkl_*
 
   # Remove zip artifacts in $ORACLE_HOME/lib
   rm "${ORACLE_HOME}"/lib/*.zip
@@ -2130,26 +2140,26 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm -r "${ORACLE_HOME}"/opmn
 
   # Remove oml4py directory
-  rm -r "${ORACLE_HOME}"/oml4py
+  rm -rf "${ORACLE_HOME}"/oml4py
 
   # Remove python directory
   rm -r "${ORACLE_HOME}"/python
 
   # Remove unnecessary binaries (see http://yong321.freeshell.org/computer/oraclebin.html)
-  rm "${ORACLE_HOME}"/bin/acfs*       # ACFS File system components
-  rm "${ORACLE_HOME}"/bin/adrci       # Automatic Diagnostic Repository Command Interpreter
-  rm "${ORACLE_HOME}"/bin/agtctl      # Multi-Threaded extproc agent control utility
-  rm "${ORACLE_HOME}"/bin/afd*        # ASM Filter Drive components
-  rm "${ORACLE_HOME}"/bin/amdu        # ASM Disk Utility
-  rm "${ORACLE_HOME}"/bin/dg4*        # Database Gateway
-  rm "${ORACLE_HOME}"/bin/dgmgrl      # Data Guard Manager CLI
-  rm "${ORACLE_HOME}"/bin/dbnest*     # DataBase NEST
-  rm "${ORACLE_HOME}"/bin/orion       # ORacle IO Numbers benchmark tool
-  rm "${ORACLE_HOME}"/bin/oms_daemon  # Oracle Memory Speed (PMEM support) daemon
-  rm "${ORACLE_HOME}"/bin/omsfscmds   # Oracle Memory Speed command line utility
-  rm "${ORACLE_HOME}"/bin/proc        # Pro*C/C++ Precompiler
-  rm "${ORACLE_HOME}"/bin/procob      # Pro COBOL Precompiler
-  rm "${ORACLE_HOME}"/bin/renamedg    # Rename Disk Group binary
+  rm "${ORACLE_HOME}"/bin/acfs*          # ACFS File system components
+  rm "${ORACLE_HOME}"/bin/adrci          # Automatic Diagnostic Repository Command Interpreter
+  rm "${ORACLE_HOME}"/bin/agtctl         # Multi-Threaded extproc agent control utility
+  rm "${ORACLE_HOME}"/bin/afd*           # ASM Filter Drive components
+  rm "${ORACLE_HOME}"/bin/amdu           # ASM Disk Utility
+  rm "${ORACLE_HOME}"/bin/dg4*           # Database Gateway
+  rm "${ORACLE_HOME}"/bin/dgmgrl         # Data Guard Manager CLI
+  rm -f "${ORACLE_HOME}"/bin/dbnest*     # DataBase NEST
+  rm "${ORACLE_HOME}"/bin/orion          # ORacle IO Numbers benchmark tool
+  rm -f "${ORACLE_HOME}"/bin/oms_daemon  # Oracle Memory Speed (PMEM support) daemon
+  rm -f "${ORACLE_HOME}"/bin/omsfscmds   # Oracle Memory Speed command line utility
+  rm "${ORACLE_HOME}"/bin/proc           # Pro*C/C++ Precompiler
+  rm "${ORACLE_HOME}"/bin/procob         # Pro COBOL Precompiler
+  rm "${ORACLE_HOME}"/bin/renamedg       # Rename Disk Group binary
 
   # Replace `orabase` with static path shell script
   su -p oracle -c "echo 'echo ${ORACLE_BASE}' > ${ORACLE_HOME}/bin/orabase"
@@ -2215,7 +2225,7 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     rm -r "${ORACLE_HOME}"/ord
 
     # Remove Oracle R
-    rm -r "${ORACLE_HOME}"/R
+    rm -rf "${ORACLE_HOME}"/R
 
     # Remove deinstall directory
     rm -r "${ORACLE_HOME}"/deinstall
@@ -2229,14 +2239,14 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     # Remove unnecessary binaries
     rm "${ORACLE_HOME}"/bin/cursize    # Cursor Size binary
     rm "${ORACLE_HOME}"/bin/dbfs*      # DataBase File System
-    rm "${ORACLE_HOME}"/bin/ORE        # Oracle R Enterprise
+    rm -f "${ORACLE_HOME}"/bin/ORE     # Oracle R Enterprise
     rm "${ORACLE_HOME}"/lib/libmle.so  # Multilingual Engine
     rm "${ORACLE_HOME}"/bin/rman       # Oracle Recovery Manager
     rm "${ORACLE_HOME}"/bin/wrap       # PL/SQL Wrapper
 
     # Remove unnecessary libraries
     rm "${ORACLE_HOME}"/lib/asm*       # Oracle Automatic Storage Management
-    rm "${ORACLE_HOME}"/lib/ore.so     # Oracle R Enterprise
+    rm -f "${ORACLE_HOME}"/lib/ore.so  # Oracle R Enterprise
 
   fi;
 
