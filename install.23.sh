@@ -1652,6 +1652,9 @@ EOF
        -- Exit on any error
        WHENEVER SQLERROR EXIT SQL.SQLCODE
 
+       -- Don't wait for online DDL delay
+       ALTER SESSION SET "_online_ddl_delay" = 0;
+
        -- CDB
        exec DBMS_SPACE.SHRINK_TABLESPACE('SYSAUX');
 
@@ -1699,6 +1702,9 @@ EOF
 
        -- Exit on any error
        WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+       -- Don't wait for online DDL delay
+       ALTER SESSION SET "_online_ddl_delay" = 0;
 
        -- CDB
        exec DBMS_SPACE.SHRINK_TABLESPACE('SYSTEM');
