@@ -1,7 +1,7 @@
 #!/bin/bash
 # Since: May, 2024
 # Author: gvenzl
-# Name: build_Dockerfile.sh
+# Name: build-images.sh
 # Description: Build test scripts for Oracle DB Free $VERSION
 #
 # Copyright 2024 Gerald Venzl
