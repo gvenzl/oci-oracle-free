@@ -79,12 +79,12 @@ function uploadFastStart() {
   #podman push localhost/gvenzl/oracle-free:23.3-full-faststart             ${DESTINATION}/gvenzl/oracle-free:23.3-full-faststart
   #echo "Upload 23.4-full-faststart"
   #podman push localhost/gvenzl/oracle-free:23.4-full-faststart             ${DESTINATION}/gvenzl/oracle-free:23.4-full-faststart
-  echo "Upload 23.5-full-faststart-$getArch"
-  podman push localhost/gvenzl/oracle-free:23.5-full-faststart-$getArch     ${DESTINATION}/gvenzl/oracle-free:23.5-full-faststart-$getArch
-  echo "Upload 23-full-faststart-$getArch"
-  podman push localhost/gvenzl/oracle-free:23-full-faststart-$getArch       ${DESTINATION}/gvenzl/oracle-free:23-full-faststart-$getArch
-  echo "Upload full-faststart-$getArch"
-  podman push localhost/gvenzl/oracle-free:full-faststart-$getArch          ${DESTINATION}/gvenzl/oracle-free:full-faststart-$getArch
+  echo "Upload 23.5-full-faststart-$(getArch)"
+  podman push localhost/gvenzl/oracle-free:23.5-full-faststart-$(getArch)     ${DESTINATION}/gvenzl/oracle-free:23.5-full-faststart-$(getArch)
+  echo "Upload 23-full-faststart-$(getArch)"
+  podman push localhost/gvenzl/oracle-free:23-full-faststart-$(getArch)       ${DESTINATION}/gvenzl/oracle-free:23-full-faststart-$(getArch)
+  echo "Upload full-faststart-$(getArch)"
+  podman push localhost/gvenzl/oracle-free:full-faststart-$(getArch)          ${DESTINATION}/gvenzl/oracle-free:full-faststart-$(getArch)
 
   # Upload REGULAR images
   #echo "Upload 23.2-faststart"
@@ -93,10 +93,10 @@ function uploadFastStart() {
   #podman push localhost/gvenzl/oracle-free:23.3-faststart                  ${DESTINATION}/gvenzl/oracle-free:23.3-faststart
   #echo "Upload 23.4-faststart"
   #podman push localhost/gvenzl/oracle-free:23.4-faststart                  ${DESTINATION}/gvenzl/oracle-free:23.4-faststart
-  echo "Upload 23.5-faststart-$getArch"
-  podman push localhost/gvenzl/oracle-free:23.5-faststart-$getArch          ${DESTINATION}/gvenzl/oracle-free:23.5-faststart-$getArch
-  echo "Upload 23-faststart-$getArch"
-  podman push localhost/gvenzl/oracle-free:23-faststart-$getArch            ${DESTINATION}/gvenzl/oracle-free:23-faststart-$getArch
+  echo "Upload 23.5-faststart-$(getArch)"
+  podman push localhost/gvenzl/oracle-free:23.5-faststart-$(getArch)          ${DESTINATION}/gvenzl/oracle-free:23.5-faststart-$(getArch)
+  echo "Upload 23-faststart-$(getArch)"
+  podman push localhost/gvenzl/oracle-free:23-faststart-$(getArch)            ${DESTINATION}/gvenzl/oracle-free:23-faststart-$(getArch)
 
   # Upload SLIM images
   #echo "Upload 23.2-slim-faststart"
@@ -105,16 +105,16 @@ function uploadFastStart() {
   #podman push localhost/gvenzl/oracle-free:23.3-slim-faststart             ${DESTINATION}/gvenzl/oracle-free:23.3-slim-faststart
   #echo "Upload 23.4-slim-faststart"
   #podman push localhost/gvenzl/oracle-free:23.4-slim-faststart             ${DESTINATION}/gvenzl/oracle-free:23.4-slim-faststart
-  echo "Upload 23.5-slim-faststart-$getArch"
-  podman push localhost/gvenzl/oracle-free:23.5-slim-faststart-$getArch     ${DESTINATION}/gvenzl/oracle-free:23.5-slim-faststart-$getArch
-  echo "Upload 23-slim-faststart-$getArch"
-  podman push localhost/gvenzl/oracle-free:23-slim-faststart-$getArch       ${DESTINATION}/gvenzl/oracle-free:23-slim-faststart-$getArch
-  echo "Upload slim-faststart-$getArch"
-  podman push localhost/gvenzl/oracle-free:slim-faststart-$getArch          ${DESTINATION}/gvenzl/oracle-free:slim-faststart-$getArch
+  echo "Upload 23.5-slim-faststart-$(getArch)"
+  podman push localhost/gvenzl/oracle-free:23.5-slim-faststart-$(getArch)     ${DESTINATION}/gvenzl/oracle-free:23.5-slim-faststart-$(getArch)
+  echo "Upload 23-slim-faststart-$(getArch)"
+  podman push localhost/gvenzl/oracle-free:23-slim-faststart-$(getArch)       ${DESTINATION}/gvenzl/oracle-free:23-slim-faststart-$(getArch)
+  echo "Upload slim-faststart-$(getArch)"
+  podman push localhost/gvenzl/oracle-free:slim-faststart-$(getArch)          ${DESTINATION}/gvenzl/oracle-free:slim-faststart-$(getArch)
 
   # Upload latest
-  echo "Upload latest-faststart-$getArch"
-  podman push localhost/gvenzl/oracle-free:latest-faststart-$getArch        ${DESTINATION}/gvenzl/oracle-free:latest-faststart-$getArch
+  echo "Upload latest-faststart-$(getArch)"
+  podman push localhost/gvenzl/oracle-free:latest-faststart-$(getArch)        ${DESTINATION}/gvenzl/oracle-free:latest-faststart-$(getArch)
 }
 
 function upload() {
@@ -130,12 +130,12 @@ function upload() {
   #podman push localhost/gvenzl/oracle-free:23.3-full                       ${DESTINATION}/gvenzl/oracle-free:23.3-full
   #echo "Upload 23.4-full"
   #podman push localhost/gvenzl/oracle-free:23.4-full                       ${DESTINATION}/gvenzl/oracle-free:23.4-full
-  echo "Upload 23.5-full-$getArch"
-  podman push localhost/gvenzl/oracle-free:23.5-full-$getArch               ${DESTINATION}/gvenzl/oracle-free:23.5-full-$getArch
-  echo "Upload 23-full-$getArch"
-  podman push localhost/gvenzl/oracle-free:23-full-$getArch                 ${DESTINATION}/gvenzl/oracle-free:23-full-$getArch
-  echo "Upload full-$getArch"
-  podman push localhost/gvenzl/oracle-free:full-$getArch                    ${DESTINATION}/gvenzl/oracle-free:full-$getArch
+  echo "Upload 23.5-full-$(getArch)"
+  podman push localhost/gvenzl/oracle-free:23.5-full-$(getArch)               ${DESTINATION}/gvenzl/oracle-free:23.5-full-$(getArch)
+  echo "Upload 23-full-$(getArch)"
+  podman push localhost/gvenzl/oracle-free:23-full-$(getArch)                 ${DESTINATION}/gvenzl/oracle-free:23-full-$(getArch)
+  echo "Upload full-$(getArch)"
+  podman push localhost/gvenzl/oracle-free:full-$(getArch)                    ${DESTINATION}/gvenzl/oracle-free:full-$(getArch)
 
   # Upload REGULAR images
   #echo "Upload 23.2"
@@ -144,10 +144,10 @@ function upload() {
   #podman push localhost/gvenzl/oracle-free:23.3                            ${DESTINATION}/gvenzl/oracle-free:23.3
   #echo "Upload 23.4"
   #podman push localhost/gvenzl/oracle-free:23.4                            ${DESTINATION}/gvenzl/oracle-free:23.4
-  echo "Upload 23.5-$getArch"
-  podman push localhost/gvenzl/oracle-free:23.5-$getArch                    ${DESTINATION}/gvenzl/oracle-free:23.5-$getArch
-  echo "Upload 23-$getArch"
-  podman push localhost/gvenzl/oracle-free:23-$getArch                      ${DESTINATION}/gvenzl/oracle-free:23-$getArch
+  echo "Upload 23.5-$(getArch)"
+  podman push localhost/gvenzl/oracle-free:23.5-$(getArch)                    ${DESTINATION}/gvenzl/oracle-free:23.5-$(getArch)
+  echo "Upload 23-$(getArch)"
+  podman push localhost/gvenzl/oracle-free:23-$(getArch)                      ${DESTINATION}/gvenzl/oracle-free:23-$(getArch)
 
   # Upload SLIM images
   #echo "Upload 23.2-slim"
@@ -156,16 +156,16 @@ function upload() {
   #podman push localhost/gvenzl/oracle-free:23.3-slim                       ${DESTINATION}/gvenzl/oracle-free:23.3-slim
   #echo "Upload 23.4-slim"
   #podman push localhost/gvenzl/oracle-free:23.4-slim                       ${DESTINATION}/gvenzl/oracle-free:23.4-slim
-  echo "Upload 23.5-slim-$getArch"
-  podman push localhost/gvenzl/oracle-free:23.5-slim-$getArch               ${DESTINATION}/gvenzl/oracle-free:23.5-slim-$getArch
-  echo "Upload 23-slim-$getArch"
-  podman push localhost/gvenzl/oracle-free:23-slim-$getArch                 ${DESTINATION}/gvenzl/oracle-free:23-slim-$getArch
-  echo "Upload slim-$getArch"
-  podman push localhost/gvenzl/oracle-free:slim-$getArch                    ${DESTINATION}/gvenzl/oracle-free:slim-$getArch
+  echo "Upload 23.5-slim-$(getArch)"
+  podman push localhost/gvenzl/oracle-free:23.5-slim-$(getArch)               ${DESTINATION}/gvenzl/oracle-free:23.5-slim-$(getArch)
+  echo "Upload 23-slim-$(getArch)"
+  podman push localhost/gvenzl/oracle-free:23-slim-$(getArch)                 ${DESTINATION}/gvenzl/oracle-free:23-slim-$(getArch)
+  echo "Upload slim-$(getArch)"
+  podman push localhost/gvenzl/oracle-free:slim-$(getArch)                    ${DESTINATION}/gvenzl/oracle-free:slim-$(getArch)
 
   # Upload latest
   echo "Upload latest"
-  podman push localhost/gvenzl/oracle-free:latest-$getArch                  ${DESTINATION}/gvenzl/oracle-free:latest-$getArch
+  podman push localhost/gvenzl/oracle-free:latest-$(getArch)                  ${DESTINATION}/gvenzl/oracle-free:latest-$(getArch)
 }
 
 # Upload images

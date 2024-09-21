@@ -27,28 +27,28 @@ source ./functions.sh
 
 # Download images
 echo "Backup latest"
-podman pull docker.io/gvenzl/oracle-free:latest-$getArch
-podman tag  docker.io/gvenzl/oracle-free:latest-$getArch docker.io/gvenzl/oracle-free:latest-$getArch-backup
-podman rmi  docker.io/gvenzl/oracle-free:latest-$getArch
+podman pull docker.io/gvenzl/oracle-free:latest-$(getArch)
+podman tag  docker.io/gvenzl/oracle-free:latest-$(getArch) docker.io/gvenzl/oracle-free:latest-$(getArch)-backup
+podman rmi  docker.io/gvenzl/oracle-free:latest-$(getArch)
 
 echo "Backup latest-faststart"
-podman pull docker.io/gvenzl/oracle-free:latest-faststart-$getArch
-podman tag  docker.io/gvenzl/oracle-free:latest-faststart-$getArch docker.io/gvenzl/oracle-free:latest-faststart-$getArch-backup
-podman rmi  docker.io/gvenzl/oracle-free:latest-faststart-$getArch
+podman pull docker.io/gvenzl/oracle-free:latest-faststart-$(getArch)
+podman tag  docker.io/gvenzl/oracle-free:latest-faststart-$(getArch) docker.io/gvenzl/oracle-free:latest-faststart-$(getArch)-backup
+podman rmi  docker.io/gvenzl/oracle-free:latest-faststart-$(getArch)
 
 
 
 
 # Backup images
 echo "Backup 23.5-full-faststart"
-podman pull docker.io/gvenzl/oracle-free:23.5-full-faststart-$getArch
-podman tag  docker.io/gvenzl/oracle-free:23.5-full-faststart-$getArch docker.io/gvenzl/oracle-free:23.5-full-faststart-$getArch-backup
-podman rmi  docker.io/gvenzl/oracle-free:23.5-full-faststart-$getArch
+podman pull docker.io/gvenzl/oracle-free:23.5-full-faststart-$(getArch)
+podman tag  docker.io/gvenzl/oracle-free:23.5-full-faststart-$(getArch) docker.io/gvenzl/oracle-free:23.5-full-faststart-$(getArch)-backup
+podman rmi  docker.io/gvenzl/oracle-free:23.5-full-faststart-$(getArch)
 
 echo "Backup 23.5-full"
-podman pull docker.io/gvenzl/oracle-free:23.5-full-$getArch
-podman tag  docker.io/gvenzl/oracle-free:23.5-full-$getArch docker.io/gvenzl/oracle-free:23.5-full-$getArch-backup
-podman rmi  docker.io/gvenzl/oracle-free:23.5-full-$getArch
+podman pull docker.io/gvenzl/oracle-free:23.5-full-$(getArch)
+podman tag  docker.io/gvenzl/oracle-free:23.5-full-$(getArch) docker.io/gvenzl/oracle-free:23.5-full-$(getArch)-backup
+podman rmi  docker.io/gvenzl/oracle-free:23.5-full-$(getArch)
 
 
 # Backup images
@@ -89,37 +89,37 @@ podman rmi  docker.io/gvenzl/oracle-free:23.5-full-$getArch
 
 
 echo "Backup 23-full-faststart"
-podman pull docker.io/gvenzl/oracle-free:23-full-faststart-$getArch
-podman tag  docker.io/gvenzl/oracle-free:23-full-faststart-$getArch docker.io/gvenzl/oracle-free:23-full-faststart-$getArch-backup
-podman rmi  docker.io/gvenzl/oracle-free:23-full-faststart-$getArch
+podman pull docker.io/gvenzl/oracle-free:23-full-faststart-$(getArch)
+podman tag  docker.io/gvenzl/oracle-free:23-full-faststart-$(getArch) docker.io/gvenzl/oracle-free:23-full-faststart-$(getArch)-backup
+podman rmi  docker.io/gvenzl/oracle-free:23-full-faststart-$(getArch)
 
 echo "Backup 23-full"
-podman pull docker.io/gvenzl/oracle-free:23-full-$getArch
-podman tag  docker.io/gvenzl/oracle-free:23-full-$getArch docker.io/gvenzl/oracle-free:23-full-$getArch-backup
-podman rmi  docker.io/gvenzl/oracle-free:23-full-$getArch
+podman pull docker.io/gvenzl/oracle-free:23-full-$(getArch)
+podman tag  docker.io/gvenzl/oracle-free:23-full-$(getArch) docker.io/gvenzl/oracle-free:23-full-$(getArch)-backup
+podman rmi  docker.io/gvenzl/oracle-free:23-full-$(getArch)
 
 echo "Backup full-faststart"
-podman pull docker.io/gvenzl/oracle-free:full-faststart-$getArch
-podman tag  docker.io/gvenzl/oracle-free:full-faststart-$getArch docker.io/gvenzl/oracle-free:full-faststart-$getArch-backup
-podman rmi  docker.io/gvenzl/oracle-free:full-faststart-$getArch
+podman pull docker.io/gvenzl/oracle-free:full-faststart-$(getArch)
+podman tag  docker.io/gvenzl/oracle-free:full-faststart-$(getArch) docker.io/gvenzl/oracle-free:full-faststart-$(getArch)-backup
+podman rmi  docker.io/gvenzl/oracle-free:full-faststart-$(getArch)
 
 echo "Backup full"
-podman pull docker.io/gvenzl/oracle-free:full-$getArch
-podman tag  docker.io/gvenzl/oracle-free:full-$getArch docker.io/gvenzl/oracle-free:full-$getArch-backup
-podman rmi  docker.io/gvenzl/oracle-free:full-$getArch
+podman pull docker.io/gvenzl/oracle-free:full-$(getArch)
+podman tag  docker.io/gvenzl/oracle-free:full-$(getArch) docker.io/gvenzl/oracle-free:full-$(getArch)-backup
+podman rmi  docker.io/gvenzl/oracle-free:full-$(getArch)
 
 
 
 
 echo "Backup 23.5-faststart"
-podman pull docker.io/gvenzl/oracle-free:23.5-faststart-$getArch
-podman tag  docker.io/gvenzl/oracle-free:23.5-faststart-$getArch docker.io/gvenzl/oracle-free:23.5-faststart-$getArch-backup
-podman rmi  docker.io/gvenzl/oracle-free:23.5-faststart-$getArch
+podman pull docker.io/gvenzl/oracle-free:23.5-faststart-$(getArch)
+podman tag  docker.io/gvenzl/oracle-free:23.5-faststart-$(getArch) docker.io/gvenzl/oracle-free:23.5-faststart-$(getArch)-backup
+podman rmi  docker.io/gvenzl/oracle-free:23.5-faststart-$(getArch)
 
 echo "Backup 23.5"
-podman pull docker.io/gvenzl/oracle-free:23.5-$getArch
-podman tag  docker.io/gvenzl/oracle-free:23.5-$getArch docker.io/gvenzl/oracle-free:23.5-$getArch-backup
-podman rmi  docker.io/gvenzl/oracle-free:23.5-$getArch
+podman pull docker.io/gvenzl/oracle-free:23.5-$(getArch)
+podman tag  docker.io/gvenzl/oracle-free:23.5-$(getArch) docker.io/gvenzl/oracle-free:23.5-$(getArch)-backup
+podman rmi  docker.io/gvenzl/oracle-free:23.5-$(getArch)
 
 
 echo "Backup 23.4-faststart"
@@ -160,14 +160,14 @@ echo "Backup 23.4-faststart"
 
 
 echo "Backup 23-faststart"
-podman pull docker.io/gvenzl/oracle-free:23-faststart-$getArch
-podman tag  docker.io/gvenzl/oracle-free:23-faststart-$getArch docker.io/gvenzl/oracle-free:23-faststart-$getArch-backup
-podman rmi  docker.io/gvenzl/oracle-free:23-faststart-$getArch
+podman pull docker.io/gvenzl/oracle-free:23-faststart-$(getArch)
+podman tag  docker.io/gvenzl/oracle-free:23-faststart-$(getArch) docker.io/gvenzl/oracle-free:23-faststart-$(getArch)-backup
+podman rmi  docker.io/gvenzl/oracle-free:23-faststart-$(getArch)
 
 echo "Backup 23"
-podman pull docker.io/gvenzl/oracle-free:23-$getArch
-podman tag  docker.io/gvenzl/oracle-free:23-$getArch docker.io/gvenzl/oracle-free:23-$getArch-backup
-podman rmi  docker.io/gvenzl/oracle-free:23-$getArch
+podman pull docker.io/gvenzl/oracle-free:23-$(getArch)
+podman tag  docker.io/gvenzl/oracle-free:23-$(getArch) docker.io/gvenzl/oracle-free:23-$(getArch)-backup
+podman rmi  docker.io/gvenzl/oracle-free:23-$(getArch)
 
 
 
@@ -175,14 +175,14 @@ podman rmi  docker.io/gvenzl/oracle-free:23-$getArch
 
 
 echo "Backup 23.5-slim-faststart"
-podman pull docker.io/gvenzl/oracle-free:23.5-slim-faststart-$getArch
-podman tag  docker.io/gvenzl/oracle-free:23.5-slim-faststart-$getArch docker.io/gvenzl/oracle-free:23.5-slim-faststart-$getArch-backup
-podman rmi  docker.io/gvenzl/oracle-free:23.5-slim-faststart-$getArch
+podman pull docker.io/gvenzl/oracle-free:23.5-slim-faststart-$(getArch)
+podman tag  docker.io/gvenzl/oracle-free:23.5-slim-faststart-$(getArch) docker.io/gvenzl/oracle-free:23.5-slim-faststart-$(getArch)-backup
+podman rmi  docker.io/gvenzl/oracle-free:23.5-slim-faststart-$(getArch)
 
 echo "Backup 23.5-slim"
-podman pull docker.io/gvenzl/oracle-free:23.5-slim-$getArch
-podman tag  docker.io/gvenzl/oracle-free:23.5-slim-$getArch docker.io/gvenzl/oracle-free:23.5-slim-$getArch-backup
-podman rmi  docker.io/gvenzl/oracle-free:23.5-slim-$getArch
+podman pull docker.io/gvenzl/oracle-free:23.5-slim-$(getArch)
+podman tag  docker.io/gvenzl/oracle-free:23.5-slim-$(getArch) docker.io/gvenzl/oracle-free:23.5-slim-$(getArch)-backup
+podman rmi  docker.io/gvenzl/oracle-free:23.5-slim-$(getArch)
 
 
 #echo "Backup 23.4-slim-faststart"
@@ -223,21 +223,21 @@ podman rmi  docker.io/gvenzl/oracle-free:23.5-slim-$getArch
 
 
 echo "Backup 23-slim-faststart"
-podman pull docker.io/gvenzl/oracle-free:23-slim-faststart-$getArch
-podman tag  docker.io/gvenzl/oracle-free:23-slim-faststart-$getArch docker.io/gvenzl/oracle-free:23-slim-faststart-$getArch-backup
-podman rmi  docker.io/gvenzl/oracle-free:23-slim-faststart-$getArch
+podman pull docker.io/gvenzl/oracle-free:23-slim-faststart-$(getArch)
+podman tag  docker.io/gvenzl/oracle-free:23-slim-faststart-$(getArch) docker.io/gvenzl/oracle-free:23-slim-faststart-$(getArch)-backup
+podman rmi  docker.io/gvenzl/oracle-free:23-slim-faststart-$(getArch)
 
 echo "Backup 23-slim"
-podman pull docker.io/gvenzl/oracle-free:23-slim-$getArch
-podman tag  docker.io/gvenzl/oracle-free:23-slim-$getArch docker.io/gvenzl/oracle-free:23-slim-$getArch-backup
-podman rmi  docker.io/gvenzl/oracle-free:23-slim-$getArch
+podman pull docker.io/gvenzl/oracle-free:23-slim-$(getArch)
+podman tag  docker.io/gvenzl/oracle-free:23-slim-$(getArch) docker.io/gvenzl/oracle-free:23-slim-$(getArch)-backup
+podman rmi  docker.io/gvenzl/oracle-free:23-slim-$(getArch)
 
 echo "Backup slim-faststart"
-podman pull docker.io/gvenzl/oracle-free:slim-faststart-$getArch
-podman tag  docker.io/gvenzl/oracle-free:slim-faststart-$getArch docker.io/gvenzl/oracle-free:slim-faststart-$getArch-backup
-podman rmi  docker.io/gvenzl/oracle-free:slim-faststart-$getArch
+podman pull docker.io/gvenzl/oracle-free:slim-faststart-$(getArch)
+podman tag  docker.io/gvenzl/oracle-free:slim-faststart-$(getArch) docker.io/gvenzl/oracle-free:slim-faststart-$(getArch)-backup
+podman rmi  docker.io/gvenzl/oracle-free:slim-faststart-$(getArch)
 
 echo "Backup slim"
-podman pull docker.io/gvenzl/oracle-free:slim-$getArch
-podman tag  docker.io/gvenzl/oracle-free:slim-$getArch docker.io/gvenzl/oracle-free:slim-backup
-podman rmi  docker.io/gvenzl/oracle-free:slim-$getArch
+podman pull docker.io/gvenzl/oracle-free:slim-$(getArch)
+podman tag  docker.io/gvenzl/oracle-free:slim-$(getArch) docker.io/gvenzl/oracle-free:slim-backup
+podman rmi  docker.io/gvenzl/oracle-free:slim-$(getArch)
