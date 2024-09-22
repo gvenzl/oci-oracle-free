@@ -20,7 +20,7 @@
 
 ARG BASE_IMAGE
 
-FROM ${BASE_IMAGE} as base
+FROM localhost/${BASE_IMAGE} as base
 
 FROM base as cdb_pdb_seed
 
