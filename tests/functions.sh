@@ -42,7 +42,7 @@ function checkDB {
   CONTAINER_NAME="${1}"
 
   tries=0
-  max_tries=12
+  max_tries=30        # 5 minute timeout for tests on slower build machines
   sleep_time_secs=10
 
   # Wait until container is ready
