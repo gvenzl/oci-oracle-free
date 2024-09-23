@@ -18,6 +18,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Function: getArch
+# Returns the architecture of the current build environment
+
+function getArch {
+
+  ENV_ARCH=$(uname -m)
+  if [ "${ENV_ARCH}" == "x86_64" ]; then
+    echo "amd64";
+  elif [[ "${ENV_ARCH}" == "aarch64" || "${ENV_ARCH}" == "arm64" ]]; then
+    echo "arm64";
+  fi;
+}
+
 # Function: checkDB
 # Checks whether the Oracle DB is up and running.
 #
@@ -29,7 +42,7 @@ function checkDB {
   CONTAINER_NAME="${1}"
 
   tries=0
-  max_tries=12
+  max_tries=30        # 5 minute timeout for tests on slower build machines
   sleep_time_secs=10
 
   # Wait until container is ready
@@ -64,7 +77,7 @@ function tear_down_container {
   podman rm -f "${1}" >/dev/null
 }
 
-# Function: run_container_test
+# Function: runContainerTest
 # Runs a container (podman run) test
 #
 # Parameters:
@@ -129,4 +142,69 @@ function runContainerTest {
     exit 1;
 
   fi;
+}
+
+# Function: createManifest
+# Creates a multi-arch manifest
+#
+# Parameters:
+# DESTINATION: The container registry destination of the images
+# TAG: The tag to create the multi-arch manifest for
+
+function createManifest() {
+
+  DESTINATION="${1}"
+  TAG="${2}"
+
+  buildah manifest create "${DESTINATION}/gvenzl/oracle-free:${TAG}" \
+    "${DESTINATION}/gvenzl/oracle-free:${TAG}-amd64" \
+    "${DESTINATION}/gvenzl/oracle-free:${TAG}-arm64"
+}
+
+# Function: pushManifest
+# Pushes a multi-arch manifest
+#
+# Parameters:
+# DESTINATION: The container registry destination of the images
+# TAG: The tag to create the multi-arch manifest for
+
+function pushManifest() {
+
+  DESTINATION="${1}"
+  TAG="${2}"
+
+  buildah manifest push "${DESTINATION}/gvenzl/oracle-free:${TAG}" "docker://${DESTINATION}/gvenzl/oracle-free:${TAG}"
+}
+
+# Function: createAndPushManifest
+# Creates and pushes a multi-arch manifest
+#
+# Parameters:
+# DESTINATION: The container registry destination of the images
+# TAG: The tag to create the multi-arch manifest for
+
+function createAndPushManifest() {
+
+  DESTINATION="${1}"
+  TAG="${2}"
+
+  createManifest "${DESTINATION}" "${TAG}"
+  pushManifest "${DESTINATION}" "${TAG}"
+}
+
+# Function: backupImage
+# Backs up an image from the container registry
+#
+# Parameters:
+# DESTINATION: The container registry destination of the images
+# TAG: The tag to create the multi-arch manifest for
+
+function backupImage() {
+
+  DESTINATION="${1}"
+  TAG="${2}"
+
+  podman pull ${DESTINATION}/gvenzl/oracle-free:${TAG}
+  podman tag  ${DESTINATION}/gvenzl/oracle-free:${TAG} ${DESTINATION}/gvenzl/oracle-free:${TAG}-backup
+  podman rmi  ${DESTINATION}/gvenzl/oracle-free:${TAG}
 }

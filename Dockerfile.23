@@ -20,7 +20,7 @@
 
 FROM oraclelinux:8-slim as builder
 
-ARG BUILD_MODE BUILD_VERSION DB_FLAVOR
+ARG BUILD_MODE BUILD_VERSION DB_FLAVOR ARCH RPM_ARCH
 
 ENV OCI_IMAGE_VERSION=${BUILD_VERSION} \
     OCI_IMAGE_FLAVOR=${BUILD_MODE} \
@@ -32,7 +32,7 @@ ENV OCI_IMAGE_VERSION=${BUILD_VERSION} \
     PATH=${PATH}:/opt/oracle/product/23${DB_FLAVOR}/dbhomeFree/bin:/opt/oracle \
     NLS_LANG=.AL32UTF8
 
-COPY oracle-database-free-23${DB_FLAVOR}-${BUILD_VERSION}-1.0-1.el8.x86_64.rpm install.23.sh container-entrypoint.sh resetPassword createAppUser createDatabase healthcheck.sh /install/
+COPY oracle-database-free-23${DB_FLAVOR}-${BUILD_VERSION}-1.0-1.el8.${RPM_ARCH}.rpm install.23.sh container-entrypoint.sh resetPassword createAppUser createDatabase healthcheck.sh /install/
 
 RUN /install/install.23.sh "${BUILD_MODE}"
 

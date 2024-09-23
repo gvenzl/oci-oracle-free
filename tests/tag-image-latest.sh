@@ -1,8 +1,8 @@
 #!/bin/bash
 # Since: April, 2023
 # Author: gvenzl
-# Name: all_build_tests.sh
-# Description: Script for all build tests for Oracle DB Free
+# Name: tag-image-latest.sh
+# Description: Tag the latest image
 #
 # Copyright 2023 Gerald Venzl
 #
@@ -22,8 +22,9 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-# In order of newest to latest
-./build_Dockerfile.sh "23.5"
-./build_Dockerfile.sh "23.4"
-#./build_Dockerfile.sh "23.3"
-#./build_Dockerfile.sh "23.2"
+source ./functions.sh
+
+# Tag latest image
+podman tag gvenzl/oracle-free:23.5-$(getArch)           gvenzl/oracle-free:latest-$(getArch)
+
+podman tag gvenzl/oracle-free:23.5-faststart-$(getArch) gvenzl/oracle-free:latest-faststart-$(getArch)

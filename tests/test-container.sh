@@ -1,8 +1,8 @@
 #!/bin/bash
 # Since: April, 2023
 # Author: gvenzl
-# Name: test_container_2330.sh
-# Description: Run container test scripts for Oracle DB Free 23.3
+# Name: test-container.sh
+# Description: Run container test scripts for Oracle DB Free
 #
 # Copyright 2023 Gerald Venzl
 #
@@ -21,6 +21,15 @@
 source ./functions.sh
 
 CONTAINER_IMAGE="${1}"
+
+echo""
+echo "############################################################################"
+echo "############################################################################"
+echo "Starting tests for ${CONTAINER_IMAGE}"
+echo "############################################################################"
+echo "############################################################################"
+echo""
+echo""
 
 #######################
 ##### Image tests #####
@@ -45,6 +54,7 @@ TEST_NAME="ORACLE_PASSWORD ${CONTAINER_IMAGE}"
 EXPECTED_RESULT="OK"
 
 # Spin up container
+TEST_START_TMS=$(date '+%s')
 runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "${CONTAINER_IMAGE}"
 
 # Test password, if it works we will get "OK" back from the SQL statement
@@ -57,12 +67,15 @@ result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s system/"${ORA_PWD}" <<EOF
 EOF
 )
 
+TEST_END_TMS=$(date '+%s')
+TEST_DURATION=$(( TEST_END_TMS - TEST_START_TMS ))
+
 # See whether we got "OK" back from our test
 if [ "${result}" == "${EXPECTED_RESULT}" ]; then
-  echo "TEST ${TEST_NAME}: OK";
+  echo "TEST ${TEST_NAME}: OK (${TEST_DURATION} sec)";
   echo "";
 else
-  echo "TEST ${TEST_NAME}: FAILED!";
+  echo "TEST ${TEST_NAME}: FAILED! (${TEST_DURATION} sec)";
   exit 1;
 fi;
 
@@ -84,13 +97,14 @@ ORA_PWD_CMD="-e ORACLE_RANDOM_PASSWORD=sure"
 # Tell test method not to tear down container
 NO_TEAR_DOWN="true"
 # Let's keep the container name in a var to keep it simple
-CONTAINER_NAME="23-rand-ora-pwd"
+CONTAINER_NAME="rand-ora-pwd"
 # Let's keep the test name in a var to keep it simple too
 TEST_NAME="ORACLE_RANDOM_PASSWORD ${CONTAINER_IMAGE}"
 # This is what we want to have back from the SQL statement
 EXPECTED_RESULT="OK"
 
 # Spin up container
+TEST_START_TMS=$(date '+%s')
 runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "${CONTAINER_IMAGE}"
 
 # Let's get the password
@@ -106,12 +120,15 @@ result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s system/"${rand_pwd}"@//loca
 EOF
 )
 
+TEST_END_TMS=$(date '+%s')
+TEST_DURATION=$(( TEST_END_TMS - TEST_START_TMS ))
+
 # See whether we got "OK" back from our test
 if [ "${result}" == "${EXPECTED_RESULT}" ]; then
-  echo "TEST ${TEST_NAME}: OK";
+  echo "TEST ${TEST_NAME}: OK (${TEST_DURATION} sec)";
   echo "";
 else
-  echo "TEST ${TEST_NAME}: FAILED!";
+  echo "TEST ${TEST_NAME}: FAILED! (${TEST_DURATION} sec)";
   exit 1;
 fi;
 
@@ -142,6 +159,7 @@ APP_USER="test_app_user"
 APP_USER_PASSWORD="MyAppUserPassword"
 
 # Spin up container
+TEST_START_TMS=$(date '+%s')
 runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "${CONTAINER_IMAGE}"
 
 # Test the random password, if it works we will get "OK" back from the SQL statement
@@ -154,12 +172,15 @@ result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${APP_USER}"/"${APP_USER_P
 EOF
 )
 
+TEST_END_TMS=$(date '+%s')
+TEST_DURATION=$(( TEST_END_TMS - TEST_START_TMS ))
+
 # See whether we got "OK" back from our test
 if [ "${result}" == "${EXPECTED_RESULT}" ]; then
-  echo "TEST ${TEST_NAME}: OK";
+  echo "TEST ${TEST_NAME}: OK (${TEST_DURATION} sec)";
   echo "";
 else
-  echo "TEST ${TEST_NAME}: FAILED!";
+  echo "TEST ${TEST_NAME}: FAILED! (${TEST_DURATION} sec)";
   exit 1;
 fi;
 
@@ -183,7 +204,7 @@ NO_TEAR_DOWN="true"
 # Let's keep the container name in a var to keep it simple
 CONTAINER_NAME="23-oracle-db"
 # Let's keep the test name in a var to keep it simple too
-TEST_NAME="23.4 ORACLE_DATABASE ${CONTAINER_IMAGE}"
+TEST_NAME="ORACLE_DATABASE variable ${CONTAINER_IMAGE}"
 # This is what we want to have back from the SQL statement
 EXPECTED_RESULT="Hi from your Oracle PDB"
 # Oracle PDB (use mixed case deliberately)
@@ -193,6 +214,7 @@ ORA_PWD="MyTestPassword"
 ORA_PWD_CMD="-e ORACLE_PASSWORD=${ORA_PWD}"
 
 # Spin up container
+TEST_START_TMS=$(date '+%s')
 runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "${CONTAINER_IMAGE}"
 
 # Test the random password, if it works we will get "OK" back from the SQL statement
@@ -205,12 +227,15 @@ result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s sys/"${ORA_PWD}"@//localhos
 EOF
 )
 
+TEST_END_TMS=$(date '+%s')
+TEST_DURATION=$(( TEST_END_TMS - TEST_START_TMS ))
+
 # See whether we got "OK" back from our test
 if [ "${result}" == "${EXPECTED_RESULT}" ]; then
-  echo "TEST ${TEST_NAME}: OK";
+  echo "TEST ${TEST_NAME}: OK (${TEST_DURATION} sec)";
   echo "";
 else
-  echo "TEST ${TEST_NAME}: FAILED!";
+  echo "TEST ${TEST_NAME}: FAILED! (${TEST_DURATION} sec)";
   exit 1;
 fi;
 
@@ -235,7 +260,7 @@ NO_TEAR_DOWN="true"
 # Let's keep the container name in a var to keep it simple
 CONTAINER_NAME="23-oracle-db"
 # Let's keep the test name in a var to keep it simple too
-TEST_NAME="23.3 ORACLE_DATABASE & APP_USER ${CONTAINER_IMAGE}"
+TEST_NAME="ORACLE_DATABASE & APP_USER variables ${CONTAINER_IMAGE}"
 # This is what we want to have back from the SQL statement
 EXPECTED_RESULT="Hi from your Oracle PDB"
 # App user
@@ -246,6 +271,7 @@ APP_USER_PASSWORD="ThatAppUserPassword1"
 ORACLE_DATABASE="regression_tests"
 
 # Spin up container
+TEST_START_TMS=$(date '+%s')
 runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "${CONTAINER_IMAGE}"
 
 # Test the random password, if it works we will get "OK" back from the SQL statement
@@ -258,12 +284,15 @@ result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${APP_USER}"/"${APP_USER_P
 EOF
 )
 
+TEST_END_TMS=$(date '+%s')
+TEST_DURATION=$(( TEST_END_TMS - TEST_START_TMS ))
+
 # See whether we got "OK" back from our test
 if [ "${result}" == "${EXPECTED_RESULT}" ]; then
-  echo "TEST ${TEST_NAME}: OK";
+  echo "TEST ${TEST_NAME}: OK (${TEST_DURATION} sec)";
   echo "";
 else
-  echo "TEST ${TEST_NAME}: FAILED!";
+  echo "TEST ${TEST_NAME}: FAILED! (${TEST_DURATION} sec)";
   exit 1;
 fi;
 
@@ -288,7 +317,7 @@ NO_TEAR_DOWN="true"
 # Let's keep the container name in a var to keep it simple
 CONTAINER_NAME="23-oracle-db-pdbs"
 # Let's keep the test name in a var to keep it simple too
-TEST_NAME="23.4 MULTIPLE PDBs & APP_USER ${CONTAINER_IMAGE}"
+TEST_NAME="MULTIPLE PDBs & APP_USER ${CONTAINER_IMAGE}"
 # This is what we want to have back from the SQL statement
 EXPECTED_RESULT="Hi from your Oracle PDB"
 # App user
@@ -299,6 +328,7 @@ APP_USER_PASSWORD="AnotherAppUserPassword1"
 ORACLE_DATABASE="test_pdb1,TEST_PDB2,PDB3"
 
 # Spin up container
+TEST_START_TMS=$(date '+%s')
 runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "${CONTAINER_IMAGE}"
 
 ##################
@@ -314,12 +344,15 @@ result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${APP_USER}"/"${APP_USER_P
 EOF
 )
 
+TEST_END_TMS=$(date '+%s')
+TEST_DURATION=$(( TEST_END_TMS - TEST_START_TMS ))
+
 # See whether we got "OK" back from our test
 if [ "${result}" == "${EXPECTED_RESULT}" ]; then
-  echo "TEST ${TEST_NAME}: OK";
+  echo "TEST ${TEST_NAME}: OK (${TEST_DURATION} sec)";
   echo "";
 else
-  echo "TEST ${TEST_NAME}: FAILED!";
+  echo "TEST ${TEST_NAME}: FAILED! (${TEST_DURATION} sec)";
   exit 1;
 fi;
 
@@ -336,12 +369,15 @@ result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${APP_USER}"/"${APP_USER_P
 EOF
 )
 
+TEST_END_TMS=$(date '+%s')
+TEST_DURATION=$(( TEST_END_TMS - TEST_START_TMS ))
+
 # See whether we got "OK" back from our test
 if [ "${result}" == "${EXPECTED_RESULT}" ]; then
-  echo "TEST ${TEST_NAME}: OK";
+  echo "TEST ${TEST_NAME}: OK (${TEST_DURATION} sec)";
   echo "";
 else
-  echo "TEST ${TEST_NAME}: FAILED!";
+  echo "TEST ${TEST_NAME}: FAILED! (${TEST_DURATION} sec)";
   exit 1;
 fi;
 
@@ -358,12 +394,15 @@ result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${APP_USER}"/"${APP_USER_P
 EOF
 )
 
+TEST_END_TMS=$(date '+%s')
+TEST_DURATION=$(( TEST_END_TMS - TEST_START_TMS ))
+
 # See whether we got "OK" back from our test
 if [ "${result}" == "${EXPECTED_RESULT}" ]; then
-  echo "TEST ${TEST_NAME}: OK";
+  echo "TEST ${TEST_NAME}: OK (${TEST_DURATION} sec)";
   echo "";
 else
-  echo "TEST ${TEST_NAME}: FAILED!";
+  echo "TEST ${TEST_NAME}: FAILED! (${TEST_DURATION} sec)";
   exit 1;
 fi;
 
@@ -399,6 +438,7 @@ APP_USER_PASSWORD="ThatAppUserPassword1"
 ORACLE_DATABASE="timezone_pdb"
 
 # Spin up container
+TEST_START_TMS=$(date '+%s')
 runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "${CONTAINER_IMAGE}"
 
 # Test the random password, if it works we will get "OK" back from the SQL statement
@@ -421,12 +461,15 @@ result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${APP_USER}"/"${APP_USER_P
 EOF
 )
 
+TEST_END_TMS=$(date '+%s')
+TEST_DURATION=$(( TEST_END_TMS - TEST_START_TMS ))
+
 # See whether we got "OK" back from our test
 if [ "${result}" == "${EXPECTED_RESULT}" ]; then
-  echo "TEST ${TEST_NAME}: OK";
+  echo "TEST ${TEST_NAME}: OK (${TEST_DURATION} sec)";
   echo "";
 else
-  echo "TEST ${TEST_NAME}: FAILED!";
+  echo "TEST ${TEST_NAME}: FAILED! (${TEST_DURATION} sec)";
   exit 1;
 fi;
 
@@ -441,3 +484,13 @@ unset EXPECTED_RESULT
 unset APP_USER
 unset APP_USER_PASSWORD
 unset ORACLE_DATABASE
+
+echo ""
+echo""
+echo "############################################################################"
+echo "############################################################################"
+echo "Finished tests for ${CONTAINER_IMAGE}"
+echo "############################################################################"
+echo "############################################################################"
+echo""
+
