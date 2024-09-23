@@ -23,7 +23,7 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-source ./function.sh
+source ./functions.sh
 
 FASTSTART_UPLOAD="N"
 REGULAR_UPLOAD="N"
@@ -54,14 +54,14 @@ echo "Login to ${DESTINATION}:"
 podman login ${DESTINATION}
 
 # Ensure all tags are in place
-./all_tag_images.sh
+./all-tag-images.sh
 
 # Backup images
 read -r -p "Do you want to backup the old images? [Y/n]: " response
 # Default --> "Y"
 response=${response:-Y}
 if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
-  ./backup_old_images.sh
+  ./backup-old-images.sh
 fi;
 
 # Start from old to new, as packages will be sorted by last update/upload time descending
