@@ -57,16 +57,15 @@ function upload() {
   echo "Uploading regular manifests to ${DESTINATION}"
   echo "########################################################"
 
-  createAndPushManifest ${DESTINATION} "latest"
-  createAndPushManifest ${DESTINATION} "23"
-  createAndPushManifest ${DESTINATION} "23.5"
-  createAndPushManifest ${DESTINATION} "slim"
-  createAndPushManifest ${DESTINATION} "23-slim"
-  createAndPushManifest ${DESTINATION} "23.5-slim"
-  createAndPushManifest ${DESTINATION} "full"
-  createAndPushManifest ${DESTINATION} "23-full"
   createAndPushManifest ${DESTINATION} "23.5-full"
-
+  createAndPushManifest ${DESTINATION} "23-full"
+  createAndPushManifest ${DESTINATION} "full"
+  createAndPushManifest ${DESTINATION} "23.5"
+  createAndPushManifest ${DESTINATION} "23"
+  createAndPushManifest ${DESTINATION} "latest"
+  createAndPushManifest ${DESTINATION} "23.5-slim"
+  createAndPushManifest ${DESTINATION} "23-slim"
+  createAndPushManifest ${DESTINATION} "slim"
 }
 
 function uploadFastStart() {
@@ -75,15 +74,15 @@ function uploadFastStart() {
   echo "Uploading faststart manifests to ${DESTINATION}"
   echo "########################################################"
 
-  createAndPushManifest ${DESTINATION} "latest-faststart"
-  createAndPushManifest ${DESTINATION} "23-faststart"
-  createAndPushManifest ${DESTINATION} "23.5-faststart"
-  createAndPushManifest ${DESTINATION} "slim-faststart"
-  createAndPushManifest ${DESTINATION} "23-slim-faststart"
-  createAndPushManifest ${DESTINATION} "23.5-slim-faststart"
-  createAndPushManifest ${DESTINATION} "full-faststart"
-  createAndPushManifest ${DESTINATION} "23-full-faststart"
   createAndPushManifest ${DESTINATION} "23.5-full-faststart"
+  createAndPushManifest ${DESTINATION} "23-full-faststart"
+  createAndPushManifest ${DESTINATION} "full-faststart"
+  createAndPushManifest ${DESTINATION} "23.5-faststart"
+  createAndPushManifest ${DESTINATION} "23-faststart"
+  createAndPushManifest ${DESTINATION} "latest-faststart"
+  createAndPushManifest ${DESTINATION} "23.5-slim-faststart"
+  createAndPushManifest ${DESTINATION} "23-slim-faststart"
+  createAndPushManifest ${DESTINATION} "slim-faststart"
 }
 
 echo ""
