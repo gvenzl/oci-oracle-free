@@ -2155,20 +2155,32 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm -r "${ORACLE_HOME}"/python
 
   # Remove unnecessary binaries (see http://yong321.freeshell.org/computer/oraclebin.html)
-  rm "${ORACLE_HOME}"/bin/acfs*          # ACFS File system components
-  rm "${ORACLE_HOME}"/bin/adrci          # Automatic Diagnostic Repository Command Interpreter
-  rm "${ORACLE_HOME}"/bin/agtctl         # Multi-Threaded extproc agent control utility
-  rm "${ORACLE_HOME}"/bin/afd*           # ASM Filter Drive components
-  rm "${ORACLE_HOME}"/bin/amdu           # ASM Disk Utility
-  rm "${ORACLE_HOME}"/bin/dg4*           # Database Gateway
-  rm "${ORACLE_HOME}"/bin/dgmgrl         # Data Guard Manager CLI
-  rm -f "${ORACLE_HOME}"/bin/dbnest*     # DataBase NEST
-  rm "${ORACLE_HOME}"/bin/orion          # ORacle IO Numbers benchmark tool
-  rm -f "${ORACLE_HOME}"/bin/oms_daemon  # Oracle Memory Speed (PMEM support) daemon
-  rm -f "${ORACLE_HOME}"/bin/omsfscmds   # Oracle Memory Speed command line utility
-  rm "${ORACLE_HOME}"/bin/proc           # Pro*C/C++ Precompiler
-  rm "${ORACLE_HOME}"/bin/procob         # Pro COBOL Precompiler
-  rm "${ORACLE_HOME}"/bin/renamedg       # Rename Disk Group binary
+  rm "${ORACLE_HOME}"/bin/acfs*           # ACFS File system components
+  rm "${ORACLE_HOME}"/bin/adapters        # Protocol Adapters shell script
+  rm "${ORACLE_HOME}"/bin/adrci           # Automatic Diagnostic Repository Command Interpreter
+  rm "${ORACLE_HOME}"/bin/afd*            # ASM Filter Drive components
+  rm "${ORACLE_HOME}"/bin/agtctl          # Multi-Threaded extproc agent control utility
+  rm "${ORACLE_HOME}"/bin/ahfctl          # Autonomous Health Framework Control Utility
+  rm "${ORACLE_HOME}"/bin/amdu            # ASM Disk Utility
+  rm "${ORACLE_HOME}"/bin/asm*            # ASM command line utility and library
+  rm "${ORACLE_HOME}"/bin/bdschecksw      # Oracle Big Data Sql CHECK SoftWare utility
+  rm "${ORACLE_HOME}"/bin/cluvfy*         # Grid Infrastructure cluster verify command
+  rm "${ORACLE_HOME}"/bin/CommonSetup.pm  # Common Setup scripts
+  rm "${ORACLE_HOME}"/bin/commonSetup.sh  # Common Setup scripts
+  rm "${ORACLE_HOME}"/bin/coraenv         # C shell oraenv user environment script
+  rm "${ORACLE_HOME}"/bin/dg4*            # Database Gateway
+  rm "${ORACLE_HOME}"/bin/dgmgrl          # Data Guard Manager CLI
+  rm "${ORACLE_HOME}"/bin/diskmon         # Disk Monitor
+  rm "${ORACLE_HOME}"/bin/dumpsga         # Dump System Global Area (SGA) utility
+  rm -f "${ORACLE_HOME}"/bin/dbnest*      # DataBase NEST
+  rm "${ORACLE_HOME}"/bin/lxegen          # NLS Calendar Utility
+  rm "${ORACLE_HOME}"/bin/mapsga          # SGA Dump mapping tool
+  rm "${ORACLE_HOME}"/bin/orion           # ORacle IO Numbers benchmark tool
+  rm -f "${ORACLE_HOME}"/bin/oms_daemon   # Oracle Memory Speed (PMEM support) daemon
+  rm -f "${ORACLE_HOME}"/bin/omsfscmds    # Oracle Memory Speed command line utility
+  rm "${ORACLE_HOME}"/bin/proc            # Pro*C/C++ Precompiler
+  rm "${ORACLE_HOME}"/bin/procob          # Pro COBOL Precompiler
+  rm "${ORACLE_HOME}"/bin/renamedg        # Rename Disk Group binary
 
   # Replace `orabase` with static path shell script
   su -p oracle -c "echo 'echo ${ORACLE_BASE}' > ${ORACLE_HOME}/bin/orabase"
