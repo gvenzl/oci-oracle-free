@@ -38,6 +38,8 @@ The regular image strives to balance between the functionality required by most 
 * `Oracle Multimedia` files have been removed (`$ORACLE_HOME/ord/im`)
 * `Oracle XDK` has been removed (`$ORACLE_HOME/xdk`)
 * `JServer JAVA Virtual Machine` has been removed (`$ORACLE_HOME/javavm`)
+* `Java Development Kit` has been removed (`$ORACLE_HOME/jdk`)
+* `Oracle SQLcl` has been removed (`$ORACLE_HOME/sqlcl`)
 * `Oracle OLAP API` has been removed (`$ORACLE_HOME/olap`)
 * `OLAP Analytic Workspace` has been removed
 * `OPatch` utility has been removed (`$ORACLE_HOME/OPatch`)
@@ -91,6 +93,7 @@ The following binaries have been removed from the `$ORACLE_HOME/bin` directory:
 * `$ORACLE_HOME/bin/proc`            (Pro*C/C++ Precompiler)
 * `$ORACLE_HOME/bin/procob`          (Pro COBOL Precompiler)
 * `$ORACLE_HOME/bin/renamedg`        (Rename Disk Group binary)
+* `$ORACLE_HOME/bin/x*`              (XML related binaries)
 
 The following binaries have been replaced by shell scripts with static output:
 

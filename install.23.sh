@@ -2121,6 +2121,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove Java JDK
   rm -r "${ORACLE_HOME}"/jdk
 
+  # Remove SQLcl
+  rm -r "${ORACLE_HOME}"/sqlcl
+
   # Remove rdbms/jlib
   rm -r "${ORACLE_HOME}"/rdbms/jlib
 
@@ -2181,6 +2184,7 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm "${ORACLE_HOME}"/bin/proc            # Pro*C/C++ Precompiler
   rm "${ORACLE_HOME}"/bin/procob          # Pro COBOL Precompiler
   rm "${ORACLE_HOME}"/bin/renamedg        # Rename Disk Group binary
+  rm "${ORACLE_HOME}"/bin/x*              # XML related binaries
 
   # Replace `orabase` with static path shell script
   su -p oracle -c "echo 'echo ${ORACLE_BASE}' > ${ORACLE_HOME}/bin/orabase"
