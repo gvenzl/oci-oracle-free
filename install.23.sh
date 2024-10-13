@@ -66,9 +66,9 @@ if [ "${ARCH}" == "arm64" ]; then
 fi;
 
 # Install container runtime specific packages
-# (used by the entrypoint script, not the database itself)
+# (used by the entrypoint script, etc., not the database itself)
 # TODO: replace with 7zip
-microdnf -y install zip unzip gzip
+microdnf -y install zip unzip gzip less findutils vim-minimal
 
 # Install 7zip
 mkdir /tmp/7z
@@ -2203,10 +2203,10 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm "${ORACLE_HOME}"/lib/libosbws.so # Oracle Secure Backup Cloud Module
   rm "${ORACLE_HOME}"/lib/libra.so    # Recovery Appliance
 
-  # Remove not needed packages
+  # Remove not needed packages for REGULAR image
   # Use rpm instad of microdnf to allow removing packages regardless of their dependencies
   rpm -e --nodeps glibc-devel glibc-headers kernel-headers libpkgconf libxcrypt-devel \
-                  pkgconf pkgconf-m4 pkgconf-pkg-config
+                  pkgconf pkgconf-m4 pkgconf-pkg-config util-linux
 
   # Remove components from ORACLE_HOME
   if [ "${BUILD_MODE}" == "SLIM" ]; then
@@ -2276,6 +2276,10 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     rm "${ORACLE_HOME}"/lib/asm*       # Oracle Automatic Storage Management
     rm -f "${ORACLE_HOME}"/lib/ore.so  # Oracle R Enterprise
 
+    # Remove not needed packages for SLIM image
+    # Use rpm instad of microdnf to allow removing packages regardless of their dependencies
+    rpm -e --nodeps findutils less vim-minimal
+
   fi;
 
 fi;
@@ -2284,9 +2288,9 @@ fi;
 # Use rpm instead of microdnf to allow removing packages regardless of dependencies specified by the Oracle FREE RPM
 rpm -e --nodeps acl bc binutils cryptsetup-libs dbus dbus-common dbus-daemon passwd \
                 dbus-libs dbus-tools device-mapper device-mapper-libs diffutils \
-                elfutils-default-yama-scope elfutils-libs file findutils hostname \
+                elfutils-default-yama-scope elfutils-libs file hostname \
                 kmod-libs ksh libfdisk libseccomp libutempter lm_sensors-libs \
-                make procps-ng smartmontools sysstat systemd systemd-pam util-linux xz
+                make procps-ng smartmontools sysstat systemd systemd-pam xz
 
 # Remove dnf cache
 microdnf clean all

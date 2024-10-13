@@ -128,6 +128,7 @@ The following libraries have been removed from the `$ORACLE_HOME/lib` directory:
   * `pkgconf`
   * `pkgconf-m4`
   * `pkgconf-pkg-config`
+  * `util-linux`
 
 ### Slim image flavor (`23-slim`)
 
@@ -172,6 +173,13 @@ The following libraries have been removed from the `$ORACLE_HOME/lib` directory:
 * `$ORACLE_HOME/lib/libmle.so` (Multilingual Engine)
 * `$ORACLE_HOME/lib/libolapapi.so` (Oracle OLAP API)
 * `$ORACLE_HOME/lib/ore.so` (Oracle R Enterprise)
+
+#### Operating system
+
+* The following Linux packages are not installed:
+  * `findutils`
+  * `less`
+  * `vim-minimal`
 
 ## Fast start image flavor (`*-faststart`)
 
