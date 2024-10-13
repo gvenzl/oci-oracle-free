@@ -2157,6 +2157,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove python directory
   rm -r "${ORACLE_HOME}"/python
 
+  # Remove sdk directory
+  rm -r "${ORACLE_HOME}"/sdk
+
   # Remove unnecessary binaries (see http://yong321.freeshell.org/computer/oraclebin.html)
   rm "${ORACLE_HOME}"/bin/acfs*           # ACFS File system components
   rm "${ORACLE_HOME}"/bin/adapters        # Protocol Adapters shell script
