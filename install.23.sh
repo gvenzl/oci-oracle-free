@@ -2027,6 +2027,9 @@ echo "BUILDER: cleanup"
 # Remove install directory
 rm -r /install
 
+# Remove OS package documentation
+rm -r /usr/share/doc/*
+
 # Cleanup database files not needed for being in a container but were installed by the rpm
 #/sbin/chkconfig --del oracle-free-23*
 rm /etc/init.d/oracle-free-23*

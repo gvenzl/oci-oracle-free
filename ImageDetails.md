@@ -25,6 +25,7 @@ A couple of modifications have been performed to make the installation more suit
 #### Operating system
 
 * `/var/log/lastlog` has been cleaned
+* `/usr/share/doc/` has been cleaned
 
 ### Regular image flavor (`23`)
 
