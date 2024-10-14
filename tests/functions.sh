@@ -156,7 +156,14 @@ function createManifest() {
   DESTINATION="${1}"
   TAG="${2}"
 
-  buildah manifest create "${DESTINATION}/gvenzl/oracle-free:${TAG}" \
+  buildah manifest create \
+    --annotation org.opencontainers.image.title="Oracle Database Free Container images" \
+    --annotation org.opencontainers.image.description="Oracle Database Free for everyone!" \
+    --annotation org.opencontainers.image.authors="Gerald Venzl" \
+    --annotation org.opencontainers.image.source="https://github.com/gvenzl/oci-oracle-free" \
+    --annotation org.opencontainers.image.licenses="Apache-2.0" \
+    --annotation org.opencontainers.image.documentation="https://github.com/gvenzl/oci-oracle-free/blob/main/README.md" \
+    "${DESTINATION}/gvenzl/oracle-free:${TAG}" \
     "${DESTINATION}/gvenzl/oracle-free:${TAG}-amd64" \
     "${DESTINATION}/gvenzl/oracle-free:${TAG}-arm64"
 }
