@@ -29,48 +29,38 @@ FASTSTART_UPLOAD="N"
 REGULAR_UPLOAD="N"
 DESTINATION="docker.io"
 
-while getopts "xrdg" optname; do
-  case "${optname}" in
-    "x") FASTSTART_UPLOAD="Y" ;;
-    "r") REGULAR_UPLOAD="Y" ;;
-    "d") DESTINATION="docker.io" ;;
-    "g") DESTINATION="ghcr.io" ;;
-    "?")
-      echo "Invalid option";
-      exit 1;
-      ;;
-    *)
-    # Should not occur
-      echo "Unknown error while processing options inside upload_images.sh"
-      ;;
-  esac;
-done;
+function usage() {
+    cat << EOF
 
-echo "Uploading to ${DESTINATION}"
+Usage: upload-images.sh [-d | -g ] [-r] [-x] [-h]
+Uploads images to Container Registries.
 
-# Log into Docker Hub before anything else so that one does not have to
-# wait for the backup to be finished)
-echo "Login to ${DESTINATION}:"
-podman login ${DESTINATION}
+Parameters:
+   -d: Upload to Docker.io (default)
+   -g: Upload to GitHub GHCR.io
+   -r: Upload regular images
+   -x: Upload 'faststart' images
+   -h: Shows this help
 
-# Ensure all tags are in place
-./all-tag-images.sh
+* select only one destination: -d or -g
 
-# Backup images
-read -r -p "Do you want to backup the old images? [Y/n]: " response
-# Default --> "Y"
-response=${response:-Y}
-if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
-  ./backup-old-images.sh
-fi;
+Apache License, Version 2.0
 
-# Start from old to new, as packages will be sorted by last update/upload time descending
+Copyright (c) 2024 Gerald Venzl
+
+EOF
+
+}
+
 
 function uploadFastStart() {
 
   echo ""
   echo "Uploading FASTSTART images..."
   echo ""
+
+  # Start from old to new, as packages will be sorted by last update/upload time descending
+
 
   # Upload FULL images
   #echo "Upload 23.2-full-faststart"
@@ -123,6 +113,8 @@ function upload() {
   echo "Uploading REGULAR images..."
   echo ""
 
+  # Start from old to new, as packages will be sorted by last update/upload time descending
+
   # Upload FULL images
   #echo "Upload 23.2-full"
   #podman push localhost/gvenzl/oracle-free:23.2-full                       ${DESTINATION}/gvenzl/oracle-free:23.2-full
@@ -167,6 +159,47 @@ function upload() {
   echo "Upload latest"
   podman push localhost/gvenzl/oracle-free:latest-$(getArch)                  ${DESTINATION}/gvenzl/oracle-free:latest-$(getArch)
 }
+
+while getopts "xrdgh" optname; do
+  case "${optname}" in
+    "x") FASTSTART_UPLOAD="Y" ;;
+    "r") REGULAR_UPLOAD="Y" ;;
+    "d") DESTINATION="docker.io" ;;
+    "g") DESTINATION="ghcr.io" ;;
+    "h")
+      usage
+      exit 0;
+      ;;
+    "?")
+      echo "Invalid option";
+      exit 1;
+      ;;
+    *)
+    # Should not occur
+      echo "Unknown error while processing options inside upload_images.sh"
+      ;;
+  esac;
+done;
+
+
+
+echo "Uploading to ${DESTINATION}"
+
+# Log into Docker Hub before anything else so that one does not have to
+# wait for the backup to be finished)
+echo "Login to ${DESTINATION}:"
+podman login ${DESTINATION}
+
+# Ensure all tags are in place
+./all-tag-images.sh
+
+# Backup images
+read -r -p "Do you want to backup the old images? [Y/n]: " response
+# Default --> "Y"
+response=${response:-Y}
+if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+  ./backup-old-images.sh
+fi;
 
 # Upload images
 

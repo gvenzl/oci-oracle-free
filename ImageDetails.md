@@ -25,6 +25,7 @@ A couple of modifications have been performed to make the installation more suit
 #### Operating system
 
 * `/var/log/lastlog` has been cleaned
+* `/usr/share/doc/` has been cleaned
 
 ### Regular image flavor (`23`)
 
@@ -37,6 +38,8 @@ The regular image strives to balance between the functionality required by most 
 * `Oracle Multimedia` files have been removed (`$ORACLE_HOME/ord/im`)
 * `Oracle XDK` has been removed (`$ORACLE_HOME/xdk`)
 * `JServer JAVA Virtual Machine` has been removed (`$ORACLE_HOME/javavm`)
+* `Java Development Kit` has been removed (`$ORACLE_HOME/jdk`)
+* `Oracle SQLcl` has been removed (`$ORACLE_HOME/sqlcl`)
 * `Oracle OLAP API` has been removed (`$ORACLE_HOME/olap`)
 * `OLAP Analytic Workspace` has been removed
 * `OPatch` utility has been removed (`$ORACLE_HOME/OPatch`)
@@ -58,26 +61,40 @@ The regular image strives to balance between the functionality required by most 
 * The `Oracle Process Manager and Notification` directory has been removed (`$ORACLE_HOME/opmn`)
 * The `Oracle Machine Learning 4 Python` directory has been removed (`$ORACLE_HOME/oml4py`)
 * `Python` has been removed (`$ORACLE_HOME/python`)
+* The `sdk` directory has been removed (`$ORACLE_HOME/sdk`)
 * Replay Upgrade has been removed (`pdb_sync$` table cleaned up in `CDB$ROOT`)
 
 ##### Database binaries
 
 The following binaries have been removed from the `$ORACLE_HOME/bin` directory:
 
-* `$ORACLE_HOME/bin/acfs*`       (ACFS File system components)
-* `$ORACLE_HOME/bin/adrci`       (Automatic Diagnostic Repository Command Interpreter)
-* `$ORACLE_HOME/bin/agtctl`      (Multi-Threaded extproc agent control utility)
-* `$ORACLE_HOME/bin/afd*`        (ASM Filter Drive components)
-* `$ORACLE_HOME/bin/amdu`        (ASM Disk Utility)
-* `$ORACLE_HOME/bin/dg4*`        (Database Gateway)
-* `$ORACLE_HOME/bin/dgmgrl`      (Data Guard Manager CLI)
-* `$ORACLE_HOME/bin/dbnest*`     (DataBase NEST)
-* `$ORACLE_HOME/bin/orion`       (ORacle IO Numbers benchmark tool)
-* `$ORACLE_HOME/bin/oms_daemon`  (Oracle Memory Speed (PMEM support) daemon)
-* `$ORACLE_HOME/bin/omsfscmds`   (Oracle Memory Speed command line utility)
-* `$ORACLE_HOME/bin/proc`        (Pro*C/C++ Precompiler)
-* `$ORACLE_HOME/bin/procob`      (Pro COBOL Precompiler)
-* `$ORACLE_HOME/bin/renamedg`    (Rename Disk Group binary)
+* `$ORACLE_HOME/bin/acfs*`           (ACFS File system components)
+* `$ORACLE_HOME/bin/adapters`        (Protocol Adapters shell script)
+* `$ORACLE_HOME/bin/adrci`           (Automatic Diagnostic Repository Command Interpreter)
+* `$ORACLE_HOME/bin/afd*`            (ASM Filter Drive components)
+* `$ORACLE_HOME/bin/agtctl`          (Multi-Threaded extproc agent control utility)
+* `$ORACLE_HOME/bin/ahfctl`          (Autonomous Health Framework control utility)
+* `$ORACLE_HOME/bin/amdu`            (ASM Disk Utility)
+* `$ORACLE_HOME/bin/asm*`            (ASM command line utility and library)
+* `$ORACLE_HOME/bin/bdschecksw`      (Oracle Big Data Sql CHECK SoftWare utility)
+* `$ORACLE_HOME/bin/cluvfy*`         (Grid Infrastructure cluster verify command)
+* `$ORACLE_HOME/bin/CommonSetup.pm`  (Common Setup scripts)
+* `$ORACLE_HOME/bin/commonSetup.sh`  (Common Setup scripts)
+* `$ORACLE_HOME/bin/coraenv`         (C shell oraenv user environment script)
+* `$ORACLE_HOME/bin/dg4*`            (Database Gateway)
+* `$ORACLE_HOME/bin/dgmgrl`          (Data Guard Manager CLI)
+* `$ORACLE_HOME/bin/diskmon`         (Disk Monitor)
+* `$ORACLE_HOME/bin/dumpsga`         (Dump System Global Area (SGA) utility)
+* `$ORACLE_HOME/bin/dbnest*`         (DataBase NEST)
+* `$ORACLE_HOME/bin/lxegen`          (NLS Calendar Utility)
+* `$ORACLE_HOME/bin/mapsga`          (SGA Dump mapping tool)
+* `$ORACLE_HOME/bin/orion`           (ORacle IO Numbers benchmark tool)
+* `$ORACLE_HOME/bin/oms_daemon`      (Oracle Memory Speed (PMEM support) daemon)
+* `$ORACLE_HOME/bin/omsfscmds`       (Oracle Memory Speed command line utility)
+* `$ORACLE_HOME/bin/proc`            (Pro*C/C++ Precompiler)
+* `$ORACLE_HOME/bin/procob`          (Pro COBOL Precompiler)
+* `$ORACLE_HOME/bin/renamedg`        (Rename Disk Group binary)
+* `$ORACLE_HOME/bin/x*`              (XML related binaries)
 
 The following binaries have been replaced by shell scripts with static output:
 
@@ -111,6 +128,7 @@ The following libraries have been removed from the `$ORACLE_HOME/lib` directory:
   * `pkgconf`
   * `pkgconf-m4`
   * `pkgconf-pkg-config`
+  * `util-linux`
 
 ### Slim image flavor (`23-slim`)
 
@@ -155,6 +173,13 @@ The following libraries have been removed from the `$ORACLE_HOME/lib` directory:
 * `$ORACLE_HOME/lib/libmle.so` (Multilingual Engine)
 * `$ORACLE_HOME/lib/libolapapi.so` (Oracle OLAP API)
 * `$ORACLE_HOME/lib/ore.so` (Oracle R Enterprise)
+
+#### Operating system
+
+* The following Linux packages are not installed:
+  * `findutils`
+  * `less`
+  * `vim-minimal`
 
 ## Fast start image flavor (`*-faststart`)
 
