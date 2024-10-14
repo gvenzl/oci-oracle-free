@@ -25,32 +25,6 @@ set -Eeuo pipefail
 
 source ./functions.sh
 
-FASTSTART_UPLOAD="N"
-REGULAR_UPLOAD="N"
-DESTINATION="docker.io"
-
-while getopts "xrdg" optname; do
-  case "${optname}" in
-    "x") FASTSTART_UPLOAD="Y" ;;
-    "r") REGULAR_UPLOAD="Y" ;;
-    "d") DESTINATION="docker.io" ;;
-    "g") DESTINATION="ghcr.io" ;;
-    "?")
-      echo "Invalid option";
-      exit 1;
-      ;;
-    *)
-    # Should not occur
-      echo "Unknown error while processing options inside upload_images.sh"
-      ;;
-  esac;
-done;
-
-# Log into Docker Hub before anything else so that one does not have to
-# wait for the backup to be finished)
-echo "Login to ${DESTINATION}:"
-podman login ${DESTINATION}
-
 function upload() {
 
   echo "########################################################"
@@ -84,6 +58,59 @@ function uploadFastStart() {
   createAndPushManifest ${DESTINATION} "23-slim-faststart"
   createAndPushManifest ${DESTINATION} "slim-faststart"
 }
+
+function usage() {
+    cat << EOF
+
+Usage: upload-march-mani.sh [-d | -g ] [-r] [-x] [-h]
+Uploads multi-architecture manifests to the Container Registries.
+
+Parameters:
+   -d: Upload to Docker.io (default)
+   -g: Upload to GitHub GHCR.io
+   -r: Upload regular images
+   -x: Upload 'faststart' images
+   -h: Shows this help
+
+* select only one destination: -d or -g
+
+Apache License, Version 2.0
+
+Copyright (c) 2024 Gerald Venzl
+
+EOF
+
+}
+
+FASTSTART_UPLOAD="N"
+REGULAR_UPLOAD="N"
+DESTINATION="docker.io"
+
+while getopts "xrdgh" optname; do
+  case "${optname}" in
+    "x") FASTSTART_UPLOAD="Y" ;;
+    "r") REGULAR_UPLOAD="Y" ;;
+    "d") DESTINATION="docker.io" ;;
+    "g") DESTINATION="ghcr.io" ;;
+    "h")
+      usage
+      exit 0;
+      ;;
+    "?")
+      echo "Invalid option";
+      exit 1;
+      ;;
+    *)
+    # Should not occur
+      echo "Unknown error while processing options inside upload_images.sh"
+      ;;
+  esac;
+done;
+
+# Log into Docker Hub before anything else so that one does not have to
+# wait for the backup to be finished)
+echo "Login to ${DESTINATION}:"
+podman login ${DESTINATION}
 
 echo ""
 echo "Starting upload..."
