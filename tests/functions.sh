@@ -156,6 +156,10 @@ function createManifest() {
   DESTINATION="${1}"
   TAG="${2}"
 
+  echo "Creating manifest: ${DESTINATION}/gvenzl/oracle-free:${TAG}"
+
+  buildah manifest rm "${DESTINATION}/gvenzl/oracle-free:${TAG}" || echo "Manifest does not exist."
+
   buildah manifest create \
     --annotation org.opencontainers.image.title="Oracle Database Free Container images" \
     --annotation org.opencontainers.image.description="Oracle Database Free for everyone!" \
@@ -179,6 +183,8 @@ function pushManifest() {
 
   DESTINATION="${1}"
   TAG="${2}"
+
+  echo "Pushing manifest: ${DESTINATION}/gvenzl/oracle-free:${TAG}"
 
   buildah manifest push "${DESTINATION}/gvenzl/oracle-free:${TAG}" "docker://${DESTINATION}/gvenzl/oracle-free:${TAG}"
 }
