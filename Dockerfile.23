@@ -32,9 +32,9 @@ ENV OCI_IMAGE_VERSION=${BUILD_VERSION} \
     PATH=${PATH}:/opt/oracle/product/23${DB_FLAVOR}/dbhomeFree/bin:/opt/oracle \
     NLS_LANG=.AL32UTF8
 
-COPY oracle-database-free-23${DB_FLAVOR}-${BUILD_VERSION}-1.0-1.el8.${RPM_ARCH}.rpm install.23.sh container-entrypoint.sh resetPassword createAppUser createDatabase healthcheck.sh /install/
+COPY oracle-database-free-23${DB_FLAVOR}-${BUILD_VERSION}-1.0-1.el8.${RPM_ARCH}.rpm install.${BUILD_VERSION}.sh container-entrypoint.sh resetPassword createAppUser createDatabase healthcheck.sh /install/
 
-RUN /install/install.23.sh "${BUILD_MODE}"
+RUN /install/install.${BUILD_VERSION}.sh "${BUILD_MODE}"
 
 ##########################################################################################
 ### Layer 1 --> Core OS

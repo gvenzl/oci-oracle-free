@@ -25,16 +25,83 @@ set -Eeuo pipefail
 
 source ./functions.sh
 
+function upload() {
+
+  echo "########################################################"
+  echo "Uploading regular manifests to ${DESTINATION}"
+  echo "########################################################"
+
+  createAndPushManifest ${DESTINATION} "23.6-full"
+  createAndPushManifest ${DESTINATION} "23.5-full"
+  createAndPushManifest ${DESTINATION} "23-full"
+  createAndPushManifest ${DESTINATION} "full"
+  createAndPushManifest ${DESTINATION} "23.5"
+  createAndPushManifest ${DESTINATION} "23.6"
+  createAndPushManifest ${DESTINATION} "23"
+  createAndPushManifest ${DESTINATION} "latest"
+  createAndPushManifest ${DESTINATION} "23.6-slim"
+  createAndPushManifest ${DESTINATION} "23.5-slim"
+  createAndPushManifest ${DESTINATION} "23-slim"
+  createAndPushManifest ${DESTINATION} "slim"
+}
+
+function uploadFastStart() {
+
+  echo "########################################################"
+  echo "Uploading faststart manifests to ${DESTINATION}"
+  echo "########################################################"
+
+  createAndPushManifest ${DESTINATION} "23.6-full-faststart"
+  createAndPushManifest ${DESTINATION} "23.5-full-faststart"
+  createAndPushManifest ${DESTINATION} "23-full-faststart"
+  createAndPushManifest ${DESTINATION} "full-faststart"
+  createAndPushManifest ${DESTINATION} "23.6-faststart"
+  createAndPushManifest ${DESTINATION} "23.5-faststart"
+  createAndPushManifest ${DESTINATION} "23-faststart"
+  createAndPushManifest ${DESTINATION} "latest-faststart"
+  createAndPushManifest ${DESTINATION} "23.6-slim-faststart"
+  createAndPushManifest ${DESTINATION} "23.5-slim-faststart"
+  createAndPushManifest ${DESTINATION} "23-slim-faststart"
+  createAndPushManifest ${DESTINATION} "slim-faststart"
+}
+
+function usage() {
+    cat << EOF
+
+Usage: upload-march-mani.sh [-d | -g ] [-r] [-x] [-h]
+Uploads multi-architecture manifests to the Container Registries.
+
+Parameters:
+   -d: Upload to Docker.io (default)
+   -g: Upload to GitHub GHCR.io
+   -r: Upload regular images
+   -x: Upload 'faststart' images
+   -h: Shows this help
+
+* select only one destination: -d or -g
+
+Apache License, Version 2.0
+
+Copyright (c) 2024 Gerald Venzl
+
+EOF
+
+}
+
 FASTSTART_UPLOAD="N"
 REGULAR_UPLOAD="N"
 DESTINATION="docker.io"
 
-while getopts "xrdg" optname; do
+while getopts "xrdgh" optname; do
   case "${optname}" in
     "x") FASTSTART_UPLOAD="Y" ;;
     "r") REGULAR_UPLOAD="Y" ;;
     "d") DESTINATION="docker.io" ;;
     "g") DESTINATION="ghcr.io" ;;
+    "h")
+      usage
+      exit 0;
+      ;;
     "?")
       echo "Invalid option";
       exit 1;
@@ -50,40 +117,6 @@ done;
 # wait for the backup to be finished)
 echo "Login to ${DESTINATION}:"
 podman login ${DESTINATION}
-
-function upload() {
-
-  echo "########################################################"
-  echo "Uploading regular manifests to ${DESTINATION}"
-  echo "########################################################"
-
-  createAndPushManifest ${DESTINATION} "23.5-full"
-  createAndPushManifest ${DESTINATION} "23-full"
-  createAndPushManifest ${DESTINATION} "full"
-  createAndPushManifest ${DESTINATION} "23.5"
-  createAndPushManifest ${DESTINATION} "23"
-  createAndPushManifest ${DESTINATION} "latest"
-  createAndPushManifest ${DESTINATION} "23.5-slim"
-  createAndPushManifest ${DESTINATION} "23-slim"
-  createAndPushManifest ${DESTINATION} "slim"
-}
-
-function uploadFastStart() {
-
-  echo "########################################################"
-  echo "Uploading faststart manifests to ${DESTINATION}"
-  echo "########################################################"
-
-  createAndPushManifest ${DESTINATION} "23.5-full-faststart"
-  createAndPushManifest ${DESTINATION} "23-full-faststart"
-  createAndPushManifest ${DESTINATION} "full-faststart"
-  createAndPushManifest ${DESTINATION} "23.5-faststart"
-  createAndPushManifest ${DESTINATION} "23-faststart"
-  createAndPushManifest ${DESTINATION} "latest-faststart"
-  createAndPushManifest ${DESTINATION} "23.5-slim-faststart"
-  createAndPushManifest ${DESTINATION} "23-slim-faststart"
-  createAndPushManifest ${DESTINATION} "slim-faststart"
-}
 
 echo ""
 echo "Starting upload..."

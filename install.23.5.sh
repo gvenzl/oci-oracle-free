@@ -31,19 +31,13 @@ BUILD_MODE=${1:-"REGULAR"}
 echo "BUILDER: BUILD_MODE=${BUILD_MODE}"
 
 # Set data file sizes (only executed for REGULAR and SLIM)
-SYSAUX_SIZE_CDB=536
-SYSAUX_SIZE_SEED=304
-SYSAUX_SIZE_PDB=327
-SYSTEM_SIZE_CDB=1052
-SYSTEM_SIZE_SEED=276
-SYSTEM_SIZE_PDB=277
-REDO_SIZE=20
 USERS_SIZE=10
 TEMP_SIZE=10
 # Overwrite REGULAR with SLIM sizes
 if [ "${BUILD_MODE}" == "SLIM" ]; then
   REDO_SIZE=10
-  SYSAUX_SIZE_CDB=560
+else
+  REDO_SIZE=20
 fi;
 
 echo "BUILDER: Installing OS dependencies"
@@ -258,9 +252,12 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- Set max job_queue_processes to 1
    ALTER SYSTEM SET JOB_QUEUE_PROCESSES=1;
 
-  -- Drop FREEPDB1 (to recreate at the end)
-  ALTER PLUGGABLE DATABASE FREEPDB1 CLOSE;
-  DROP PLUGGABLE DATABASE FREEPDB1 INCLUDING DATAFILES;
+   -- Disable parallel terminated transactions recovery
+   ALTER SYSTEM SET FAST_START_PARALLEL_ROLLBACK=FALSE;
+
+   -- Drop FREEPDB1 (to recreate at the end)
+   ALTER PLUGGABLE DATABASE FREEPDB1 CLOSE;
+   DROP PLUGGABLE DATABASE FREEPDB1 INCLUDING DATAFILES;
 
    -- Reboot of DB
    SHUTDOWN IMMEDIATE;
@@ -1101,87 +1098,45 @@ EOF
   ## Shrink SYSAUX tablespace ##
   ##############################
 
-  if [[ "$(cat /etc/oci-image-version)" ==  "23.2" ||
-        "$(cat /etc/oci-image-version)" ==  "23.3" ]]; then
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
-    su -p oracle -c "sqlplus -s / as sysdba" << EOF
+     -- Exit on any error
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
 
-       -- Exit on any error
-       WHENEVER SQLERROR EXIT SQL.SQLCODE
+     -- Don't wait for online DDL delay
+     ALTER SESSION SET "_online_ddl_delay" = 0;
 
-       -- CDB
-       ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux01.dbf' RESIZE ${SYSAUX_SIZE_CDB}M;
+     -- CDB
+     exec DBMS_SPACE.SHRINK_TABLESPACE('SYSAUX');
 
-       -- SEED
-       ALTER SESSION SET CONTAINER=PDB\$SEED;
-       ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/sysaux01.dbf' RESIZE ${SYSAUX_SIZE_SEED}M;
+     -- SEED
+     ALTER SESSION SET CONTAINER=PDB\$SEED;
+     exec DBMS_SPACE.SHRINK_TABLESPACE('SYSAUX');
 
-       exit;
+     exit;
 EOF
-
-  # 23.4 and higher
-  else
-    su -p oracle -c "sqlplus -s / as sysdba" << EOF
-
-       -- Exit on any error
-       WHENEVER SQLERROR EXIT SQL.SQLCODE
-
-       -- Don't wait for online DDL delay
-       ALTER SESSION SET "_online_ddl_delay" = 0;
-
-       -- CDB
-       exec DBMS_SPACE.SHRINK_TABLESPACE('SYSAUX');
-
-       -- SEED
-       ALTER SESSION SET CONTAINER=PDB\$SEED;
-       exec DBMS_SPACE.SHRINK_TABLESPACE('SYSAUX');
-
-       exit;
-EOF
-  fi;
 
   ##############################
   ## Shrink SYSTEM tablespace ##
   ##############################
 
-  if [[ "$(cat /etc/oci-image-version)" ==  "23.2" ||
-        "$(cat /etc/oci-image-version)" ==  "23.3" ]]; then
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
-    su -p oracle -c "sqlplus -s / as sysdba" << EOF
+     -- Exit on any error
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
 
-       -- Exit on any error
-       WHENEVER SQLERROR EXIT SQL.SQLCODE
+     -- Don't wait for online DDL delay
+     ALTER SESSION SET "_online_ddl_delay" = 0;
 
-       -- CDB
-       ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/system01.dbf' RESIZE ${SYSTEM_SIZE_CDB}M;
+     -- CDB
+     exec DBMS_SPACE.SHRINK_TABLESPACE('SYSTEM');
 
-       -- SEED
-       ALTER SESSION SET CONTAINER=PDB\$SEED;
-       ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/system01.dbf' RESIZE ${SYSTEM_SIZE_SEED}M;
+     -- SEED
+     ALTER SESSION SET CONTAINER=PDB\$SEED;
+     exec DBMS_SPACE.SHRINK_TABLESPACE('SYSTEM');
 
-       exit;
+     exit;
 EOF
-
-  # 23.4 and higher
-  else
-    su -p oracle -c "sqlplus -s / as sysdba" << EOF
-
-       -- Exit on any error
-       WHENEVER SQLERROR EXIT SQL.SQLCODE
-
-       -- Don't wait for online DDL delay
-       ALTER SESSION SET "_online_ddl_delay" = 0;
-
-       -- CDB
-       exec DBMS_SPACE.SHRINK_TABLESPACE('SYSTEM');
-
-       -- SEED
-       ALTER SESSION SET CONTAINER=PDB\$SEED;
-       exec DBMS_SPACE.SHRINK_TABLESPACE('SYSTEM');
-
-       exit;
-EOF
-  fi;
 
   ############################
   ## Shrink TEMP tablespace ##

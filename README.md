@@ -5,17 +5,19 @@ Oracle Database Free Container / Docker images.
 
 # Supported tags and respective `Dockerfile` links
 
-
 | Tag                                                                            | Status              |
 | ------------------------------------------------------------------------------ | ------------------- |
 | `latest[-faststart]`                                                           | 🔵 Always Supported |
 | `slim[-faststart]`                                                             | 🔵 Always Supported |
 | `full[-faststart]`                                                             | 🔵 Always Supported |
 | `23[-faststart]`<br/>`23[-slim][-faststart]`<br/>`23[-full][-faststart]`       | 🟢 Supported        |
-| `23.5[-faststart]`<br/>`23.5[-slim][-faststart]`<br/>`23.5[-full][-faststart]` | 🟢 Supported        |
-| `23.4[-faststart]`<br/>`23.4[-slim][-faststart]`<br/>`23.4[-full][-faststart]` | 🟡 Deprecated       |
+| `23.6[-faststart]`<br/>`23.6[-slim][-faststart]`<br/>`23.6[-full][-faststart]` | 🟢 Supported        |
+| `23.5[-faststart]`<br/>`23.5[-slim][-faststart]`<br/>`23.5[-full][-faststart]` | 🟡 Deprecated       |
+| `23.4[-faststart]`<br/>`23.4[-slim][-faststart]`<br/>`23.4[-full][-faststart]` | 🔴 Unsupported      |
 | `23.3[-faststart]`<br/>`23.3[-slim][-faststart]`<br/>`23.3[-full][-faststart]` | 🔴 Unsupported      |
 | `23.2[-faststart]`<br/>`23.2[-slim][-faststart]`<br/>`23.2[-full][-faststart]` | 🔴 Unsupported      |
+
+## Tags
 
 Tags in `[]` denote tag options, for example, `23[-slim][-faststart]` means there are the following tags:
 
@@ -23,6 +25,15 @@ Tags in `[]` denote tag options, for example, `23[-slim][-faststart]` means ther
 * `23-slim`
 * `23-faststart`
 * `23-slim-faststart`
+
+## Support status
+
+| Status              | Meaning |
+| ------------------- | ------- |
+| 🔵 Always Supported | These images will always be present and receive bug fixes and regular updates. |
+| 🟢 Supported        | These images are currently supported and receive fixes and regular updates. |
+| 🟡 Deprecated       | These images are deprecated and will only receive bug fixes.<br/>**Upgrading to a newer images is strongly advised.** |
+| 🔴 Unsupported      | These images are unsupported, will receive no further updates and may be removed at any time.<br/>**Using these images is strongly discouraged!** |
 
 # Quick Start
 
