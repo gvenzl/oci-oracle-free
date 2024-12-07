@@ -25,6 +25,6 @@ set -Eeuo pipefail
 source ./functions.sh
 
 # Tag latest image
-podman tag gvenzl/oracle-free:23.5-$(getArch)           gvenzl/oracle-free:latest-$(getArch)
+podman tag gvenzl/oracle-free:23.6-$(getArch)           gvenzl/oracle-free:latest-$(getArch)
 
-podman tag gvenzl/oracle-free:23.5-faststart-$(getArch) gvenzl/oracle-free:latest-faststart-$(getArch)
+podman tag gvenzl/oracle-free:23.6-faststart-$(getArch) gvenzl/oracle-free:latest-faststart-$(getArch)
