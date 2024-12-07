@@ -1101,87 +1101,39 @@ EOF
   ## Shrink SYSAUX tablespace ##
   ##############################
 
-  if [[ "$(cat /etc/oci-image-version)" ==  "23.2" ||
-        "$(cat /etc/oci-image-version)" ==  "23.3" ]]; then
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
-    su -p oracle -c "sqlplus -s / as sysdba" << EOF
+     -- Exit on any error
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
 
-       -- Exit on any error
-       WHENEVER SQLERROR EXIT SQL.SQLCODE
+     -- CDB
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux01.dbf' RESIZE ${SYSAUX_SIZE_CDB}M;
 
-       -- CDB
-       ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux01.dbf' RESIZE ${SYSAUX_SIZE_CDB}M;
+     -- SEED
+     ALTER SESSION SET CONTAINER=PDB\$SEED;
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/sysaux01.dbf' RESIZE ${SYSAUX_SIZE_SEED}M;
 
-       -- SEED
-       ALTER SESSION SET CONTAINER=PDB\$SEED;
-       ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/sysaux01.dbf' RESIZE ${SYSAUX_SIZE_SEED}M;
-
-       exit;
+     exit;
 EOF
-
-  # 23.4 and higher
-  else
-    su -p oracle -c "sqlplus -s / as sysdba" << EOF
-
-       -- Exit on any error
-       WHENEVER SQLERROR EXIT SQL.SQLCODE
-
-       -- Don't wait for online DDL delay
-       ALTER SESSION SET "_online_ddl_delay" = 0;
-
-       -- CDB
-       exec DBMS_SPACE.SHRINK_TABLESPACE('SYSAUX');
-
-       -- SEED
-       ALTER SESSION SET CONTAINER=PDB\$SEED;
-       exec DBMS_SPACE.SHRINK_TABLESPACE('SYSAUX');
-
-       exit;
-EOF
-  fi;
 
   ##############################
   ## Shrink SYSTEM tablespace ##
   ##############################
 
-  if [[ "$(cat /etc/oci-image-version)" ==  "23.2" ||
-        "$(cat /etc/oci-image-version)" ==  "23.3" ]]; then
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
-    su -p oracle -c "sqlplus -s / as sysdba" << EOF
+     -- Exit on any error
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
 
-       -- Exit on any error
-       WHENEVER SQLERROR EXIT SQL.SQLCODE
+     -- CDB
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/system01.dbf' RESIZE ${SYSTEM_SIZE_CDB}M;
 
-       -- CDB
-       ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/system01.dbf' RESIZE ${SYSTEM_SIZE_CDB}M;
+     -- SEED
+     ALTER SESSION SET CONTAINER=PDB\$SEED;
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/system01.dbf' RESIZE ${SYSTEM_SIZE_SEED}M;
 
-       -- SEED
-       ALTER SESSION SET CONTAINER=PDB\$SEED;
-       ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/system01.dbf' RESIZE ${SYSTEM_SIZE_SEED}M;
-
-       exit;
+     exit;
 EOF
-
-  # 23.4 and higher
-  else
-    su -p oracle -c "sqlplus -s / as sysdba" << EOF
-
-       -- Exit on any error
-       WHENEVER SQLERROR EXIT SQL.SQLCODE
-
-       -- Don't wait for online DDL delay
-       ALTER SESSION SET "_online_ddl_delay" = 0;
-
-       -- CDB
-       exec DBMS_SPACE.SHRINK_TABLESPACE('SYSTEM');
-
-       -- SEED
-       ALTER SESSION SET CONTAINER=PDB\$SEED;
-       exec DBMS_SPACE.SHRINK_TABLESPACE('SYSTEM');
-
-       exit;
-EOF
-  fi;
 
   ############################
   ## Shrink TEMP tablespace ##
