@@ -252,9 +252,12 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- Set max job_queue_processes to 1
    ALTER SYSTEM SET JOB_QUEUE_PROCESSES=1;
 
-  -- Drop FREEPDB1 (to recreate at the end)
-  ALTER PLUGGABLE DATABASE FREEPDB1 CLOSE;
-  DROP PLUGGABLE DATABASE FREEPDB1 INCLUDING DATAFILES;
+   -- Disable parallel terminated transactions recovery
+   ALTER SYSTEM SET FAST_START_PARALLEL_ROLLBACK=FALSE;
+
+   -- Drop FREEPDB1 (to recreate at the end)
+   ALTER PLUGGABLE DATABASE FREEPDB1 CLOSE;
+   DROP PLUGGABLE DATABASE FREEPDB1 INCLUDING DATAFILES;
 
    -- Reboot of DB
    SHUTDOWN IMMEDIATE;
