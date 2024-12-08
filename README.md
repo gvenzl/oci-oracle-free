@@ -3,7 +3,7 @@ Oracle Database Free Container / Docker images.
 
 **The images are compatible with `podman` and `docker`. You can use `podman` or `docker` interchangeably.**
 
-# Supported tags and respective `Dockerfile` links
+# Supported tags
 
 | Tag                                                                            | Status              |
 | ------------------------------------------------------------------------------ | ------------------- |
