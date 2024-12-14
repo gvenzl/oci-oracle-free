@@ -249,6 +249,10 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- beyond 2GB RAM, which cannot be set on FREE.
    ALTER SYSTEM SET CPU_COUNT=2 SCOPE=SPFILE;
 
+   -- Deactivate memory protection keys feature (#79)
+   -- Like with every underscore parameter, DO NOT SET THIS PARAMETER EVER UNLESS YOU KNOW WHAT THE HECK YOU ARE DOING!
+   ALTER SYSTEM SET "_enable_memory_protection_keys"=FALSE SCOPE=SPFILE;
+
    -- Set max job_queue_processes to 1
    ALTER SYSTEM SET JOB_QUEUE_PROCESSES=1;
 
@@ -358,10 +362,6 @@ EOF
      -- Deactivate Intel's Math Kernel Libraries
      -- Like with every underscore parameter, DO NOT SET THIS PARAMETER EVER UNLESS YOU KNOW WHAT THE HECK YOU ARE DOING!
      ALTER SYSTEM SET "_dmm_blas_library"='libora_netlib.so' SCOPE=SPFILE;
-
-     -- Deactivate memory protection keys feature
-     -- Like with every underscore parameter, DO NOT SET THIS PARAMETER EVER UNLESS YOU KNOW WHAT THE HECK YOU ARE DOING!
-     ALTER SYSTEM SET "_enable_memory_protection_keys"=FALSE SCOPE=SPFILE;
 
      -- Disable shared servers (enables faster shutdown)
      ALTER SYSTEM SET SHARED_SERVERS=0;
