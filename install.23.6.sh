@@ -359,6 +359,10 @@ EOF
      -- Like with every underscore parameter, DO NOT SET THIS PARAMETER EVER UNLESS YOU KNOW WHAT THE HECK YOU ARE DOING!
      ALTER SYSTEM SET "_dmm_blas_library"='libora_netlib.so' SCOPE=SPFILE;
 
+     -- Deactivate memory protection keys feature
+     -- Like with every underscore parameter, DO NOT SET THIS PARAMETER EVER UNLESS YOU KNOW WHAT THE HECK YOU ARE DOING!
+     ALTER SYSTEM SET "_enable_memory_protection_keys"=FALSE SCOPE=SPFILE;
+
      -- Disable shared servers (enables faster shutdown)
      ALTER SYSTEM SET SHARED_SERVERS=0;
 
