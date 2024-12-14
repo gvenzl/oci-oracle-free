@@ -137,7 +137,7 @@ function uploadRegular() {
   upload "slim-$(getArch)"
 
   # Upload latest
-  upload "latest"
+  upload "latest-$(getArch)"
 }
 
 while getopts "xrdgh" optname; do
