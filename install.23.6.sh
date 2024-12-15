@@ -62,7 +62,7 @@ fi;
 # Install container runtime specific packages
 # (used by the entrypoint script, etc., not the database itself)
 # TODO: replace with 7zip
-microdnf -y install zip unzip gzip less findutils vim-minimal
+microdnf -y install zip unzip gzip less findutils vim-minimal sudo
 
 # Install 7zip
 mkdir /tmp/7z
@@ -80,6 +80,13 @@ mv 7zzs /usr/bin/
 mv License.txt /usr/share/
 cd - 1> /dev/null
 rm -rf /tmp/7z
+
+echo "BUILDER: Setup oracle user for sudo privileges"
+
+# Setup oracle for sudoers
+chmod u+w /etc/sudoers
+echo "oracle   ALL=(ALL)   NOPASSWD: ALL" >> /etc/sudoers
+chmod u-w /etc/sudoers
 
 ##############################################
 ###### Install and configure Database ########
@@ -1649,10 +1656,6 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     # Remove unnecessary libraries
     rm "${ORACLE_HOME}"/lib/asm*       # Oracle Automatic Storage Management
     rm -f "${ORACLE_HOME}"/lib/ore.so  # Oracle R Enterprise
-
-    # Remove not needed packages for SLIM image
-    # Use rpm instad of microdnf to allow removing packages regardless of their dependencies
-    rpm -e --nodeps findutils less vim-minimal
 
   fi;
 
