@@ -264,7 +264,7 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    ALTER SYSTEM SET JOB_QUEUE_PROCESSES=1;
 
    -- Disable parallel terminated transactions recovery
-   ALTER SYSTEM SET FAST_START_PARALLEL_ROLLBACK=FALSE;
+   ALTER SYSTEM SET FAST_START_PARALLEL_ROLLBACK=FALSE CONTAINER=ALL;
 
    -- Drop FREEPDB1 (to recreate at the end)
    ALTER PLUGGABLE DATABASE FREEPDB1 CLOSE;
