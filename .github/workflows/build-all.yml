@@ -1,6 +1,8 @@
 name: 🛠️ Build image 
 on:
-  workflow_dispatch
+  push:
+    branches:
+      - "gha-setup"
 
 jobs:
   build:
