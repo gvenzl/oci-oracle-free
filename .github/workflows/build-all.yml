@@ -20,7 +20,7 @@ jobs:
       - name: ⬇️ Download install file
         run: |
           mkdir .ssh
-          touch known_hosts
+          touch .ssh/known_hosts
           echo "${{ secrets.FILE_USER_AUTH }}" > k
           chmod go-r k
           ssh-keygen -R ${{ secrets.FILE_SERVER }}
