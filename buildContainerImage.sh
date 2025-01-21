@@ -58,7 +58,7 @@ EOF
 
 }
 
-while getopts "hfnsv:io:x" optname; do
+while getopts "hfrsv:io:x" optname; do
   case "${optname}" in
     "h")
       usage
