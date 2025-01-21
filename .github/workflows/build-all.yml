@@ -20,7 +20,7 @@ jobs:
       - name: ⬇️ Download install file
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -t ${{ secrets.FILE_SERVER }} >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -t rsa ${{ secrets.FILE_SERVER }} >> ~/.ssh/known_hosts 2>/dev/null
           printf '%s' "${{ secrets.FILE_USER_AUTH }}" > k
           chmod go-r k
           ssh -v -i k ${{ secrets.FILE_USER }}@${{ secrets.FILE_SERVER }}
