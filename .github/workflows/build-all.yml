@@ -21,7 +21,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan ${{ secrets.FILE_SERVER }} >> ~/.ssh/known_hosts 2>/dev/null
-          eval $(ssh-agent -s)
+          eval $(ssh-agent)
           ssh-add - <<< "${{ secrets.FILE_USER_AUTH }}"
           # Sleep random 15 seconds not to trigger the server to go into DDoS mode because of too many opening SSH connections
           sleep $((RANDOM%15))
