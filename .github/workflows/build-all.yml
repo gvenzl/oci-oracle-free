@@ -36,32 +36,50 @@ jobs:
       - name: 🛠️ Build faststartcontainer image for ${{ matrix.versions }}, flavor "${{ matrix.flavors }}"
         run: ./buildContainerImage.sh -v "${{ matrix.versions }}" -${{ matrix.flavors }} -x
 
-      - name: 🔬 Test images
+      - name: Generate environment variables
+        id: env_vars
         run: |
           if     [ "${{ matrix.flavors }}" == "f" ]; then image_flavor="-full";
             elif [ "${{ matrix.flavors }}" == "r" ]; then image_flavor="";
             elif [ "${{ matrix.flavors }}" == "s" ]; then image_flavor="-slim";
             else image_flavor="";
           fi;
+          echo "IMAGE_FLAVOR=$image_flavor" >> "$GITHUB_OUTPUT"
           if     [ "$(uname -m)" == "aarch64" ]; then image_arch="arm64";
             elif [ "$(uname -m)" == "x86_64" ]; then image_arch="amd64";
             else image_arch="";
           fi;
+          echo "IMAGE_ARCH=$image_arch" >> "$GITHUB_OUTPUT"
+
+      - name: 🔬 Test images
+        env:
+          IMAGE_FLAVOR: ${{ steps.env_vars.outputs.IMAGE_FLAVOR }}
+          IMAGE_ARCH: ${{ steps.env_vars.outputs.IMAGE_ARCH }}
+        run: |
           cd tests
-          ./test-container.sh "gvenzl/oracle-free:${{ matrix.versions }}$image_flavor-$image_arch"
-          ./test-container.sh "gvenzl/oracle-free:${{ matrix.versions }}$image_flavor-faststart-$image_arch"
+          ./test-container.sh "gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}"
+          ./test-container.sh "gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}"
 
       - name: 📥 Export images to local file system
+        env:
+          IMAGE_FLAVOR: ${{ steps.env_vars.outputs.IMAGE_FLAVOR }}
+          IMAGE_ARCH: ${{ steps.env_vars.outputs.IMAGE_ARCH }}
         run: | 
-          podman save -o "oracle-free-${{ matrix.versions }}$image_flavor-$image_arch.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}$image_flavor-$image_arch"
-          podman save -o "oracle-free-${{ matrix.versions }}$image_flavor-faststart-$image_arch.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}$image_flavor-faststart-$image_arch"
+          podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-$image_arch"
+          podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}"
 
       - name: ⬆️ Upload image non-faststart image for deploy job
+        env:
+          IMAGE_FLAVOR: ${{ steps.env_vars.outputs.IMAGE_FLAVOR }}
+          IMAGE_ARCH: ${{ steps.env_vars.outputs.IMAGE_ARCH }}
         uses: actions/upload-artifact@v4
         with:
-          name: oracle-free-${{ matrix.versions }}$image_flavor-$image_arch.tar
+          name: oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar
 
       - name: ⬆️ Upload image faststart image for deploy job
+        env:
+          IMAGE_FLAVOR: ${{ steps.env_vars.outputs.IMAGE_FLAVOR }}
+          IMAGE_ARCH: ${{ steps.env_vars.outputs.IMAGE_ARCH }}
         uses: actions/upload-artifact@v4
         with:
-          name: oracle-free-${{ matrix.versions }}$image_flavor-faststart-$image_arch.tar
+          name: oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar
