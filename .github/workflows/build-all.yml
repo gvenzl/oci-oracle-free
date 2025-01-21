@@ -20,6 +20,7 @@ jobs:
       - name: ⬇️ Download install file
         run: |
           mkdir -p ~/.ssh
+          ssh -Q key
           ssh-keyscan -p 22 ${{ secrets.FILE_SERVER }} >> ~/.ssh/known_hosts
           printf '%s' "${{ secrets.FILE_USER_AUTH }}" > k
           chmod go-r k
