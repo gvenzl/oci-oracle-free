@@ -65,7 +65,7 @@ jobs:
           IMAGE_FLAVOR: ${{ steps.env_vars.outputs.IMAGE_FLAVOR }}
           IMAGE_ARCH: ${{ steps.env_vars.outputs.IMAGE_ARCH }}
         run: | 
-          podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-$image_arch"
+          podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}"
           podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}"
 
       - name: ⬆️ Upload image non-faststart image for deploy job
