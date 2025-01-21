@@ -35,9 +35,9 @@ jobs:
 
       - name: 🔬 Test images
         run: |
-          if   [ "${{ matrix.flavors }}" == f ]; then image_flavor="-full";
-          elif [ "${{ matrix.flavors }}" == r ]; then image_flavor="";
-          elif [ "${{ matrix.flavors }}" == s ]; then image_flavor="-slim";
+          if   [ "${{ matrix.flavors }}" == "f" ]; then image_flavor="-full";
+          elif [ "${{ matrix.flavors }}" == "r" ]; then image_flavor="";
+          elif [ "${{ matrix.flavors }}" == "s" ]; then image_flavor="-slim";
           else image_flavor="";
           fi;
           if   [ "$(uname -m)" == "aarch64" ]; then image_arch="arm64";
