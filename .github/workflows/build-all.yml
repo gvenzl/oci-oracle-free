@@ -21,7 +21,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -p 22 ${{ secrets.FILE_SERVER }} >> ~/.ssh/known_hosts
-          echo "${{ secrets.FILE_USER_AUTH }}" > k
+          printf '%s\n' "${{ secrets.FILE_USER_AUTH }}" > k
           chmod go-r k
           scp -i k ${{ secrets.FILE_USER }}@${{ secrets.FILE_SERVER }}:"oracle-database-free-23ai-${{ matrix.versions }}-1.0-1.el8.$(uname -m).rpm" .
           rm k
