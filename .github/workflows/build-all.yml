@@ -21,7 +21,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan ${{ secrets.FILE_SERVER }} >> ~/.ssh/known_hosts 2>/dev/null
-          ssh-agent
+          eval $(ssh-agent -s)
           ssh-add - <<< "${{ secrets.FILE_USER_AUTH }}"
           scp ${{ secrets.FILE_USER }}@${{ secrets.FILE_SERVER }}:"oracle-database-free-23ai-${{ matrix.versions }}-1.0-1.el8.$(uname -m).rpm" .
 
