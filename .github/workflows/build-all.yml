@@ -11,8 +11,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm]
-        versions: ["23.5", "23.6"]
-        flavors: ["f", "r", "s"]
+        versions: ["23.6"]
+        flavors: ["s"]
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
