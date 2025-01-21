@@ -19,11 +19,9 @@ jobs:
 
       - name: ⬇️ Download install file
         run: |
-          mkdir .ssh
-          touch .ssh/known_hosts
+          ssh-keyscan ${{ secrets.FILE_SERVER }}
           echo "${{ secrets.FILE_USER_AUTH }}" > k
           chmod go-r k
-          ssh-keygen -R ${{ secrets.FILE_SERVER }}
           scp -i k ${{ secrets.FILE_USER }}@${{ secrets.FILE_SERVER }}:"oracle-database-free-23ai-${{ matrix.versions }}-1.0-1.el8.$(uname -m).rpm" .
           rm k
 
