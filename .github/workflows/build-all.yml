@@ -53,8 +53,8 @@ jobs:
 
       - name: 📥 Export images to local file system
         run: | 
-          podman save -o oracle-free-${{ matrix.versions }}$image_flavor-$image_arch.tar localhost/gvenzl/oracle-free:${{ matrix.versions }}$image_flavor-$image_arch
-          podman save -o oracle-free-${{ matrix.versions }}$image_flavor-faststart-$image_arch.tar localhost/gvenzl/oracle-free:${{ matrix.versions }}$image_flavor-faststart-$image_arch
+          podman save -o "oracle-free-${{ matrix.versions }}$image_flavor-$image_arch.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}$image_flavor-$image_arch"
+          podman save -o "oracle-free-${{ matrix.versions }}$image_flavor-faststart-$image_arch.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}$image_flavor-faststart-$image_arch"
 
       - name: ⬆️ Upload image non-faststart image for deploy job
         uses: actions/upload-artifact@v4
