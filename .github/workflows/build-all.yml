@@ -75,6 +75,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar
+          path: oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar
 
       - name: ⬆️ Upload image faststart image for deploy job
         env:
@@ -83,3 +84,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar
+          path: oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar
