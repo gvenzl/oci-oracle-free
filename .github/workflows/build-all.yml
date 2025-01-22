@@ -69,19 +69,13 @@ jobs:
           podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}"
 
       - name: ⬆️ Upload image non-faststart image for deploy job
-        env:
-          IMAGE_FLAVOR: ${{ steps.env_vars.outputs.IMAGE_FLAVOR }}
-          IMAGE_ARCH: ${{ steps.env_vars.outputs.IMAGE_ARCH }}
         uses: actions/upload-artifact@v4
         with:
-          name: oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar
-          path: oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar
+          name: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar
+          path: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar
 
       - name: ⬆️ Upload image faststart image for deploy job
-        env:
-          IMAGE_FLAVOR: ${{ steps.env_vars.outputs.IMAGE_FLAVOR }}
-          IMAGE_ARCH: ${{ steps.env_vars.outputs.IMAGE_ARCH }}
         uses: actions/upload-artifact@v4
         with:
-          name: oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar
-          path: oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar
+          name: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-faststart-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar
+          path: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-faststart-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar
