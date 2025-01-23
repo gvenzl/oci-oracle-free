@@ -14,18 +14,13 @@ jobs:
         versions: ["23.5", "23.6"]
         arch: [ "aarch64", "x86_64" ]
     steps:
-      - name: Add host
+      - name: ⬇️ Download install file
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan ${{ secrets.FILE_SERVER }} >> ~/.ssh/known_hosts 2>/dev/null
-
-      - name: Start SSH agent
-        run: |
           eval $(ssh-agent)
           ssh-add - <<< "${{ secrets.FILE_USER_AUTH }}"
-
-      - name: ⬇️ Download install file
-        run: scp ${{ secrets.FILE_USER }}@${{ secrets.FILE_SERVER }}:"oracle-database-free-23ai-${{ matrix.versions }}-1.0-1.el8.${{ matrix.arch }}.rpm" .
+          scp ${{ secrets.FILE_USER }}@${{ secrets.FILE_SERVER }}:"oracle-database-free-23ai-${{ matrix.versions }}-1.0-1.el8.${{ matrix.arch }}.rpm" .
 
       - name: Store install file
         uses: actions/upload-artifact@v4
