@@ -51,7 +51,7 @@ jobs:
             else image_flavor="";
           fi;
           echo "IMAGE_FLAVOR=$image_flavor" >> "$GITHUB_OUTPUT"
-          os_arch=$(uname -a)
+          os_arch=$(uname -m)
           if     [ "${os_arch}" == "aarch64" ]; then image_arch="arm64";
             elif [ "${os_arch}" == "x86_64" ];  then image_arch="amd64";
             else image_arch="";
