@@ -25,6 +25,7 @@ jobs:
       - name: Store install file
         uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: oracle-database-free-23ai-${{ matrix.versions }}-1.0-1.el8.${{ matrix.arch }}.rpm
           path: oracle-database-free-23ai-${{ matrix.versions }}-1.0-1.el8.${{ matrix.arch }}.rpm
 
@@ -93,11 +94,13 @@ jobs:
       - name: ⬆️ Upload image non-faststart image for deploy job
         uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar
           path: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar
 
       - name: ⬆️ Upload image faststart image for deploy job
         uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-faststart-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar
           path: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-faststart-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar
