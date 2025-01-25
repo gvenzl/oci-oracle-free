@@ -151,7 +151,7 @@ jobs:
         id: push-to-ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: gvenzl/oracle-free
+          image: oracle-free
           tags: ${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}
           registry: ghcr.io/${{ github.repository_owner }}
           username: ${{ github.actor }}
