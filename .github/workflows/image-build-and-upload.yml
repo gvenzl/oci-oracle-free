@@ -1,4 +1,4 @@
-name: 🛠️ Build image 
+name: 🛠️ Build and upload all images 
 on:
   push:
     branches:
@@ -151,7 +151,7 @@ jobs:
         id: push-to-ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: oracle-free
+          image: gvenzl/oracle-free
           tags: ${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}
           registry: ghcr.io
           username: ${{ github.actor }}
