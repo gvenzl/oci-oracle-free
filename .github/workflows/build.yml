@@ -3,8 +3,8 @@ on:
   push:
     branches:
       - "gha-setup"
-
 jobs:
+
   download-install-files:
     name: Download install binaries
     environment: build
@@ -95,12 +95,65 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           retention-days: 1
-          name: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar
+          name: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-${{ steps.env_vars.outputs.IMAGE_ARCH }}
           path: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar
 
       - name: ⬆️ Upload image faststart image for deploy job
         uses: actions/upload-artifact@v4
         with:
           retention-days: 1
-          name: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-faststart-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar
+          name: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-faststart-${{ steps.env_vars.outputs.IMAGE_ARCH }}
           path: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-faststart-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar
+
+  upload-platform-images:
+    name: Upload platform images to registries
+    environment: upload
+    runs-on: ubuntu-24.04
+    needs: [ build-images ]
+
+    permissions:
+      packages: write
+      id-token: write
+      contents: read
+      attestations: write
+
+    strategy:
+      matrix:
+        versions: ["23.5", "23.6"]
+        arch: [ "amd64", "arm64" ]
+        flavor: [ "-full", "-slim", "" ] # "" is the "regular" image
+
+    steps:
+      - name: ⏬ Install build dependencies
+        run: sudo apt-get install -y buildah podman
+
+      - name: Download non-faststart image
+        uses: actions/download-artifact@v4
+        with:
+          name: oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}
+
+      - name: Download faststart image
+        uses: actions/download-artifact@v4
+        with:
+          name: oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}
+
+      - name: Import images
+        run: |
+          podman load -i oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}.tar
+          podman load -i oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}.tar
+
+      - name: DEBUG
+        run: |
+         podman images
+         ls -al
+
+      - name: Push to GitHub Container Registry
+        id: push-to-ghcr
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: oracle-free
+          tags: ${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
