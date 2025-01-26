@@ -5,6 +5,9 @@
 # Name: setup-tde.sh
 # Description: A script to configure the database for Transparent Data Encryption in United Mode.
 #
+# Parameters:
+# KEYSTORE_PASSWORD: The keystore password (default: random 8 characters).
+#
 # Copyright 2024 Gerald Venzl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");

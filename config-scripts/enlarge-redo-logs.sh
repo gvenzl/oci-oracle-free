@@ -6,7 +6,7 @@
 # Description: A script to enlarge the REDO log journal files.
 #
 # Parameters:
-# REDO_SIZE_MB: The size of the new REDO log files in MB.
+# REDO_SIZE_MB: The size of the new REDO log files in MB (default: 100 MB).
 #
 # Copyright 2024 Gerald Venzl
 #
