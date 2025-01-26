@@ -3,6 +3,12 @@ on:
   push:
     branches:
       - "gha-setup"
+env:
+  FLAVFORS: '["f", "r", "s"]'
+  VERSIONS: '[ "23.5", "23.6" ]'
+  RPM_ARCH: '[ "aarch64", "x86_64" ]'
+  IMAGE_ARCH: '[ "arm64", "amd64" ]'
+
 jobs:
 
   download-install-files:
@@ -11,8 +17,8 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        versions: ["23.5", "23.6"]
-        arch: [ "aarch64", "x86_64" ]
+        versions: ${{ fromJson(env.VERSIONS) }}
+        arch: ${{ fromJson(env.RPM_ARCH) }}
     steps:
       - name: ⬇️ Download install file
         run: |
@@ -37,8 +43,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-24.04, ubuntu-24.04-arm]
-        versions: ["23.5", "23.6"]
-        flavors: ["f", "r", "s"]
+        versions: ${{ fromJson(env.VERSIONS) }}
+        flavors: ${{ fromJson(env.FLAVORS) }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -119,8 +125,8 @@ jobs:
 
     strategy:
       matrix:
-        versions: [ "23.5", "23.6" ]
-        arch: [ "amd64", "arm64" ]
+        versions: ${{ fromJson(env.VERSIONS) }}
+        arch: ${{ fromJson(env.IMAGE_ARCH) }}
         flavor: [ "-full", "-slim", "" ] # "" is the "regular" image
 
     steps:
