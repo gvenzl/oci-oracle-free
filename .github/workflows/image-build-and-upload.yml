@@ -11,7 +11,9 @@ jobs:
       FLAVFORS: '["f", "r", "s"]'
       VERSIONS: '[ "23.5", "23.6" ]'
       RPM_ARCH: '[ "aarch64", "x86_64" ]'
-      IMAGE_ARCH: '[ "arm64", "amd64" ]'  
+      IMAGE_ARCH: '[ "arm64", "amd64" ]'
+    steps:
+      - run: echo "Setting constants"
 
   download-install-files:
     name: Download install binaries
