@@ -3,22 +3,25 @@ on:
   push:
     branches:
       - "gha-setup"
-env:
-  FLAVFORS: '["f", "r", "s"]'
-  VERSIONS: '[ "23.5", "23.6" ]'
-  RPM_ARCH: '[ "aarch64", "x86_64" ]'
-  IMAGE_ARCH: '[ "arm64", "amd64" ]'
-
 jobs:
+
+  set-constants:
+    runs-on: ubuntu-latest
+    outputs:
+      FLAVFORS: '["f", "r", "s"]'
+      VERSIONS: '[ "23.5", "23.6" ]'
+      RPM_ARCH: '[ "aarch64", "x86_64" ]'
+      IMAGE_ARCH: '[ "arm64", "amd64" ]'  
 
   download-install-files:
     name: Download install binaries
     environment: build
     runs-on: ubuntu-24.04
+    needs: set-constants
     strategy:
       matrix:
-        versions: ${{ fromJson( env.VERSIONS ) }}
-        arch: ${{ fromJson($RPM_ARCH) }}
+        versions: ${{ fromJSON(needs.set-constants.outputs.VERSION) }}
+        arch: ${{ fromJSON(needs.set-constants.outputs.RPM_ARCH) }}
     steps:
       - name: ⬇️ Download install file
         run: |
