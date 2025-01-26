@@ -22,8 +22,8 @@ jobs:
     needs: set-constants
     strategy:
       matrix:
-        versions: ${{ fromJSON(set-constants.outputs.VERSION) }}
-        arch: ${{ fromJSON(set-constants.outputs.RPM_ARCH) }}
+        versions: ${{ fromJSON(jobs.set-constants.outputs.VERSION) }}
+        arch: ${{ fromJSON(jobs.set-constants.outputs.RPM_ARCH) }}
     steps:
       - name: ⬇️ Download install file
         run: |
