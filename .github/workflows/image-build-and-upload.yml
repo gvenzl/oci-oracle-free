@@ -8,13 +8,16 @@ jobs:
   set-constants:
     runs-on: ubuntu-latest
     outputs:
-      FLAVFORS: '["f", "r", "s"]'
-      VERSIONS: '[ "23.5", "23.6" ]'
+      FLAVFORS: ${{ steps.step1.outputs.FLAVORS }}
+      VERSIONS: ${{ steps.step1.outputs.VERSIONS }}
       RPM_ARCH: '[ "aarch64", "x86_64" ]'
       IMAGE_ARCH: '[ "arm64", "amd64" ]'
     steps:
-      - run: echo "Setting constants"
-
+      - id: step1
+        run: |
+          echo 'FLAVORS=["f", "r", "s"]' >> $GITHUB_OUTPUT
+          echo 'VERSIONS=[ "23.5", "23.6" ]' >> $GITHUB_OUTPUT 
+        
   download-install-files:
     name: Download install binaries
     environment: build
@@ -22,7 +25,7 @@ jobs:
     needs: set-constants
     strategy:
       matrix:
-        versions: ${{ fromJSON(jobs.set-constants.outputs.VERSION) }}
+        versions: ${{ fromJSON(jobs.set-constants.outputs.VERSIONS) }}
         arch: ${{ fromJSON(jobs.set-constants.outputs.RPM_ARCH) }}
     steps:
       - name: ⬇️ Download install file
