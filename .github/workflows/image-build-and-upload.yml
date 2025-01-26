@@ -17,8 +17,8 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        versions: ${{ fromJson(env.VERSIONS) }}
-        arch: ${{ fromJson(env.RPM_ARCH) }}
+        versions: ${{ fromJson(VERSIONS) }}
+        arch: ${{ fromJson(RPM_ARCH) }}
     steps:
       - name: ⬇️ Download install file
         run: |
@@ -43,8 +43,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-24.04, ubuntu-24.04-arm]
-        versions: ${{ fromJson(env.VERSIONS) }}
-        flavors: ${{ fromJson(env.FLAVORS) }}
+        versions: ${{ fromJson(VERSIONS) }}
+        flavors: ${{ fromJson(FLAVORS) }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -125,8 +125,8 @@ jobs:
 
     strategy:
       matrix:
-        versions: ${{ fromJson(env.VERSIONS) }}
-        arch: ${{ fromJson(env.IMAGE_ARCH) }}
+        versions: ${{ fromJson(VERSIONS) }}
+        arch: ${{ fromJson(IMAGE_ARCH) }}
         flavor: [ "-full", "-slim", "" ] # "" is the "regular" image
 
     steps:
