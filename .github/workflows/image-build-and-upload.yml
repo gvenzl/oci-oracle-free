@@ -49,7 +49,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-24.04, ubuntu-24.04-arm]
-        versions: ${{ fromJSON(needs.set-constants.outputs.VERSION) }}
+        versions: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
         flavors: ${{ fromJSON(needs.set-constants.outputs.FLAVORS) }}
     steps:
       - name: Checkout repo
@@ -131,7 +131,7 @@ jobs:
 
     strategy:
       matrix:
-        versions: ${{ fromJSON(needs.set-constants.outputs.VERSION) }}
+        versions: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
         arch: ${{ fromJSON(needs.set-constants.outputs.IMAGE_ARCH) }}
         flavor: [ "-full", "-slim", "" ] # "" is the "regular" image
 
