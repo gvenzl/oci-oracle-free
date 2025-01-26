@@ -44,7 +44,7 @@ jobs:
     name: Build and test images
     runs-on: ${{ matrix.os }}
     environment: build
-    needs: [ download-install-files ]
+    needs: download-install-files
     strategy:
       matrix:
         os: [ubuntu-24.04, ubuntu-24.04-arm]
@@ -120,7 +120,7 @@ jobs:
     name: Upload platform images to registries
     environment: upload
     runs-on: ubuntu-24.04
-    needs: [ build-images ]
+    needs: build-images
 
     permissions:
       packages: write
@@ -130,8 +130,8 @@ jobs:
 
     strategy:
       matrix:
-        versions: ${{ fromJson($VERSIONS) }}
-        arch: ${{ fromJson($IMAGE_ARCH) }}
+        versions: ${{ fromJSON(needs.set-constants.outputs.VERSION) }}
+        arch: ${{ fromJSON(needs.set-constants.outputs.IMAGE_ARCH) }}
         flavor: [ "-full", "-slim", "" ] # "" is the "regular" image
 
     steps:
