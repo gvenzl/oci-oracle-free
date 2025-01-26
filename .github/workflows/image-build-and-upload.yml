@@ -146,16 +146,16 @@ jobs:
         id: push-to-ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: test
+          image: oracle-free
           tags: ${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}
-          registry: ghcr.io/${{ github.repository_owner }}
+          registry: ghcr.io/${{ github.repository_owner }}/test
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate artifact attestation for non-faststart image
         uses: actions/attest-build-provenance@v2
         with:
-          subject-name: ghcr.io/gvenzl/test
+          subject-name: ghcr.io/gvenzl/test/oracle-free
           subject-digest: ${{ steps.push-to-ghcr.outputs.digest }}
           push-to-registry: true
 
@@ -163,15 +163,15 @@ jobs:
         id: push-faststart-to-ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: test
+          image: oracle-free
           tags: ${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}
-          registry: ghcr.io/${{ github.repository_owner }}
+          registry: ghcr.io/${{ github.repository_owner }}/test
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
    
       - name: Generate artifact attestation for faststart image
         uses: actions/attest-build-provenance@v2
         with:
-          subject-name: ghcr.io/gvenzl/test
+          subject-name: ghcr.io/gvenzl/test/oracle-free
           subject-digest: ${{ steps.push-faststart-to-ghcr.outputs.digest }}
           push-to-registry: true
