@@ -22,8 +22,8 @@ jobs:
     needs: set-constants
     strategy:
       matrix:
-        versions: ${{ fromJSON(needs.set-constants.outputs.VERSION) }}
-        arch: ${{ fromJSON(needs.set-constants.outputs.RPM_ARCH) }}
+        versions: ${{ fromJSON(set-constants.outputs.VERSION) }}
+        arch: ${{ fromJSON(set-constants.outputs.RPM_ARCH) }}
     steps:
       - name: ⬇️ Download install file
         run: |
@@ -48,8 +48,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-24.04, ubuntu-24.04-arm]
-        versions: ${{ fromJson($VERSIONS) }}
-        flavors: ${{ fromJson($FLAVORS) }}
+        versions: ${{ fromJSON(set-constants.outputs.VERSION) }}
+        flavors: ${{ fromJSON(set-constants.outputs.FLAVORS) }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
