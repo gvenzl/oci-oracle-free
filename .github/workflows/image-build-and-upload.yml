@@ -6,6 +6,7 @@ on:
 jobs:
 
   set-constants:
+    name: Setting workflow constants
     runs-on: ubuntu-latest
     outputs:
       FLAVORS: '[ "f", "r", "s" ]'
