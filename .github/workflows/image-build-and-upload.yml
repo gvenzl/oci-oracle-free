@@ -119,7 +119,7 @@ jobs:
 
     strategy:
       matrix:
-        versions: ["23.5", "23.6"]
+        versions: [ "23.5", "23.6" ]
         arch: [ "amd64", "arm64" ]
         flavor: [ "-full", "-slim", "" ] # "" is the "regular" image
 
@@ -142,18 +142,36 @@ jobs:
           podman load -i oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}.tar
           podman load -i oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}.tar
 
-      - name: DEBUG
-        run: |
-         podman images
-         ls -al
-
-      - name: Push to GitHub Container Registry
+      - name: Push non-faststart image to GitHub Container Registry
         id: push-to-ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: oracle-free
+          image: test
           tags: ${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}
           registry: ghcr.io/${{ github.repository_owner }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Generate artifact attestation for non-faststart image
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/gvenzl/test
+          subject-digest: ${{ steps.push-to-ghcr.outputs.digest }}
+          push-to-registry: true
+
+      - name: Push faststart image to GitHub Container Registry
+        id: push-faststart-to-ghcr
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: test
+          tags: ${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}
+          registry: ghcr.io/${{ github.repository_owner }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+   
+      - name: Generate artifact attestation for faststart image
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/gvenzl/test
+          subject-digest: ${{ steps.push-faststart-to-ghcr.outputs.digest }}
+          push-to-registry: true
