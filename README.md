@@ -377,6 +377,10 @@ The execution order and implications are the same as with the [Initialization sc
 
 ***Warning:*** files placed in `/container-entrypoint-startdb.d` are always executed after the database in a container is started, including pre-created databases. Use this mechanism only if you wish to perform a certain task always after the database has been (re)started by the container.
 
+## Configuration scripts
+
+If you would like to change the configuration of the database, several configuration scripts can be found in [`config-scripts`](config-scripts).
+
 # Feedback
 
 If you have questions or constructive feedback about these images, please file a ticket over at [github.com/gvenzl/oci-oracle-free](https://github.com/gvenzl/oci-oracle-free/issues).
