@@ -6,8 +6,8 @@ on:
 jobs:
 
   set-constants:
-    name: Setting workflow constants
-    runs-on: ubuntu-latest
+    name: 🔠 Setting workflow constants
+    runs-on: ubuntu-24.04
     outputs:
       FLAVORS: '[ "f", "r", "s" ]'
       VERSIONS: '[ "23.5", "23.6" ]'
@@ -17,7 +17,7 @@ jobs:
       - run: echo "setting constants"
         
   download-install-files:
-    name: Download install binaries
+    name: ⬇️ Download install binaries
     environment: build
     runs-on: ubuntu-24.04
     needs: set-constants
@@ -26,7 +26,7 @@ jobs:
         versions: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
         arch: ${{ fromJSON(needs.set-constants.outputs.RPM_ARCH) }}
     steps:
-      - name: ⬇️ Download install file
+      - name: ⬇️ Download install file from web
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan ${{ secrets.FILE_SERVER }} >> ~/.ssh/known_hosts 2>/dev/null
@@ -34,7 +34,7 @@ jobs:
           ssh-add - <<< "${{ secrets.FILE_USER_AUTH }}"
           scp ${{ secrets.FILE_USER }}@${{ secrets.FILE_SERVER }}:"oracle-database-free-23ai-${{ matrix.versions }}-1.0-1.el8.${{ matrix.arch }}.rpm" .
 
-      - name: Store install file
+      - name: 💾 Store install file
         uses: actions/upload-artifact@v4
         with:
           retention-days: 1
@@ -42,20 +42,20 @@ jobs:
           path: oracle-database-free-23ai-${{ matrix.versions }}-1.0-1.el8.${{ matrix.arch }}.rpm
 
   build-images:
-    name: Build and test images
+    name: 🛠️ 🔬 Build and test images
     runs-on: ${{ matrix.os }}
     environment: build
-    needs: download-install-files
+    needs: [ set-constants, download-install-files ]
     strategy:
       matrix:
         os: [ubuntu-24.04, ubuntu-24.04-arm]
         versions: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
         flavors: ${{ fromJSON(needs.set-constants.outputs.FLAVORS) }}
     steps:
-      - name: Checkout repo
+      - name: 📂 Checkout repo
         uses: actions/checkout@v4
 
-      - name: Generate environment variables
+      - name: 🔄 Generate environment variables
         id: env_vars
         run: |
           if     [ "${{ matrix.flavors }}" == "f" ]; then image_flavor="-full";
@@ -75,7 +75,7 @@ jobs:
       - name: ⏬ Install build dependencies
         run: sudo apt-get install -y buildah podman
 
-      - name: Get install file
+      - name: ⬇️ Download stored install file
         uses: actions/download-artifact@v4
         with:
           name: oracle-database-free-23ai-${{ matrix.versions }}-1.0-1.el8.${{ steps.env_vars.outputs.OS_ARCH }}.rpm
@@ -95,7 +95,7 @@ jobs:
           ./test-container.sh "gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}"
           ./test-container.sh "gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}"
 
-      - name: 📥 Export images to local file system
+      - name: 📤 Export images to local file system
         env:
           IMAGE_FLAVOR: ${{ steps.env_vars.outputs.IMAGE_FLAVOR }}
           IMAGE_ARCH: ${{ steps.env_vars.outputs.IMAGE_ARCH }}
@@ -118,10 +118,10 @@ jobs:
           path: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-faststart-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar
 
   upload-platform-images:
-    name: Upload platform images to registries
+    name: ⬆️ 📋 Upload platform images to registries
     environment: upload
     runs-on: ubuntu-24.04
-    needs: build-images
+    needs: [ set-constants, build-images ]
 
     permissions:
       packages: write
@@ -139,22 +139,22 @@ jobs:
       - name: ⏬ Install build dependencies
         run: sudo apt-get install -y buildah podman
 
-      - name: Download non-faststart image
+      - name: ⬇️ Download non-faststart image
         uses: actions/download-artifact@v4
         with:
           name: oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}
 
-      - name: Download faststart image
+      - name: ⬇️ Download faststart image
         uses: actions/download-artifact@v4
         with:
           name: oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}
 
-      - name: Import images
+      - name: 📥 Import images
         run: |
           podman load -i oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}.tar
           podman load -i oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}.tar
 
-      - name: Push non-faststart image to GitHub Container Registry
+      - name: 🫸 Push non-faststart image to GitHub Container Registry
         id: push-to-ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
@@ -164,14 +164,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate artifact attestation for non-faststart image
+      - name: 🔄 Generate artifact attestation for non-faststart image
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ghcr.io/gvenzl/test/oracle-free
           subject-digest: ${{ steps.push-to-ghcr.outputs.digest }}
           push-to-registry: true
 
-      - name: Push faststart image to GitHub Container Registry
+      - name: 🫸 Push faststart image to GitHub Container Registry
         id: push-faststart-to-ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
@@ -181,7 +181,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
    
-      - name: Generate artifact attestation for faststart image
+      - name: 🔄 Generate artifact attestation for faststart image
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ghcr.io/gvenzl/test/oracle-free
