@@ -154,15 +154,19 @@ jobs:
           podman load -i oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}.tar
           podman load -i oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}.tar
 
+      - name: Login to GHCR registry
+        uses: redhat-actions/podman-login@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io/${{ github.repository_owner }}/test
+
       - name: 🫸 Push non-faststart image to GitHub Container Registry
         id: push-to-ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
           image: oracle-free
           tags: ${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}
-          registry: ghcr.io/${{ github.repository_owner }}/test
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🔄 Generate artifact attestation for non-faststart image
         uses: actions/attest-build-provenance@v2
@@ -177,9 +181,6 @@ jobs:
         with:
           image: oracle-free
           tags: ${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}
-          registry: ghcr.io/${{ github.repository_owner }}/test
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
    
       - name: 🔄 Generate artifact attestation for faststart image
         uses: actions/attest-build-provenance@v2
