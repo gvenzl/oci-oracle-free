@@ -11,6 +11,7 @@ jobs:
     outputs:
       FLAVORS: '[ "f", "r", "s" ]'
       VERSIONS: '[ "23.5", "23.6" ]'
+      LATEST_VERSION: "23.6"
       RPM_ARCH: '[ "aarch64", "x86_64" ]'
       IMAGE_ARCH: '[ "arm64", "amd64" ]'
     steps:
@@ -190,3 +191,89 @@ jobs:
           subject-name: ghcr.io/gvenzl/test/oracle-free
           subject-digest: ${{ steps.push-faststart-to-ghcr.outputs.digest }}
           push-to-registry: true
+
+  upload-latest-tags:
+    name: ⬆️ 📋 Upload latest images to registries
+    environment: upload
+    runs-on: ubuntu-24.04
+    needs: [ set-constants, upload-platform-images ]
+
+    permissions:
+      packages: write
+      id-token: write
+      contents: read
+      attestations: write
+
+    strategy:
+      matrix:
+        arch: ${{ fromJSON(needs.set-constants.outputs.IMAGE_ARCH) }}
+        flavor: [ "-full", "-slim", "" ] # "" is the "regular" image
+
+    steps:
+      - name: ⏬ Install build dependencies
+        run: sudo apt-get install -y buildah podman
+
+      - name: ⬇️ Download non-faststart image
+        uses: actions/download-artifact@v4
+        with:
+          name: oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}-${{ matrix.arch }}
+
+      - name: ⬇️ Download faststart image
+        uses: actions/download-artifact@v4
+        with:
+          name: oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}
+
+      - name: 📥 Import images
+        run: |
+          podman load -i oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}-${{ matrix.arch }}.tar
+          podman load -i oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}.tar
+
+      - name: Tag images
+        env:
+          LATEST_VERSION: ${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}
+          FLAVOR: ${{ matrix.flavor }}
+          ARCH: ${{ matrix.arch }}
+        run: |
+          podman tag gvenzl/oracle-free-${LATEST_VERSION}${FLAVOR}-${ARCH} gvenzl/oracle-free:23-${ARCH}
+          podman tag oracle-free-${LATEST_VERSION}${FLAVOR}-fastatart-${ARCH} gvenzl/oracle-free:23-faststart${ARCH}
+          if [[ "${FLAVOR} == "" ]]; then # regular image
+            podman tag gvenzl/oracle-free-${LATEST_VERSION}${FLAVOR}-${ARCH} gvenzl/oracle-free:latest-${ARCH}
+          fi;
+
+      - name: Login to GHCR registry
+        uses: redhat-actions/podman-login@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io/${{ github.repository_owner }}/test
+
+      - name: 🫸 Push non-faststart image to GitHub Container Registry
+        id: push-to-ghcr
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          registry: ghcr.io/${{ github.repository_owner }}/test
+          image: oracle-free
+          tags: 23.6${{ matrix.flavor }}-${{ matrix.arch }}
+
+      - name: 🔄 Generate artifact attestation for non-faststart image
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/gvenzl/test/oracle-free
+          subject-digest: ${{ steps.push-to-ghcr.outputs.digest }}
+          push-to-registry: true
+
+      - name: 🫸 Push faststart image to GitHub Container Registry
+        id: push-faststart-to-ghcr
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          registry: ghcr.io/${{ github.repository_owner }}/test
+          image: oracle-free
+          tags: 23.6${{ matrix.flavor }}-faststart-${{ matrix.arch }}
+   
+      - name: 🔄 Generate artifact attestation for faststart image
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/gvenzl/test/oracle-free
+          subject-digest: ${{ steps.push-faststart-to-ghcr.outputs.digest }}
+          push-to-registry: true
+  
