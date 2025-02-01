@@ -233,10 +233,10 @@ jobs:
           FLAVOR: ${{ matrix.flavor }}
           ARCH: ${{ matrix.arch }}
         run: |
-          podman tag oracle-free-${LATEST_VERSION}${FLAVOR}-${ARCH} gvenzl/oracle-free:23-${ARCH}
-          podman tag oracle-free-${LATEST_VERSION}${FLAVOR}-fastatart-${ARCH} gvenzl/oracle-free:23-faststart${ARCH}
+          podman tag gvenzl/oracle-free-${LATEST_VERSION}${FLAVOR}-${ARCH} gvenzl/oracle-free:23-${ARCH}
+          podman tag gvenzl/oracle-free-${LATEST_VERSION}${FLAVOR}-fastatart-${ARCH} gvenzl/oracle-free:23-faststart${ARCH}
           if [[ "${FLAVOR} == "" ]]; then # regular image
-            podman tag oracle-free-${LATEST_VERSION}${FLAVOR}-${ARCH} gvenzl/oracle-free:latest-${ARCH}
+            podman tag gvenzl/oracle-free-${LATEST_VERSION}${FLAVOR}-${ARCH} gvenzl/oracle-free:latest-${ARCH}
           fi;
 
       - name: Login to GHCR registry
