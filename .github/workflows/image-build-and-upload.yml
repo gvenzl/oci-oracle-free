@@ -237,10 +237,17 @@ jobs:
           FLAVOR: ${{ matrix.flavor }}
           ARCH: ${{ matrix.arch }}
         run: |
-          podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-${ARCH} oracle-free:23-${ARCH}
-          podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-fastatart-${ARCH} oracle-free:23-faststart${ARCH}
+          # Tag 23[-full | -slim][-faststart]
+          podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-${ARCH} oracle-free:23${FLAVOR}-${ARCH}
+          podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-faststart-${ARCH} oracle-free:23${FLAVOR}-faststart-${ARCH}
+
+          # Tag [-latest] or [-slim | -full]
           if [[ "${FLAVOR} == "" ]]; then # regular image
-            podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-${ARCH} oracle-free:latest-${ARCH}
+            podman tag gvenzl/oracle-free:${LATEST_VERSION}-${ARCH} oracle-free:latest-${ARCH}
+            podman tag gvenzl/oracle-free:${LATEST_VERSION}-faststart-${ARCH} oracle-free:latest-faststart-${ARCH}
+          else
+            podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-${ARCH} oracle-free:${FLAVOR}-${ARCH}
+            podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-faststart-${ARCH} oracle-free:${FLAVOR}-faststart-${ARCH}
           fi;
 
       - name: Login to GHCR registry
@@ -250,13 +257,13 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io/${{ github.repository_owner }}/test
 
-      - name: 🫸 Push non-faststart image to GitHub Container Registry
+      - name: 🫸 Push non-faststart image 23 to GitHub Container Registry
         id: push-to-ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
           registry: ghcr.io/${{ github.repository_owner }}/test
           image: oracle-free
-          tags: 23.6${{ matrix.flavor }}-${{ matrix.arch }}
+          tags: 23${{ matrix.flavor }}-${{ matrix.arch }}
 
       - name: 🔄 Generate artifact attestation for non-faststart image
         uses: actions/attest-build-provenance@v2
