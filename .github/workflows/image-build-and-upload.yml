@@ -227,6 +227,10 @@ jobs:
           podman load -i oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}-${{ matrix.arch }}.tar
           podman load -i oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}.tar
 
+      - name: DEBUG
+        run: |
+          podman images
+  
       - name: Tag images
         env:
           LATEST_VERSION: ${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}
