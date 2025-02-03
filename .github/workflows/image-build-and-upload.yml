@@ -242,7 +242,7 @@ jobs:
           podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-faststart-${ARCH} oracle-free:23${FLAVOR}-faststart-${ARCH}
 
           # Tag [-latest] or [-slim | -full]
-          if [[ "${FLAVOR} == "" ]]; then # regular image
+          if [[ "${FLAVOR}" == "" ]]; then # regular image
             podman tag gvenzl/oracle-free:${LATEST_VERSION}-${ARCH} oracle-free:latest-${ARCH}
             podman tag gvenzl/oracle-free:${LATEST_VERSION}-faststart-${ARCH} oracle-free:latest-faststart-${ARCH}
           else
