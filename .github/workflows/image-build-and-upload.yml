@@ -232,6 +232,7 @@ jobs:
           podman images
   
       - name: Tag images
+        id: tag-images
         env:
           LATEST_VERSION: ${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}
           FLAVOR: ${{ matrix.flavor }}
@@ -243,13 +244,16 @@ jobs:
 
           # Tag [-latest] or [-slim | -full]
           if [[ "${FLAVOR}" == "" ]]; then # regular image
-            podman tag gvenzl/oracle-free:${LATEST_VERSION}-${ARCH} oracle-free:latest-${ARCH}
-            podman tag gvenzl/oracle-free:${LATEST_VERSION}-faststart-${ARCH} oracle-free:latest-faststart-${ARCH}
+            FLAVOR_NO_DASH="latest"
+            podman tag gvenzl/oracle-free:${LATEST_VERSION}-${ARCH} oracle-free:${FLAVOR_NO_DASH}-${ARCH}
+            podman tag gvenzl/oracle-free:${LATEST_VERSION}-faststart-${ARCH} oracle-free:${FLAVOR_NO_DASH}-faststart-${ARCH}
           else
             FLAVOR_NO_DASH=${FLAVOR:1}
             podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-${ARCH} oracle-free:${FLAVOR_NO_DASH}-${ARCH}
             podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-faststart-${ARCH} oracle-free:${FLAVOR_NO_DASH}-faststart-${ARCH}
           fi;
+          # Store value for push
+          echo "FLAVOR_NO_DASH=${FLAVOR_NO_DASH} >> $GITHUB_OUTPUT
 
       - name: Login to GHCR registry
         uses: redhat-actions/podman-login@v1
@@ -258,7 +262,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io/${{ github.repository_owner }}/test
 
-      - name: 🫸 Push non-faststart image 23 to GitHub Container Registry
+      - name: 🫸 Push 23 non-faststart image to GitHub Container Registry
         id: push-to-ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
@@ -273,13 +277,13 @@ jobs:
           subject-digest: ${{ steps.push-to-ghcr.outputs.digest }}
           push-to-registry: true
 
-      - name: 🫸 Push faststart image to GitHub Container Registry
+      - name: 🫸 Push 23 faststart image to GitHub Container Registry
         id: push-faststart-to-ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
           registry: ghcr.io/${{ github.repository_owner }}/test
           image: oracle-free
-          tags: 23.6${{ matrix.flavor }}-faststart-${{ matrix.arch }}
+          tags: 23${{ matrix.flavor }}-faststart-${{ matrix.arch }}
    
       - name: 🔄 Generate artifact attestation for faststart image
         uses: actions/attest-build-provenance@v2
@@ -287,4 +291,33 @@ jobs:
           subject-name: ghcr.io/gvenzl/test/oracle-free
           subject-digest: ${{ steps.push-faststart-to-ghcr.outputs.digest }}
           push-to-registry: true
-  
+
+      - name: 🫸 Push versionless image to GitHub Container Registry
+        id: push-versionless-to-ghcr
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          registry: ghcr.io/${{ github.repository_owner }}/test
+          image: oracle-free
+          tags: ${{ steps.tag-images.outputs.FLAVOR_NO_DASH }}-${{ matrix.arch }}
+
+      - name: 🔄 Generate artifact attestation for versionless image
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/gvenzl/test/oracle-free
+          subject-digest: ${{ steps.push-versionless-to-ghcr.outputs.digest }}
+          push-to-registry: true
+
+      - name: 🫸 Push versionless faststart image to GitHub Container Registry
+        id: push-versionless-faststart-to-ghcr
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          registry: ghcr.io/${{ github.repository_owner }}/test
+          image: oracle-free
+          tags: ${{ steps.tag-images.outputs.FLAVOR_NO_DASH }}-faststart-${{ matrix.arch }}
+
+      - name: 🔄 Generate artifact attestation for versionless faststart image
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/gvenzl/test/oracle-free
+          subject-digest: ${{ steps.push-versionless-faststart-to-ghcr.outputs.digest }}
+          push-to-registry: true
