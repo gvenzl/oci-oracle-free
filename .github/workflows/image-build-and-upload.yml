@@ -246,8 +246,9 @@ jobs:
             podman tag gvenzl/oracle-free:${LATEST_VERSION}-${ARCH} oracle-free:latest-${ARCH}
             podman tag gvenzl/oracle-free:${LATEST_VERSION}-faststart-${ARCH} oracle-free:latest-faststart-${ARCH}
           else
-            podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-${ARCH} oracle-free:${FLAVOR}-${ARCH}
-            podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-faststart-${ARCH} oracle-free:${FLAVOR}-faststart-${ARCH}
+            FLAVOR_NO_DASH=${FLAVOR:1}
+            podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-${ARCH} oracle-free:${FLAVOR_NO_DASH}-${ARCH}
+            podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-faststart-${ARCH} oracle-free:${FLAVOR_NO_DASH}-faststart-${ARCH}
           fi;
 
       - name: Login to GHCR registry
