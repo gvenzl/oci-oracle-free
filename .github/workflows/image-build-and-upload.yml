@@ -253,7 +253,7 @@ jobs:
             podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-faststart-${ARCH} oracle-free:${FLAVOR_NO_DASH}-faststart-${ARCH}
           fi;
           # Store value for push
-          echo "FLAVOR_NO_DASH=${FLAVOR_NO_DASH} >> $GITHUB_OUTPUT
+          echo "FLAVOR_NO_DASH=${FLAVOR_NO_DASH}" >> $GITHUB_OUTPUT
 
       - name: Login to GHCR registry
         uses: redhat-actions/podman-login@v1
