@@ -170,13 +170,6 @@ jobs:
           image: oracle-free
           tags: ${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}
 
-      - name: 🔄 Generate artifact attestation for non-faststart image
-        uses: actions/attest-build-provenance@v2
-        with:
-          subject-name: ghcr.io/gvenzl/test/oracle-free
-          subject-digest: ${{ steps.push-to-ghcr.outputs.digest }}
-          push-to-registry: true
-
       - name: 🫸 Push faststart image to GitHub Container Registry
         id: push-faststart-to-ghcr
         uses: redhat-actions/push-to-registry@v2
@@ -184,13 +177,6 @@ jobs:
           registry: ghcr.io/${{ github.repository_owner }}/test
           image: oracle-free
           tags: ${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}
-   
-      - name: 🔄 Generate artifact attestation for faststart image
-        uses: actions/attest-build-provenance@v2
-        with:
-          subject-name: ghcr.io/gvenzl/test/oracle-free
-          subject-digest: ${{ steps.push-faststart-to-ghcr.outputs.digest }}
-          push-to-registry: true
 
   upload-latest-tags:
     name: ⬆️ 📋 Upload latest images to registries
@@ -199,9 +185,7 @@ jobs:
 
     permissions:
       packages: write
-      id-token: write
       contents: read
-      attestations: write
 
     strategy:
       matrix:
@@ -270,13 +254,6 @@ jobs:
           image: oracle-free
           tags: 23${{ matrix.flavor }}-${{ matrix.arch }}
 
-      - name: 🔄 Generate artifact attestation for non-faststart image
-        uses: actions/attest-build-provenance@v2
-        with:
-          subject-name: ghcr.io/gvenzl/test/oracle-free
-          subject-digest: ${{ steps.push-to-ghcr.outputs.digest }}
-          push-to-registry: true
-
       - name: 🫸 Push 23 faststart image to GitHub Container Registry
         id: push-faststart-to-ghcr
         uses: redhat-actions/push-to-registry@v2
@@ -284,13 +261,6 @@ jobs:
           registry: ghcr.io/${{ github.repository_owner }}/test
           image: oracle-free
           tags: 23${{ matrix.flavor }}-faststart-${{ matrix.arch }}
-   
-      - name: 🔄 Generate artifact attestation for faststart image
-        uses: actions/attest-build-provenance@v2
-        with:
-          subject-name: ghcr.io/gvenzl/test/oracle-free
-          subject-digest: ${{ steps.push-faststart-to-ghcr.outputs.digest }}
-          push-to-registry: true
 
       - name: 🫸 Push versionless image to GitHub Container Registry
         id: push-versionless-to-ghcr
@@ -300,13 +270,6 @@ jobs:
           image: oracle-free
           tags: ${{ steps.tag-images.outputs.FLAVOR_NO_DASH }}-${{ matrix.arch }}
 
-      - name: 🔄 Generate artifact attestation for versionless image
-        uses: actions/attest-build-provenance@v2
-        with:
-          subject-name: ghcr.io/gvenzl/test/oracle-free
-          subject-digest: ${{ steps.push-versionless-to-ghcr.outputs.digest }}
-          push-to-registry: true
-
       - name: 🫸 Push versionless faststart image to GitHub Container Registry
         id: push-versionless-faststart-to-ghcr
         uses: redhat-actions/push-to-registry@v2
@@ -315,9 +278,33 @@ jobs:
           image: oracle-free
           tags: ${{ steps.tag-images.outputs.FLAVOR_NO_DASH }}-faststart-${{ matrix.arch }}
 
-      - name: 🔄 Generate artifact attestation for versionless faststart image
-        uses: actions/attest-build-provenance@v2
-        with:
-          subject-name: ghcr.io/gvenzl/test/oracle-free
-          subject-digest: ${{ steps.push-versionless-faststart-to-ghcr.outputs.digest }}
-          push-to-registry: true
+  upload-manifests-tags:
+    name: ⬆️ 📋 Upload manifest to registries
+    runs-on: ubuntu-24.04
+    needs: [ set-constants, upload-latest-tags ]
+    strategy:
+      matrix:
+        version: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
+        image_flavor: ${{ steps.env_vars.outputs.IMAGE_FLAVOR }}
+
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - name: Create multi-arch manifest
+        run: |
+          buildah manifest create \
+          --annotation org.opencontainers.image.title="Oracle Database Free Container images" \
+          --annotation org.opencontainers.image.description="Oracle Database Free for everyone!" \
+          --annotation org.opencontainers.image.authors="Gerald Venzl" \
+          --annotation org.opencontainers.image.source="https://github.com/gvenzl/oci-oracle-free" \
+          --annotation org.opencontainers.image.licenses="Apache-2.0" \
+          --annotation org.opencontainers.image.documentation="https://github.com/gvenzl/oci-oracle-free/blob/main/README.md" \
+          "ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.versions }}${{ matrix.image_flavor }}" \
+          "ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.versions }}${{ matrix.image_flavor }}-amd64" \
+          "ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.versions }}${{ matrix.image_flavor }}-arm64"
+
+      - name: Push multi-arch manifest
+        run: |
+          buildah manifest push "ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.versions }}${{ matrix.image_flavor }}" "docker://ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.versions }}${{ matrix.image_flavor }}"
