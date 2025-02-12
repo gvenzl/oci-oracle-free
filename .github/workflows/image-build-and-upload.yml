@@ -74,7 +74,10 @@ jobs:
           echo "OS_ARCH=$os_arch" >> "$GITHUB_OUTPUT"
 
       - name: ⏬ Install build dependencies
-        run: sudo apt-get install -y buildah podman
+        run: |
+          sudo apt-get -y update
+          sudo apt-get install -y buildah podman
+          sudo apt upgrade -y buildah podman
 
       - name: ⬇️ Download stored install file
         uses: actions/download-artifact@v4
@@ -295,6 +298,7 @@ jobs:
     steps:
       - name: Create multi-arch manifest
         run: |
+          buildah -v
           buildah manifest create \
           --annotation org.opencontainers.image.title="Oracle Database Free Container images" \
           --annotation org.opencontainers.image.description="Oracle Database Free for everyone!" \
