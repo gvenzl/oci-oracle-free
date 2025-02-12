@@ -285,7 +285,8 @@ jobs:
     strategy:
       matrix:
         version: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
-        image_flavor: ${{ steps.env_vars.outputs.IMAGE_FLAVOR }}
+        image_flavor: [ "-full", "", "-slim" ]
+        image_faststart: [ "", "-faststart" ]
 
     permissions:
       packages: write
@@ -301,10 +302,11 @@ jobs:
           --annotation org.opencontainers.image.source="https://github.com/gvenzl/oci-oracle-free" \
           --annotation org.opencontainers.image.licenses="Apache-2.0" \
           --annotation org.opencontainers.image.documentation="https://github.com/gvenzl/oci-oracle-free/blob/main/README.md" \
-          "ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}" \
-          "ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}-amd64" \
-          "ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}-arm64"
+          "ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}" \
+          "ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}-amd64" \
+          "ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}-arm64"
 
       - name: Push multi-arch manifest
         run: |
-          buildah manifest push "ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.versions }}${{ matrix.image_flavor }}" "docker://ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.versions }}${{ matrix.image_flavor }}"
+          buildah manifest push "ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.versions }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}" \
+                       "docker://ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.versions }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}"
