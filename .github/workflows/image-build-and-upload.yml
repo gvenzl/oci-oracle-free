@@ -285,6 +285,8 @@ jobs:
     name: ⬆️ 📋 Upload manifest to registries
     runs-on: ubuntu-24.04
     needs: [ set-constants, upload-latest-tags ]
+    env:
+      IMAGE_ARCH: ${{ set-constants.IMAGE_ARCH }}
     strategy:
       matrix:
         version: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
@@ -298,7 +300,13 @@ jobs:
     steps:
       - name: Create multi-arch manifest
         run: |
-          buildah -v
+          os_arch=$(uname -m)
+          if     [ "${os_arch}" == "aarch64" ]; then image_arch="arm64";
+            elif [ "${os_arch}" == "x86_64" ];  then image_arch="amd64";
+            else image_arch="";
+          fi;
+          wget -O buildah.deb http://http.us.debian.org/debian/pool/main/g/golang-github-containers-buildah/buildah_1.39.0+ds1-1_${image_arch}.deb
+          sudo apt install -f buildah.deb
           buildah manifest create \
           --annotation org.opencontainers.image.title="Oracle Database Free Container images" \
           --annotation org.opencontainers.image.description="Oracle Database Free for everyone!" \
