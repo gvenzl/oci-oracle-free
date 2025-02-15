@@ -285,8 +285,6 @@ jobs:
     name: ⬆️ 📋 Upload manifest to registries
     runs-on: ubuntu-24.04
     needs: [ set-constants, upload-latest-tags ]
-    env:
-      IMAGE_ARCH: ${{ set-constants.IMAGE_ARCH }}
     strategy:
       matrix:
         version: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
