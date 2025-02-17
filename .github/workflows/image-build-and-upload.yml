@@ -304,7 +304,7 @@ jobs:
             else image_arch="";
           fi;
           wget -O buildah.deb http://http.us.debian.org/debian/pool/main/g/golang-github-containers-buildah/buildah_1.39.0+ds1-1_${image_arch}.deb
-          sudo apt install -f buildah.deb
+          sudo apt install ./buildah.deb
           buildah manifest create \
           --annotation org.opencontainers.image.title="Oracle Database Free Container images" \
           --annotation org.opencontainers.image.description="Oracle Database Free for everyone!" \
