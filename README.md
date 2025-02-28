@@ -104,7 +104,7 @@ This is an optional variable. Set this variable to a non-empty string to create 
 **Note:** creating a new pluggable database will add to the initial container startup time. If you do not want that additional startup time, use the already existing `FREEPDB1` database instead.
 
 ### `APP_USER`
-This is an optional variable. Set this variable to a non-empty string to create a new database schema user with the name specified in this variable. For 18c and onwards, the user will be created in the default `FREEPDB1` pluggable database. If `ORACLE_DATABASE` has been specified, the user will also be created in that pluggable database. This variable requires `APP_USER_PASSWORD` or `APP_USER_PASSWORD_FILE` to be specified as well.
+This is an optional variable. Set this variable to a non-empty string to create a new database schema user with the name specified in this variable. For 18c and onwards, the user will be created in the default `FREEPDB1` pluggable database. If `ORACLE_DATABASE` has been specified, the user will also be created in that pluggable database. This variable requires `APP_USER_PASSWORD` or `APP_USER_PASSWORD_FILE` to be specified as well. The `APP_USER` is created with the [DB_DEVELOPER_ROLE](https://docs.oracle.com/en/database/oracle/oracle-database/23/dbseg/managing-security-for-application-developers.html#GUID-DCEEC563-4F6C-4B0A-9EB2-9F88CDF351D7).
 
 ### `APP_USER_PASSWORD`
 This is an optional variable. Set this variable to a non-empty string to define a password for the database schema user specified by `APP_USER`. This variable requires `APP_USER` to be specified as well.
