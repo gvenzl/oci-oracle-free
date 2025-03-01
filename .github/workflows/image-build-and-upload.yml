@@ -303,10 +303,12 @@ jobs:
             elif [ "${os_arch}" == "x86_64" ];  then image_arch="amd64";
             else image_arch="";
           fi;
-          wget -O buildah.deb http://http.us.debian.org/debian/pool/main/g/golang-github-containers-buildah/buildah_1.39.0+ds1-1_${image_arch}.deb
-          wget -O libgpgme.deb http://http.us.debian.org/debian/pool/main/g/gpgme1.0/libgpgme11t64_1.24.1-4_${image_arch}.deb
-          wget -O libsubid.deb http://http.us.debian.org/debian/pool/main/s/shadow/libsubid5_4.16.0-7_${image_arch}.deb
-          sudo apt install ./libsubid.deb ./libgpgme.deb ./buildah.deb
+          wget -O buildah.deb      http://http.us.debian.org/debian/pool/main/g/golang-github-containers-buildah/buildah_1.39.0+ds1-1_${image_arch}.deb
+          wget -O libgpgme.deb     http://http.us.debian.org/debian/pool/main/g/gpgme1.0/libgpgme11t64_1.24.1-4_${image_arch}.deb
+          wget -O libsubid.deb     http://http.us.debian.org/debian/pool/main/s/shadow/libsubid5_4.16.0-7_${image_arch}.deb
+          wget -O libgpg-error.deb http://http.us.debian.org/debian/pool/main/libg/libgpg-error/libgpg-error0_1.51-3_${image_arch}.deb
+          wget -O libassuan9.deb   http://http.us.debian.org/debian/pool/main/liba/libassuan/libassuan9_3.0.1-2_${image_arch}.deb
+          sudo apt install ./libgpg-error.deb ./libassuan9.deb ./libsubid.deb ./libgpgme.deb ./buildah.deb
           buildah manifest create \
           --annotation org.opencontainers.image.title="Oracle Database Free Container images" \
           --annotation org.opencontainers.image.description="Oracle Database Free for everyone!" \
