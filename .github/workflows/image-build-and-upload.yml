@@ -296,31 +296,11 @@ jobs:
       contents: read
 
     steps:
-      - name: Create multi-arch manifest
-        run: |
-          os_arch=$(uname -m)
-          if     [ "${os_arch}" == "aarch64" ]; then image_arch="arm64";
-            elif [ "${os_arch}" == "x86_64" ];  then image_arch="amd64";
-            else image_arch="";
-          fi;
-          wget -O buildah.deb      http://http.us.debian.org/debian/pool/main/g/golang-github-containers-buildah/buildah_1.39.0+ds1-1_${image_arch}.deb
-          wget -O libgpgme.deb     http://http.us.debian.org/debian/pool/main/g/gpgme1.0/libgpgme11t64_1.24.2-1+b1_${image_arch}.deb
-          wget -O libsubid.deb     http://http.us.debian.org/debian/pool/main/s/shadow/libsubid5_4.17.2-5_${image_arch}.deb
-          wget -O libgpg-error.deb http://http.us.debian.org/debian/pool/main/libg/libgpg-error/libgpg-error0_1.51-3_${image_arch}.deb
-          wget -O libassuan9.deb   http://http.us.debian.org/debian/pool/main/liba/libassuan/libassuan9_3.0.1-2_${image_arch}.deb
-          sudo apt install ./libgpg-error.deb ./libassuan9.deb ./libsubid.deb ./libgpgme.deb ./buildah.deb
-          buildah manifest create \
-          --annotation org.opencontainers.image.title="Oracle Database Free Container images" \
-          --annotation org.opencontainers.image.description="Oracle Database Free for everyone!" \
-          --annotation org.opencontainers.image.authors="Gerald Venzl" \
-          --annotation org.opencontainers.image.source="https://github.com/gvenzl/oci-oracle-free" \
-          --annotation org.opencontainers.image.licenses="Apache-2.0" \
-          --annotation org.opencontainers.image.documentation="https://github.com/gvenzl/oci-oracle-free/blob/main/README.md" \
-          "ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}" \
-          "ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}-amd64" \
-          "ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}-arm64"
-
       - name: Push multi-arch manifest
-        run: |
-          buildah manifest push "ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.versions }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}" \
-                       "docker://ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.versions }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}"
+        uses: pixelfederation/gh-action-manifest-tool@0.1.7
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          platforms: linux/amd64,linux/arm64
+          template: ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.versions }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}-ARCH
+          target: ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.versions }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
