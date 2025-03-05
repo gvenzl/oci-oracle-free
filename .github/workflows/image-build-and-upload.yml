@@ -297,7 +297,7 @@ jobs:
 
     steps:
       - name: Push multi-arch manifest
-        uses: pixelfederation/gh-action-manifest-tool@0.1.7
+        uses: pixelfederation/gh-action-manifest-tool@0.1.0
         with:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
