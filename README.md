@@ -112,7 +112,26 @@ This is an optional variable. Set this variable to a non-empty string to create 
 This is an optional variable. Set this variable to a non-empty string to define a password for the database schema user specified by `APP_USER`. This variable requires `APP_USER` to be specified as well.
 
 ## GitHub Actions
-The images can be used as a [Service Container](https://docs.github.com/en/actions/guides/about-service-containers) within a [GitHub Actions](https://docs.github.com/en/actions) workflow. Below is an example service definition for your GitHub Actions YAML file:
+
+### Action
+
+These images can be used via the GitHub [Setup Oracle DB Free](https://github.com/marketplace/actions/setup-oracle-db-free) action available on the GitHub Actions Marketplace. The basic usage can be:
+
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gvenzl/setup-oracle-free@v1
+        with:
+          app-user: <username>
+          app-user-password: <password>
+```
+
+### Service Container
+
+Alternatively, the images can be used directly as a [Service Container](https://docs.github.com/en/actions/guides/about-service-containers) within a GitHub Actions workflow. Below is an example service definition for your GitHub Actions YAML file:
 
 ```yaml
     services:
