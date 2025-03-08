@@ -67,13 +67,13 @@ We are proud of the following users of these images:
 * [Benthos](https://benthos.dev/) [[`c29f81d`](https://github.com/benthosdev/benthos/pull/1949/commits/c29f81d6b767c8ce8394111ee8649389c871ec1c)]
 * [Hibernate Reactive](https://hibernate.org/reactive/) [[`0af4ebc`]](https://github.com/hibernate/hibernate-reactive/commit/0af4ebc9390d631c4e97032452344444e5455834)
 * [Ibis](https://ibis-project.org/) [[`b568a81`](https://github.com/ibis-project/ibis/pull/6126/commits/b568a8152ff1ad1724d374e35bde4907fd7e6ea4)]
+* [JobRunr](https://www.jobrunr.io/en) [[`675061e`](https://github.com/jobrunr/jobrunr/commit/675061e7fd8719567b955de2ec858b9b6f388039)]
 * [jOOQ](https://www.jooq.org/) [[`Twitter`](https://twitter.com/lukaseder/status/1695419767652229268)]
 * [Quarkus](https://quarkus.io/) [[`546922c`](https://github.com/quarkusio/quarkus/commit/546922cf13b4de2d84966550577c0f22ef27000c)]
 * [Ruby on Rails ActiveRecord adapter](https://github.com/rsim/oracle-enhanced) [[`deb214d`](https://github.com/rsim/oracle-enhanced/commit/deb214decc3799608c8be386e91c6c7531c59793)]
 * [Spring Data](https://spring.io/projects/spring-data) [[`3cac9d1`](https://github.com/spring-projects/spring-data-relational/commit/3cac9d145618a073736393b62961c94dae77117f)]
 * [Micronaut](https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/) [[`37882de`](https://github.com/micronaut-projects/micronaut-test-resources/commit/37882dec85657df1a3661f7eea1a8bc0dce124ff)]
 * [utPLSQL](http://utplsql.org/) [[`0497dcf`](https://github.com/utPLSQL/utPLSQL/commit/0497dcfadcac637d186fdbc0aa36338d178f597d)]
-* [JobRunr](https://www.jobrunr.io/en) [[`675061e`](https://github.com/jobrunr/jobrunr/commit/675061e7fd8719567b955de2ec858b9b6f388039)]
 
 If you are using these images and would like to be listed as well, please open an [issue on GitHub](https://github.com/gvenzl/oci-oracle-free/issues) or reach out on [Twitter](https://twitter.com/geraldvenzl).
 
