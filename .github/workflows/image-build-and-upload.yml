@@ -281,8 +281,8 @@ jobs:
           image: oracle-free
           tags: ${{ steps.tag-images.outputs.FLAVOR_NO_DASH }}-faststart-${{ matrix.arch }}
 
-  upload-manifests-tags:
-    name: ⬆️ 📋 Upload manifest to registries
+  upload-versioned-manifests-tags:
+    name: ⬆️ 📋 Upload versioned manifests to registries
     runs-on: ubuntu-24.04
     needs: [ set-constants, upload-latest-tags ]
     strategy:
@@ -304,3 +304,50 @@ jobs:
           platforms: linux/amd64,linux/arm64
           template: ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}-ARCH
           target: ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+
+  upload-23-manifests-tags:
+    name: ⬆️ 📋 Upload 23 manifests to registries
+    runs-on: ubuntu-24.04
+    needs: [ set-constants, upload-latest-tags ]
+    strategy:
+      matrix:
+        image_flavor: [ "-full", "", "-slim" ]
+        image_faststart: [ "", "-faststart" ]
+
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - name: Push multi-arch manifest
+        uses: pixelfederation/gh-action-manifest-tool@v0.1.7
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          platforms: linux/amd64,linux/arm64
+          template: ghcr.io/${{ github.repository_owner }}/test/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}-ARCH
+          target: ghcr.io/${{ github.repository_owner }}/test/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+
+
+  upload-latest-manifests-tags:
+    name: ⬆️ 📋 Upload latest manifests to registries
+    runs-on: ubuntu-24.04
+    needs: [ set-constants, upload-latest-tags ]
+    strategy:
+      matrix:
+        image_flavor: [ "full", "latest", "slim" ]
+        image_faststart: [ "", "-faststart" ]
+
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - name: Push multi-arch manifest
+        uses: pixelfederation/gh-action-manifest-tool@v0.1.7
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          platforms: linux/amd64,linux/arm64
+          template: ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }}-ARCH
+          target: ghcr.io/${{ github.repository_owner }}/test/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
