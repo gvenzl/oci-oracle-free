@@ -83,6 +83,30 @@ backupImage "docker.io" "slim-$(getArch)"
 
 
 ########################################
+### Backup 23.7 images
+########################################
+echo "Backup 23.7-full-faststart"
+backupImage "docker.io" "23.7-full-faststart-$(getArch)"
+
+echo "Backup 23.7-full"
+backupImage "docker.io" "23.7-full-$(getArch)"
+
+echo "Backup 23.7-faststart"
+backupImage "docker.io" "23.7-faststart-$(getArch)"
+
+echo "Backup 23.7"
+backupImage "docker.io" "23.7-$(getArch)"
+
+echo "Backup 23.7-slim-faststart"
+backupImage "docker.io" "23.7-slim-faststart-$(getArch)"
+
+echo "Backup 23.7-slim"
+backupImage "docker.io" "23.7-slim-$(getArch)"
+
+
+
+
+########################################
 ### Backup 23.6 images
 ########################################
 echo "Backup 23.6-full-faststart"
@@ -104,94 +128,107 @@ echo "Backup 23.6-slim"
 backupImage "docker.io" "23.6-slim-$(getArch)"
 
 
+###########################################################################
+
+###########################################################################
+
+###########################################################################
+
+### No need to backup unsupported images, they are not changing anymore ###
+
+###########################################################################
+
+###########################################################################
+
+###########################################################################
 
 
 ########################################
 ### Backup 23.5 images
 ########################################
-echo "Backup 23.5-full-faststart"
-backupImage "docker.io" "23.5-full-faststart-$(getArch)"
-
-echo "Backup 23.5-full"
-backupImage "docker.io" "23.5-full-$(getArch)"
-
-echo "Backup 23.5-faststart"
-backupImage "docker.io" "23.5-faststart-$(getArch)"
-
-echo "Backup 23.5"
-backupImage "docker.io" "23.5-$(getArch)"
-
-echo "Backup 23.5-slim-faststart"
-backupImage "docker.io" "23.5-slim-faststart-$(getArch)"
-
-echo "Backup 23.5-slim"
-backupImage "docker.io" "23.5-slim-$(getArch)"
+# echo "Backup 23.5-full-faststart"
+# backupImage "docker.io" "23.5-full-faststart-$(getArch)"
+#
+# echo "Backup 23.5-full"
+# backupImage "docker.io" "23.5-full-$(getArch)"
+#
+# echo "Backup 23.5-faststart"
+# backupImage "docker.io" "23.5-faststart-$(getArch)"
+#
+# echo "Backup 23.5"
+# backupImage "docker.io" "23.5-$(getArch)"
+#
+# echo "Backup 23.5-slim-faststart"
+# backupImage "docker.io" "23.5-slim-faststart-$(getArch)"
+#
+# echo "Backup 23.5-slim"
+# backupImage "docker.io" "23.5-slim-$(getArch)"
 
 
 
 ########################################
 ### Backup 23.4 images
 ########################################
-echo "Backup 23.4-full-faststart"
-backupImage "docker.io" "23.4-full-faststart"
-
-echo "Backup 23.4-full"
-backupImage "docker.io" "23.4-full"
-
-echo "Backup 23.4-faststart"
-backupImage "docker.io" "23.4-faststart"
-
-echo "Backup 23.4"
-backupImage "docker.io" "23.4"
-
-echo "Backup 23.4-slim-faststart"
-backupImage "docker.io" "23.4-slim-faststart"
-
-echo "Backup 23.4-slim"
-backupImage "docker.io" "23.4-slim"
+# echo "Backup 23.4-full-faststart"
+# backupImage "docker.io" "23.4-full-faststart"
+#
+# echo "Backup 23.4-full"
+# backupImage "docker.io" "23.4-full"
+#
+# echo "Backup 23.4-faststart"
+# backupImage "docker.io" "23.4-faststart"
+#
+# echo "Backup 23.4"
+# backupImage "docker.io" "23.4"
+#
+# echo "Backup 23.4-slim-faststart"
+# backupImage "docker.io" "23.4-slim-faststart"
+#
+# echo "Backup 23.4-slim"
+# backupImage "docker.io" "23.4-slim"
 
 
 
 ########################################
 ### Backup 23.3 images
 ########################################
-echo "Backup 23.3-full-faststart"
-backupImage "docker.io" "23.3-full-faststart"
-
-echo "Backup 23.3-full"
-backupImage "docker.io" "23.3-full"
-
-echo "Backup 23.3-faststart"
-backupImage "docker.io" "23.3-faststart"
-
-echo "Backup 23.3"
-backupImage "docker.io" "23.3"
-
-echo "Backup 23.3-slim-faststart"
-backupImage "docker.io" "23.3-slim-faststart"
-
-echo "Backup 23.3-slim"
-backupImage "docker.io" "23.3-slim"
+# echo "Backup 23.3-full-faststart"
+# backupImage "docker.io" "23.3-full-faststart"
+#
+# echo "Backup 23.3-full"
+# backupImage "docker.io" "23.3-full"
+#
+# echo "Backup 23.3-faststart"
+# backupImage "docker.io" "23.3-faststart"
+#
+# echo "Backup 23.3"
+# backupImage "docker.io" "23.3"
+#
+# echo "Backup 23.3-slim-faststart"
+# backupImage "docker.io" "23.3-slim-faststart"
+#
+# echo "Backup 23.3-slim"
+# backupImage "docker.io" "23.3-slim"
 
 
 
 ########################################
 ### Backup 23.2 images
 ########################################
-echo "Backup 23.2-full-faststart"
-backupImage "docker.io" "23.2-full-faststart"
-
-echo "Backup 23.2-full"
-backupImage "docker.io" "23.2-full"
-
-echo "Backup 23.2-faststart"
-backupImage "docker.io" "23.2-faststart"
-
-echo "Backup 23.2"
-backupImage "docker.io" "23.2"
-
-echo "Backup 23.2-slim-faststart"
-backupImage "docker.io" "23.2-slim-faststart"
-
-echo "Backup 23.2-slim"
-backupImage "docker.io" "23.2-slim"
+# echo "Backup 23.2-full-faststart"
+# backupImage "docker.io" "23.2-full-faststart"
+#
+# echo "Backup 23.2-full"
+# backupImage "docker.io" "23.2-full"
+#
+# echo "Backup 23.2-faststart"
+# backupImage "docker.io" "23.2-faststart"
+#
+# echo "Backup 23.2"
+# backupImage "docker.io" "23.2"
+#
+# echo "Backup 23.2-slim-faststart"
+# backupImage "docker.io" "23.2-slim-faststart"
+#
+# echo "Backup 23.2-slim"
+# backupImage "docker.io" "23.2-slim"

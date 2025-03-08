@@ -76,8 +76,9 @@ function uploadFastStart() {
   #upload "23.2-full-faststart"
   #upload "23.3-full-faststart"
   #upload "23.4-full-faststart"
-  upload "23.5-full-faststart-$(getArch)"
+  #upload "23.5-full-faststart-$(getArch)"
   upload "23.6-full-faststart-$(getArch)"
+  upload "23.7-full-faststart-$(getArch)"
   upload "23-full-faststart-$(getArch)"
   upload "full-faststart-$(getArch)"
 
@@ -85,16 +86,18 @@ function uploadFastStart() {
   #upload "23.2-faststart"
   #upload "23.3-faststart"
   #upload "23.4-faststart"
-  upload "23.5-faststart-$(getArch)"
+  #upload "23.5-faststart-$(getArch)"
   upload "23.6-faststart-$(getArch)"
+  upload "23.7-faststart-$(getArch)"
   upload "23-faststart-$(getArch)"
 
   # Upload SLIM images
   #upload "23.2-slim-faststart"
   #upload "23.3-slim-faststart"
   #upload "23.4-slim-faststart"
-  upload "23.5-slim-faststart-$(getArch)"
+  #upload "23.5-slim-faststart-$(getArch)"
   upload "23.6-slim-faststart-$(getArch)"
+  upload "23.7-slim-faststart-$(getArch)"
   upload "23-slim-faststart-$(getArch)"
   upload "slim-faststart-$(getArch)"
 
@@ -114,8 +117,9 @@ function uploadRegular() {
   #upload "23.2-full"
   #upload "23.3-full"
   #upload "23.4-full"
-  upload "23.5-full-$(getArch)"
+  #upload "23.5-full-$(getArch)"
   upload "23.6-full-$(getArch)"
+  upload "23.7-full-$(getArch)"
   upload "23-full-$(getArch)"
   upload "full-$(getArch)"
 
@@ -123,16 +127,18 @@ function uploadRegular() {
   #upload "23.2"
   #upload "23.3"
   #upload "23.4"
-  upload "23.5-$(getArch)"
+  #upload "23.5-$(getArch)"
   upload "23.6-$(getArch)"
+  upload "23.7-$(getArch)"
   upload "23-$(getArch)"
 
   # Upload SLIM images
   #upload "23.2-slim"
   #upload "23.3-slim"
   #upload "23.4-slim"
-  upload "23.5-slim-$(getArch)"
+  #upload "23.5-slim-$(getArch)"
   upload "23.6-slim-$(getArch)"
+  upload "23.7-slim-$(getArch)"
   upload "23-slim-$(getArch)"
   upload "slim-$(getArch)"
 

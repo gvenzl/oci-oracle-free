@@ -11,8 +11,9 @@ Oracle Database Free Container / Docker images.
 | `slim[-faststart]`                                                             | 🔵 Always Supported |
 | `full[-faststart]`                                                             | 🔵 Always Supported |
 | `23[-faststart]`<br/>`23[-slim][-faststart]`<br/>`23[-full][-faststart]`       | 🟢 Supported        |
-| `23.6[-faststart]`<br/>`23.6[-slim][-faststart]`<br/>`23.6[-full][-faststart]` | 🟢 Supported        |
-| `23.5[-faststart]`<br/>`23.5[-slim][-faststart]`<br/>`23.5[-full][-faststart]` | 🟡 Deprecated       |
+| `23.7[-faststart]`<br/>`23.7[-slim][-faststart]`<br/>`23.7[-full][-faststart]` | 🟢 Supported        |
+| `23.6[-faststart]`<br/>`23.6[-slim][-faststart]`<br/>`23.6[-full][-faststart]` | 🟡 Deprecated       |
+| `23.5[-faststart]`<br/>`23.5[-slim][-faststart]`<br/>`23.5[-full][-faststart]` | 🔴 Unsupported      |
 | `23.4[-faststart]`<br/>`23.4[-slim][-faststart]`<br/>`23.4[-full][-faststart]` | 🔴 Unsupported      |
 | `23.3[-faststart]`<br/>`23.3[-slim][-faststart]`<br/>`23.3[-full][-faststart]` | 🔴 Unsupported      |
 | `23.2[-faststart]`<br/>`23.2[-slim][-faststart]`<br/>`23.2[-full][-faststart]` | 🔴 Unsupported      |
@@ -66,6 +67,7 @@ We are proud of the following users of these images:
 * [Benthos](https://benthos.dev/) [[`c29f81d`](https://github.com/benthosdev/benthos/pull/1949/commits/c29f81d6b767c8ce8394111ee8649389c871ec1c)]
 * [Hibernate Reactive](https://hibernate.org/reactive/) [[`0af4ebc`]](https://github.com/hibernate/hibernate-reactive/commit/0af4ebc9390d631c4e97032452344444e5455834)
 * [Ibis](https://ibis-project.org/) [[`b568a81`](https://github.com/ibis-project/ibis/pull/6126/commits/b568a8152ff1ad1724d374e35bde4907fd7e6ea4)]
+* [JobRunr](https://www.jobrunr.io/en) [[`675061e`](https://github.com/jobrunr/jobrunr/commit/675061e7fd8719567b955de2ec858b9b6f388039)]
 * [jOOQ](https://www.jooq.org/) [[`Twitter`](https://twitter.com/lukaseder/status/1695419767652229268)]
 * [Quarkus](https://quarkus.io/) [[`546922c`](https://github.com/quarkusio/quarkus/commit/546922cf13b4de2d84966550577c0f22ef27000c)]
 * [Ruby on Rails ActiveRecord adapter](https://github.com/rsim/oracle-enhanced) [[`deb214d`](https://github.com/rsim/oracle-enhanced/commit/deb214decc3799608c8be386e91c6c7531c59793)]
@@ -110,7 +112,26 @@ This is an optional variable. Set this variable to a non-empty string to create 
 This is an optional variable. Set this variable to a non-empty string to define a password for the database schema user specified by `APP_USER`. This variable requires `APP_USER` to be specified as well.
 
 ## GitHub Actions
-The images can be used as a [Service Container](https://docs.github.com/en/actions/guides/about-service-containers) within a [GitHub Actions](https://docs.github.com/en/actions) workflow. Below is an example service definition for your GitHub Actions YAML file:
+
+### Action
+
+These images can be used via the GitHub [Setup Oracle DB Free](https://github.com/marketplace/actions/setup-oracle-db-free) action available on the GitHub Actions Marketplace. The basic usage can be:
+
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gvenzl/setup-oracle-free@v1
+        with:
+          app-user: <username>
+          app-user-password: <password>
+```
+
+### Service Container
+
+Alternatively, the images can be used directly as a [Service Container](https://docs.github.com/en/actions/guides/about-service-containers) within a GitHub Actions workflow. Below is an example service definition for your GitHub Actions YAML file:
 
 ```yaml
     services:
@@ -376,6 +397,10 @@ The execution order and implications are the same as with the [Initialization sc
 ***Note:*** if the database inside the container is initialized (started for the first time), startup scripts are executed after the setup scripts.
 
 ***Warning:*** files placed in `/container-entrypoint-startdb.d` are always executed after the database in a container is started, including pre-created databases. Use this mechanism only if you wish to perform a certain task always after the database has been (re)started by the container.
+
+## Configuration scripts
+
+If you would like to change the configuration of the database, several configuration scripts can be found in [`config-scripts`](config-scripts).
 
 # Feedback
 

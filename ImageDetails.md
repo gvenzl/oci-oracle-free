@@ -16,6 +16,9 @@ A couple of modifications have been performed to make the installation more suit
 * `COMMON_USER_PREFIX=''`
 * `LOCAL_LISTENER=''`
 * `CPU_COUNT=2` (see https://github.com/gvenzl/oci-oracle-xe/issues/64 and https://github.com/gvenzl/oci-oracle-xe/pull/107)
+* `"_enable_memory_protection_keys"=FALSE` (see https://github.com/gvenzl/oci-oracle-free/issues/79)
+* `JOB_QUEUE_PROCESSES=1`
+* `FAST_START_PARALLEL_ROLLBACK=FALSE`
 * An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
 * `DISABLE_OOB=ON` in `sqlnet.ora` (see https://github.com/gvenzl/oci-oracle-xe/issues/43)
 * `BREAK_POLL_SKIP=1000` in `sqlnet.ora` (see https://github.com/gvenzl/oci-oracle-xe/issues/43)

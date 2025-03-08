@@ -22,7 +22,7 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-VERSION="23.6"
+VERSION="23.7"
 
 source ./functions.sh
 

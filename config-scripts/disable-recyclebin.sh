@@ -1,10 +1,11 @@
 #!/bin/bash
-# Since: April, 2023
-# Author: gvenzl
-# Name: all-build-tests.sh
-# Description: Script for all build tests for Oracle DB Free
 #
-# Copyright 2023 Gerald Venzl
+# Since: December, 2024
+# Author: gvenzl
+# Name: disable-recyclebin.sh
+# Description: A script to disable the database recyclebin.
+#
+# Copyright 2024 Gerald Venzl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,10 +23,18 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-# In order of newest to latest
-./build-image.sh "23.7"
-./build-image.sh "23.6"
-#./build-image.sh "23.5"
-#./build-image.sh "23.4"
-#./build-image.sh "23.3"
-#./build-image.sh "23.2"
+echo "CONFIGURATION: Disabling the database recyclebin."
+
+sqlplus -s / as sysdba << EOF
+
+   -- Exit on any error
+   WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+   ALTER SYSTEM SET RECYCLEBIN=OFF CONTAINER=ALL SCOPE=SPFILE;
+   SHUTDOWN IMMEDIATE;
+   STARTUP;
+
+   exit;
+EOF
+
+echo "CONFIGURATION: Database recyclebin disabled."

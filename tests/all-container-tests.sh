@@ -24,6 +24,14 @@ set -Eeuo pipefail
 
 source ./functions.sh
 
+./test-container.sh "gvenzl/oracle-free:23.7-full-faststart-$(getArch)"
+./test-container.sh "gvenzl/oracle-free:23.7-faststart-$(getArch)"
+./test-container.sh "gvenzl/oracle-free:23.7-slim-faststart-$(getArch)"
+
+./test-container.sh "gvenzl/oracle-free:23.7-full-$(getArch)"
+./test-container.sh "gvenzl/oracle-free:23.7-$(getArch)"
+./test-container.sh "gvenzl/oracle-free:23.7-slim-$(getArch)"
+
 ./test-container.sh "gvenzl/oracle-free:23.6-full-faststart-$(getArch)"
 ./test-container.sh "gvenzl/oracle-free:23.6-faststart-$(getArch)"
 ./test-container.sh "gvenzl/oracle-free:23.6-slim-faststart-$(getArch)"
@@ -32,13 +40,13 @@ source ./functions.sh
 ./test-container.sh "gvenzl/oracle-free:23.6-$(getArch)"
 ./test-container.sh "gvenzl/oracle-free:23.6-slim-$(getArch)"
 
-./test-container.sh "gvenzl/oracle-free:23.5-full-faststart-$(getArch)"
-./test-container.sh "gvenzl/oracle-free:23.5-faststart-$(getArch)"
-./test-container.sh "gvenzl/oracle-free:23.5-slim-faststart-$(getArch)"
+#./test-container.sh "gvenzl/oracle-free:23.5-full-faststart-$(getArch)"
+#./test-container.sh "gvenzl/oracle-free:23.5-faststart-$(getArch)"
+#./test-container.sh "gvenzl/oracle-free:23.5-slim-faststart-$(getArch)"
 
-./test-container.sh "gvenzl/oracle-free:23.5-full-$(getArch)"
-./test-container.sh "gvenzl/oracle-free:23.5-$(getArch)"
-./test-container.sh "gvenzl/oracle-free:23.5-slim-$(getArch)"
+#./test-container.sh "gvenzl/oracle-free:23.5-full-$(getArch)"
+#./test-container.sh "gvenzl/oracle-free:23.5-$(getArch)"
+#./test-container.sh "gvenzl/oracle-free:23.5-slim-$(getArch)"
 
 #./test-container.sh "gvenzl/oracle-free:23.4-full-faststart"
 #./test-container.sh "gvenzl/oracle-free:23.4-faststart"
