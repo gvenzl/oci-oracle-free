@@ -2,7 +2,7 @@
 #
 # Since: April, 2023
 # Author: gvenzl
-# Name: install.2320.sh
+# Name: install.23.4.sh
 # Description: Install script for Oracle Database 23 Free
 #
 # Copyright 2023 Gerald Venzl

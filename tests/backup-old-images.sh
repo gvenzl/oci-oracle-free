@@ -83,6 +83,30 @@ backupImage "docker.io" "slim-$(getArch)"
 
 
 ########################################
+### Backup 23.7 images
+########################################
+echo "Backup 23.7-full-faststart"
+backupImage "docker.io" "23.7-full-faststart-$(getArch)"
+
+echo "Backup 23.7-full"
+backupImage "docker.io" "23.7-full-$(getArch)"
+
+echo "Backup 23.7-faststart"
+backupImage "docker.io" "23.7-faststart-$(getArch)"
+
+echo "Backup 23.7"
+backupImage "docker.io" "23.7-$(getArch)"
+
+echo "Backup 23.7-slim-faststart"
+backupImage "docker.io" "23.7-slim-faststart-$(getArch)"
+
+echo "Backup 23.7-slim"
+backupImage "docker.io" "23.7-slim-$(getArch)"
+
+
+
+
+########################################
 ### Backup 23.6 images
 ########################################
 echo "Backup 23.6-full-faststart"

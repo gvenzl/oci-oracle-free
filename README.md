@@ -11,8 +11,9 @@ Oracle Database Free Container / Docker images.
 | `slim[-faststart]`                                                             | 🔵 Always Supported |
 | `full[-faststart]`                                                             | 🔵 Always Supported |
 | `23[-faststart]`<br/>`23[-slim][-faststart]`<br/>`23[-full][-faststart]`       | 🟢 Supported        |
-| `23.6[-faststart]`<br/>`23.6[-slim][-faststart]`<br/>`23.6[-full][-faststart]` | 🟢 Supported        |
-| `23.5[-faststart]`<br/>`23.5[-slim][-faststart]`<br/>`23.5[-full][-faststart]` | 🟡 Deprecated       |
+| `23.7[-faststart]`<br/>`23.6[-slim][-faststart]`<br/>`23.7[-full][-faststart]` | 🟢 Supported        |
+| `23.6[-faststart]`<br/>`23.6[-slim][-faststart]`<br/>`23.6[-full][-faststart]` | 🟡 Deprecated       |
+| `23.5[-faststart]`<br/>`23.5[-slim][-faststart]`<br/>`23.5[-full][-faststart]` | 🔴 Unsupported      |
 | `23.4[-faststart]`<br/>`23.4[-slim][-faststart]`<br/>`23.4[-full][-faststart]` | 🔴 Unsupported      |
 | `23.3[-faststart]`<br/>`23.3[-slim][-faststart]`<br/>`23.3[-full][-faststart]` | 🔴 Unsupported      |
 | `23.2[-faststart]`<br/>`23.2[-slim][-faststart]`<br/>`23.2[-full][-faststart]` | 🔴 Unsupported      |

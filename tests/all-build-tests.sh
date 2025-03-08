@@ -23,8 +23,9 @@
 set -Eeuo pipefail
 
 # In order of newest to latest
+./build-image.sh "23.7"
 ./build-image.sh "23.6"
-./build-image.sh "23.5"
+#./build-image.sh "23.5"
 #./build-image.sh "23.4"
 #./build-image.sh "23.3"
 #./build-image.sh "23.2"

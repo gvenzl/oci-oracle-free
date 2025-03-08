@@ -2,10 +2,10 @@
 #
 # Since: April, 2023
 # Author: gvenzl
-# Name: install.23.5.sh
+# Name: install.23.7.sh
 # Description: Install script for Oracle Database 23 Free
 #
-# Copyright 2023 Gerald Venzl
+# Copyright 2025 Gerald Venzl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -62,16 +62,16 @@ fi;
 # Install container runtime specific packages
 # (used by the entrypoint script, etc., not the database itself)
 # TODO: replace with 7zip
-microdnf -y install zip unzip gzip less findutils vim-minimal
+microdnf -y install zip unzip gzip less findutils vim-minimal sudo
 
 # Install 7zip
 mkdir /tmp/7z
 cd /tmp/7z
 
 if [ "${ARCH}" == "arm64" ]; then
-  download_location="https://7zip.org/a/7z2408-linux-arm64.tar.xz"
+  download_location="https://7zip.org/a/7z2409-linux-arm64.tar.xz"
 else
-  download_location="https://7zip.org/a/7z2408-linux-x64.tar.xz"
+  download_location="https://7zip.org/a/7z2409-linux-x64.tar.xz"
 fi;
 
 curl -s -L -k -O "${download_location}"
@@ -80,6 +80,13 @@ mv 7zzs /usr/bin/
 mv License.txt /usr/share/
 cd - 1> /dev/null
 rm -rf /tmp/7z
+
+echo "BUILDER: Setup oracle user for sudo privileges"
+
+# Setup oracle for sudoers
+chmod u+w /etc/sudoers
+echo "oracle   ALL=(ALL)   NOPASSWD: ALL" >> /etc/sudoers
+chmod u-w /etc/sudoers
 
 ##############################################
 ###### Install and configure Database ########
@@ -236,7 +243,7 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
    -- Remove local_listener entry (using default 1521)
    ALTER SYSTEM SET LOCAL_LISTENER='';
-   
+
    -- Explicitly set CPU_COUNT=2 to avoid memory miscalculation (#64)
    --
    -- This will cause the CPU_COUNT=2 to be written to the SPFILE and then
@@ -249,11 +256,15 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- beyond 2GB RAM, which cannot be set on FREE.
    ALTER SYSTEM SET CPU_COUNT=2 SCOPE=SPFILE;
 
+   -- Deactivate memory protection keys feature (#79)
+   -- Like with every underscore parameter, DO NOT SET THIS PARAMETER EVER UNLESS YOU KNOW WHAT THE HECK YOU ARE DOING!
+   ALTER SYSTEM SET "_enable_memory_protection_keys"=FALSE SCOPE=SPFILE;
+
    -- Set max job_queue_processes to 1
    ALTER SYSTEM SET JOB_QUEUE_PROCESSES=1;
 
    -- Disable parallel terminated transactions recovery
-   ALTER SYSTEM SET FAST_START_PARALLEL_ROLLBACK=FALSE;
+   ALTER SYSTEM SET FAST_START_PARALLEL_ROLLBACK=FALSE CONTAINER=ALL;
 
    -- Drop FREEPDB1 (to recreate at the end)
    ALTER PLUGGABLE DATABASE FREEPDB1 CLOSE;
@@ -502,8 +513,6 @@ EOF
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM DBMS_XDBT');
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE XDB.DBMS_XDBT');
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE SYS.VALIDATE_CONTEXT');
-       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM CTX_USER_AUTOSYNC_STATUS');
-       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM CTX_USER_AUTOSYNC_JOBS');
 
        -- Remove Spatial leftover components
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP USER MDDATA CASCADE');
@@ -519,8 +528,6 @@ EOF
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM DBMS_XDBT');
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE XDB.DBMS_XDBT');
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE SYS.VALIDATE_CONTEXT');
-       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM CTX_USER_AUTOSYNC_STATUS');
-       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM CTX_USER_AUTOSYNC_JOBS');
 
        -- Remove Spatial leftover components
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP USER MDDATA CASCADE');
@@ -1150,7 +1157,7 @@ EOF
       -- CDB
       ALTER TABLESPACE TEMP SHRINK SPACE;
       ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp01.dbf' RESIZE ${TEMP_SIZE}M;
-     
+
       -- SEED
       ALTER SESSION SET CONTAINER=PDB\$SEED;
       ALTER TABLESPACE TEMP SHRINK SPACE;
@@ -1649,10 +1656,6 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     # Remove unnecessary libraries
     rm "${ORACLE_HOME}"/lib/asm*       # Oracle Automatic Storage Management
     rm -f "${ORACLE_HOME}"/lib/ore.so  # Oracle R Enterprise
-
-    # Remove not needed packages for SLIM image
-    # Use rpm instad of microdnf to allow removing packages regardless of their dependencies
-    rpm -e --nodeps findutils less vim-minimal
 
   fi;
 
