@@ -449,7 +449,8 @@ if healthcheck.sh "${ORACLE_SID}"; then
 
   if [[ $(cat /etc/oci-image-version) == "23.2" ||
         $(cat /etc/oci-image-version) == "23.3" ||
-        $(cat /etc/oci-image-version) == "23.4" ]]; then
+        $(cat /etc/oci-image-version) == "23.4" ||
+        $(cat /etc/oci-image-version) == "23.5" ]]; then
     echo ""
     echo "################################################"
     echo "NOTICE: YOU ARE USING AN OLD IMAGE VERSION $(cat /etc/oci-image-version)!"
