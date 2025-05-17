@@ -27,19 +27,45 @@ set -Eeuo pipefail
 NEW_PDB="${1:-}"
 
 if [ -n "${NEW_PDB}" ]; then
+  if [ -f "${ORACLE_BASE}/${NEW_PDB}.pdb" ]; then
+    echo "Plugging existing pluggable database ${NEW_PDB} from ${ORACLE_BASE}/${NEW_PDB}.pdb"
 
-  RANDOM_PDBADIN_PASSWORD=$(date +%s | sha256sum | base64 | head -c 8)
+    sqlplus -s / as sysdba <<EOF
+       -- Exit on any errors
+       WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+       CREATE PLUGGABLE DATABASE ${NEW_PDB} \
+        USING '${ORACLE_BASE}/${NEW_PDB}.pdb' COPY \
+         FILE_NAME_CONVERT=('$ORACLE_BASE','${ORACLE_BASE}/oradata/${ORACLE_SID}/${NEW_PDB}');
+
+       exit;
+EOF
+
+    # remove pdb file same as FREE.7z is removed after initialization
+    rm -v "${ORACLE_BASE}/${NEW_PDB}.pdb"
+  else
+    echo "Creating new pluggable database ${NEW_PDB}"
+
+    RANDOM_PDBADIN_PASSWORD=$(date +%s | sha256sum | base64 | head -c 8)
+    sqlplus -s / as sysdba <<EOF
+       -- Exit on any errors
+       WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+       CREATE PLUGGABLE DATABASE ${NEW_PDB} \
+        ADMIN USER PDBADMIN IDENTIFIED BY "${RANDOM_PDBADIN_PASSWORD}" \
+         FILE_NAME_CONVERT=('pdbseed','${NEW_PDB}') \
+          DEFAULT TABLESPACE USERS \
+           DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/${NEW_PDB}/users01.dbf' \
+            SIZE 1m AUTOEXTEND ON NEXT 10m MAXSIZE UNLIMITED;
+
+       exit;
+EOF
+    unset RANDOM_PDBADIN_PASSWORD
+  fi
 
   sqlplus -s / as sysdba <<EOF
      -- Exit on any errors
      WHENEVER SQLERROR EXIT SQL.SQLCODE
-
-     CREATE PLUGGABLE DATABASE ${NEW_PDB} \
-      ADMIN USER PDBADMIN IDENTIFIED BY "${RANDOM_PDBADIN_PASSWORD}" \
-       FILE_NAME_CONVERT=('pdbseed','${NEW_PDB}') \
-        DEFAULT TABLESPACE USERS \
-         DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/${NEW_PDB}/users01.dbf' \
-          SIZE 1m AUTOEXTEND ON NEXT 10m MAXSIZE UNLIMITED;
 
      -- Open PDB and save state
      ALTER PLUGGABLE DATABASE ${NEW_PDB} OPEN READ WRITE;
@@ -49,7 +75,5 @@ if [ -n "${NEW_PDB}" ]; then
      ALTER SYSTEM REGISTER;
      exit;
 EOF
-
-  unset RANDOM_PDBADIN_PASSWORD
 
 fi;
