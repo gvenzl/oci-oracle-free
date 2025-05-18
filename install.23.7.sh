@@ -220,6 +220,8 @@ chown oracle:oinstall "${ORACLE_BASE}"/.bash_profile
 mkdir /container-entrypoint-initdb.d
 mkdir /container-entrypoint-startdb.d
 chown oracle:oinstall /container-entrypoint*
+mkdir /pdb-plug
+chown oracle:oinstall /pdb-plug
 
 # Store image information
 echo "${OCI_IMAGE_VERSION}" > /etc/oci-image-version

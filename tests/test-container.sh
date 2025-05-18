@@ -485,6 +485,94 @@ unset APP_USER
 unset APP_USER_PASSWORD
 unset ORACLE_DATABASE
 
+################################################
+##### Test existing pluggable database #####
+################################################
+
+# Tell test method not to tear down container
+NO_TEAR_DOWN="true"
+# Let's keep the container name in a var to keep it simple
+CONTAINER_NAME="existing-pdb-test-source"
+# Let's keep the test name in a var to keep it simple too
+TEST_NAME="EXISTING PDB TEST ${CONTAINER_IMAGE}"
+# This is what we want to have back from the SQL statement
+EXPECTED_RESULT="Hi from your replugged Oracle PDB"
+# App user
+TEST_APP_USER="my_test_user"
+APP_USER="${TEST_APP_USER}"
+# App user password
+TEST_APP_USER_PASSWORD="ThatAppUserPassword1"
+APP_USER_PASSWORD="${TEST_APP_USER_PASSWORD}"
+# Oracle PDB
+ORACLE_DATABASE="mypdb"
+
+# Volume
+mkdir /tmp/pdb_location
+chmod -R 777 /tmp/pdb_location
+CONTAINER_VOLUME="/tmp/pdb_location:/opt/source_pdb"
+
+# Spin up container
+TEST_START_TMS=$(date '+%s')
+runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "${CONTAINER_IMAGE}"
+
+podman exec -i ${CONTAINER_NAME} sqlplus -s sys/LetsTest1@//localhost/FREE as sysdba <<EOF
+   whenever sqlerror exit sql.sqlcode;
+
+   ALTER PLUGGABLE DATABASE ${ORACLE_DATABASE} CLOSE;
+   ALTER PLUGGABLE DATABASE ${ORACLE_DATABASE} UNPLUG INTO '/opt/source_pdb/mypdb.pdb';
+   DROP PLUGGABLE DATABASE ${ORACLE_DATABASE} INCLUDING DATAFILES;
+   exit;
+EOF
+
+podman stop ${CONTAINER_NAME}
+podman rm ${CONTAINER_NAME}
+
+# Otherwise the app user will be recreated for the new container but we want to make sure it exists
+unset APP_USER
+unset APP_USER_PASSWORD
+
+CONTAINER_VOLUME="/tmp/pdb_location:/pdb-plug"
+runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "${CONTAINER_IMAGE}"
+
+result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${TEST_APP_USER}"/"${TEST_APP_USER_PASSWORD}"@//localhost/"${ORACLE_DATABASE}" <<EOF
+   whenever sqlerror exit sql.sqlcode;
+   set heading off;
+   set echo off;
+   set feedback off;
+   set pagesize 0;
+
+   SELECT '${EXPECTED_RESULT}';
+   exit;
+EOF
+)
+
+TEST_END_TMS=$(date '+%s')
+TEST_DURATION=$(( TEST_END_TMS - TEST_START_TMS ))
+
+# See whether we got "OK" back from our test
+if [ "${result}" == "${EXPECTED_RESULT}" ]; then
+  echo "TEST ${TEST_NAME}: OK (${TEST_DURATION} sec)";
+  echo "";
+else
+  echo "TEST ${TEST_NAME}: FAILED! (${TEST_DURATION} sec)";
+  exit 1;
+fi;
+
+
+rm -rf /tmp/pdb_location
+
+# Tear down the container, no longer needed
+tear_down_container "${CONTAINER_NAME}"
+
+# Clean up environment variables, all tests should remain self-contained
+unset CONTAINER_NAME
+unset NO_TEAR_DOWN
+unset TEST_NAME
+unset EXPECTED_RESULT
+unset TEST_APP_USER
+unset TEST_APP_USER_PASSWORD
+unset ORACLE_DATABASE
+
 echo ""
 echo""
 echo "############################################################################"

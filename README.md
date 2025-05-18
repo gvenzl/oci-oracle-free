@@ -1,6 +1,25 @@
 # oci-oracle-free
 Oracle Database Free Container / Docker images.
 
+# Table of Contents
+
+- [Supported tags](#supported-tags)
+- [Quick Start](#quick-start)
+- [Users of these images](#users-of-these-images)
+- [How to use these images](#how-to-use-these-images)
+  - [Image flavors](#image-flavors)
+  - [Environment variables](#environment-variables)
+  - [GitHub Actions](#github-actions)
+  - [Docker Compose](#docker-compose)
+  - [Database users](#database-users)
+  - [Pluggable databases](#pluggable-databases)
+  - [Container secrets](#container-secrets)
+  - [Pluggable databases](#pluggable-databases)
+  - [Initialization scripts](#initialization-scripts)
+  - [Startup scripts](#startup-scripts)
+  - [Configuration scripts](#configuration-scripts)
+- [Feedback](#feedback)
+
 **The images are compatible with `podman` and `docker`. You can use `podman` or `docker` interchangeably.**
 
 # Supported tags
@@ -98,18 +117,18 @@ Environment variables allow you to customize your container. Note that these var
 This variable is mandatory for the first container startup and specifies the password for the Oracle Database `SYS` and `SYSTEM` users.
 
 ### `ORACLE_RANDOM_PASSWORD`
-This is an optional variable. Set this variable to a non-empty value, like `yes`, to generate a random initial password for the `SYS` and `SYSTEM` users. The generated password will be printed to stdout (`ORACLE PASSWORD FOR SYS AND SYSTEM: ...`).
+Optional. Set this variable to a non-empty value, like `yes`, to generate a random initial password for the `SYS` and `SYSTEM` users. The generated password will be printed to stdout (`ORACLE PASSWORD FOR SYS AND SYSTEM: ...`).
 
 ### `ORACLE_DATABASE`
-This is an optional variable. Set this variable to a non-empty string to create a new pluggable database with the name specified in this variable. Multiple pluggable databases are created when separating multiple names with a comma, for example, `ORACLE_DATABASE=PDB1,PDB2,PDB3`.
+Optional. Set this variable to a non-empty string to either create a new pluggable database or plug in an existing PDB found in `pdb-plug/<name>.pdb` with the name specified in this variable. Multiple pluggable databases are created when providing a comma-separated list, for example, `ORACLE_DATABASE=PDB1,PDB2,PDB3`.
 
 **Note:** creating a new pluggable database will add to the initial container startup time. If you do not want that additional startup time, use the already existing `FREEPDB1` database instead.
 
 ### `APP_USER`
-This is an optional variable. Set this variable to a non-empty string to create a new database schema user with the name specified in this variable. For 18c and onwards, the user will be created in the default `FREEPDB1` pluggable database. If `ORACLE_DATABASE` has been specified, the user will also be created in that pluggable database. This variable requires `APP_USER_PASSWORD` or `APP_USER_PASSWORD_FILE` to be specified as well.
+Optional. Set this variable to a non-empty string to create a new database schema user with the name specified in this variable. For 18c and onwards, the user will be created in the default `FREEPDB1` pluggable database. If `ORACLE_DATABASE` has been specified, the user will also be created in that pluggable database. This variable requires `APP_USER_PASSWORD` or `APP_USER_PASSWORD_FILE` to be specified as well.
 
 ### `APP_USER_PASSWORD`
-This is an optional variable. Set this variable to a non-empty string to define a password for the database schema user specified by `APP_USER`. This variable requires `APP_USER` to be specified as well.
+Optional. Set this variable to a non-empty string to define a password for the database schema user specified by `APP_USER`. This variable requires `APP_USER` to be specified as well.
 
 ## GitHub Actions
 
@@ -242,6 +261,10 @@ docker exec <container name|id> createAppUser <your app user> <your app user pas
 ```
 
 The command can also be invoked inside initialization and/or startup scripts.
+
+## Pluggable databases
+
+Automatically plug-in one or more PDBs by providing the `<PDB_NAME>.pdb` file(s) in the `/pdb-plug` folder inside the container and list the PDB name(s) in [`ORACLE_DATABASE`](#oracle-database).
 
 ## Container secrets
 

@@ -365,28 +365,21 @@ if healthcheck.sh "${ORACLE_SID}"; then
     if [ -n "${ORACLE_DATABASE:-}" ]; then
 
       OIFS="${IFS}"
+      # Set Internal Field Separator (IFS) to split by command separated list
       IFS=","
 
       # No "" around ${ORACLE_DATABASE} as that would prevent word splitting
       for new_pdb in ${ORACLE_DATABASE}; do
-        echo "CONTAINER: Creating pluggable database '${new_pdb}'."
-
-        PDB_CREATE_START_TMS=$(date '+%s')
 
         createDatabase "${new_pdb}"
 
-        PDB_CREATE_END_TMS=$(date '+%s')
-        PDB_CREATE_DURATION=$(( PDB_CREATE_END_TMS - PDB_CREATE_START_TMS ))
-
-        echo "CONTAINER: DONE: Creating pluggable database '${new_pdb}', duration: ${PDB_CREATE_DURATION} seconds."
-
         if ! healthcheck.sh "${new_pdb}"; then
            echo "CONTAINER: pluggable database not ready for service, aborting container start!"
-           echo "Please report a bug at https://github.com/gvenzl/oci-oracle-free/issues with your environment details."
            exit 1;
         fi;
       done
 
+      # Reset Internal Field Separator (IFS)
       IFS="${OIFS}"
       unset OIFS
 
