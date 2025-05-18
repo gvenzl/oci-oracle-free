@@ -1,5 +1,5 @@
 # oci-oracle-free
-Oracle Database Free Container / Docker images.
+Oracle Database Free Container images.
 
 # Table of Contents
 
@@ -14,13 +14,10 @@ Oracle Database Free Container / Docker images.
   - [Database users](#database-users)
   - [Pluggable databases](#pluggable-databases)
   - [Container secrets](#container-secrets)
-  - [Pluggable databases](#pluggable-databases)
   - [Initialization scripts](#initialization-scripts)
   - [Startup scripts](#startup-scripts)
   - [Configuration scripts](#configuration-scripts)
 - [Feedback](#feedback)
-
-**The images are compatible with `podman` and `docker`. You can use `podman` or `docker` interchangeably.**
 
 # Supported tags
 
@@ -94,7 +91,7 @@ We are proud of the following users of these images:
 * [Micronaut](https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/) [[`37882de`](https://github.com/micronaut-projects/micronaut-test-resources/commit/37882dec85657df1a3661f7eea1a8bc0dce124ff)]
 * [utPLSQL](http://utplsql.org/) [[`0497dcf`](https://github.com/utPLSQL/utPLSQL/commit/0497dcfadcac637d186fdbc0aa36338d178f597d)]
 
-If you are using these images and would like to be listed as well, please open an [issue on GitHub](https://github.com/gvenzl/oci-oracle-free/issues) or reach out on [Twitter](https://twitter.com/geraldvenzl).
+If you are using these images and would like to be listed as well, please open an [issue on GitHub](https://github.com/gvenzl/oci-oracle-free/issues).
 
 # How to use these images
 
@@ -107,11 +104,11 @@ If you are using these images and would like to be listed as well, please open a
 | Full      | `-full`       | An image containing all functionality as provided by the Oracle Database installation.      | Best for extensions and/or customizations.                                                             |
 | Faststart | `*-faststart` | The same image flavor as above but with an already expanded and ready-to-go database inside the image. This image trades image size on disk for a faster database startup time. | Best for (automated) test scenarios where the image is pulled once and many containers are started and torn down with no need for persistence (container volumes). |
 
-For a full list of changes that have been made to the Oracle Database and OS installation in each individual image flavor, please see [ImageDetails.md](https://github.com/gvenzl/oci-oracle-free/blob/main/ImageDetails.md).
+See [ImageDetails.md](https://github.com/gvenzl/oci-oracle-free/blob/main/ImageDetails.md) for a full list of changes that have been made to the Oracle Database and OS installation in each individual image flavor.
 
 ## Environment variables
 
-Environment variables allow you to customize your container. Note that these variables will only be considered during the database initialization (first container startup).
+Environment variables allow you to customize your container. These variables will only be considered during the database initialization (first container startup).
 
 ### `ORACLE_PASSWORD`
 This variable is mandatory for the first container startup and specifies the password for the Oracle Database `SYS` and `SYSTEM` users.
@@ -264,7 +261,7 @@ The command can also be invoked inside initialization and/or startup scripts.
 
 ## Pluggable databases
 
-Automatically plug-in one or more PDBs by providing the `<PDB_NAME>.pdb` file(s) in the `/pdb-plug` folder inside the container and list the PDB name(s) in [`ORACLE_DATABASE`](#oracle-database).
+Automatically plug-in one or more PDBs by providing the `<PDB_NAME>.pdb` file(s) in the `/pdb-plug` folder inside the container and list the PDB name(s) in [`ORACLE_DATABASE`](#oracle_database).
 
 ## Container secrets
 
@@ -427,4 +424,4 @@ If you would like to change the configuration of the database, several configura
 
 # Feedback
 
-If you have questions or constructive feedback about these images, please file a ticket over at [github.com/gvenzl/oci-oracle-free](https://github.com/gvenzl/oci-oracle-free/issues).
+If you have questions or constructive feedback about these images, please submit a ticket at [github.com/gvenzl/oci-oracle-free](https://github.com/gvenzl/oci-oracle-free/issues).
