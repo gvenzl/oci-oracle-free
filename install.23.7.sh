@@ -216,7 +216,7 @@ chown oracle:oinstall "${ORACLE_BASE}"/.bash_profile
 # is `oracle`, they can no longer create these folders.
 # Instead we provide them here already so that these folks can start putting files into
 # them directly, if they have to.
-
+echo "BUILDER: creating entrypoint folders"
 mkdir /container-entrypoint-initdb.d
 mkdir /container-entrypoint-startdb.d
 chown oracle:oinstall /container-entrypoint*
@@ -224,6 +224,7 @@ mkdir /pdb-plug
 chown oracle:oinstall /pdb-plug
 
 # Store image information
+echo "BUILDER: storing image information"
 echo "${OCI_IMAGE_VERSION}" > /etc/oci-image-version
 echo "${OCI_IMAGE_FLAVOR}"  > /etc/oci-image-flavor
 

@@ -3,7 +3,17 @@
 # Author: gvenzl
 # Name: healthcheck.sh
 # Description: Checks the health of the database
-#              Parameter 1: the CDB name or PDB name(s) to check for
+#
+#   Parameter 1: the CDB name or PDB name(s) to check for
+#   Parameter 2: ignore the container status checks (any value can be passed)
+#
+#   Returns:
+#     0 - the database is ready for use.
+#     1 - the database is not yet ready for use.
+#     2 - the container is still starting up.
+#     3 - PDBs are still being created/plugged in.
+#     4 - the container is still executing user-defined setup scripts.
+#     5 - the container is still executing user-defined startup scripts.
 #
 # Copyright 2023 Gerald Venzl
 #
@@ -23,11 +33,58 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-# Check whether PDB is open
-#  Either the PDB passed on as $ORACLE_DATABASE or the default "FREEPDB1"
+# Either the PDB passed on as $ORACLE_DATABASE or the default "FREEPDB1"
 DATABASES=${1:-${ORACLE_DATABASE:-FREEPDB1}}
 # Make the variable uppercase and use sed to add ' around each database name
+# shellcheck disable=SC2001
 DATABASES=$(echo "${DATABASES^^}" | sed "s/[^,]\+/'&'/g")
+
+# Check container status
+# Set default to empty string so that we don't run into "unbound variable"
+IGNORE_CONTAINER_CHECK="${2:-}"
+
+# Healthcheck is used for the CDB and some PDB creation steps.
+# We need a way to ignore the container readiness checks for that.
+# So check whether the variable is empty
+if [ -z "${IGNORE_CONTAINER_CHECK}" ]; then
+
+  # If the file is still there, the container is still initializing.
+  # The file is not called "healthcheck-..." so that bash autocomplete doesn't pick
+  # it up for the user
+  if [ -f "/opt/oracle/hc-container-init" ]; then
+    exit 2;
+  fi;
+
+  # If the file is still there, the PDBs are still created.
+  # There is a chance that if the user didn't ask for any PDBs and that this status is
+  # briefly returned, but it is highly unlikely as the container init file
+  # gets deleted just prior to creating PDBs and deleting this file.
+  # The file is not called "healthcheck-..." so that bash autocomplete doesn't pick
+  # it up for the user
+  if [ -f "/opt/oracle/hc-pdb-create" ]; then
+    exit 3;
+  fi;
+
+  # If the file is still there, the user setup scripts are still running.
+  # There is a chance that if the user didn't provide any scripts, that this status is
+  # briefly returned, but it is highly unlikely as the container init file
+  # gets deleted just prior to running user scripts and deleting this file.
+  # The file is not called "healthcheck-..." so that bash autocomplete doesn't pick
+  # it up for the user
+  if [ -f "/opt/oracle/hc-user-setup-scripts" ]; then
+    exit 4;
+  fi;
+
+  # If the file is still there, the user startup scripts are still running.
+  # There is a chance that if the user didn't provide any scripts, that this status is
+  # briefly returned, but it is highly unlikely as the container init file
+  # gets deleted just prior to running user scripts and deleting this file.
+  # The file is not called "healthcheck-..." so that bash autocomplete doesn't pick
+  # it up for the user
+  if [ -f "/opt/oracle/hc-user-startup-scripts" ]; then
+    exit 5;
+  fi;
+fi;
 
 # This statement retrieves information about all the PDBs and container database that are
 # listed in the name IN () list. The IN list values are constructed in the bash

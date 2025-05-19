@@ -304,6 +304,11 @@ trap stop_database SIGINT SIGTERM
 
 echo "CONTAINER: starting up..."
 
+# Create healthcheck status files
+touch /opt/oracle/hc-container-init
+touch /opt/oracle/hc-pdb-create
+touch /opt/oracle/hc-user-startup-scripts
+
 # Setup all required environment variables
 setup_env_vars
 
@@ -313,6 +318,7 @@ check_minimum_memory
 # If database does not yet exist, create directory structure
 if [ -z "${DATABASE_ALREADY_EXISTS:-}" ]; then
   echo "CONTAINER: first database startup, initializing..."
+  touch /opt/oracle/hc-user-setup-scripts
   create_dbconfig
 # Otherwise check that symlinks are in place
 else
@@ -334,7 +340,7 @@ EOF
 echo ""
 
 # Check whether instance database did come up successfully
-if healthcheck.sh "${ORACLE_SID}"; then
+if healthcheck.sh "${ORACLE_SID}" "container status ignore"; then
 
   # First database startup / initialization
   if [ -z "${DATABASE_ALREADY_EXISTS:-}" ]; then
@@ -361,6 +367,14 @@ if healthcheck.sh "${ORACLE_SID}"; then
       exit 1;
     fi;
 
+    ##################################################################################
+    ##################################################################################
+    ########################## Container INIT done ###################################
+    ##################################################################################
+    ##################################################################################
+    # Delete container init healthcheck file
+    rm -f /opt/oracle/hc-container-init
+
     # Check whether user PDB should be created
     if [ -n "${ORACLE_DATABASE:-}" ]; then
 
@@ -373,7 +387,7 @@ if healthcheck.sh "${ORACLE_SID}"; then
 
         createDatabase "${new_pdb}"
 
-        if ! healthcheck.sh "${new_pdb}"; then
+        if ! healthcheck.sh "${new_pdb}" "container status ignore"; then
            echo "CONTAINER: pluggable database not ready for service, aborting container start!"
            exit 1;
         fi;
@@ -384,6 +398,14 @@ if healthcheck.sh "${ORACLE_SID}"; then
       unset OIFS
 
     fi;
+
+    ##################################################################################
+    ##################################################################################
+    ########################## PDB creation done #####################################
+    ##################################################################################
+    ##################################################################################
+    # Delete pdb create healtcheck file
+    rm -f /opt/oracle/hc-pdb-create
 
     # Check whether app user should be created
     # setup_env_vars has already validated environment variables
@@ -420,20 +442,39 @@ if healthcheck.sh "${ORACLE_SID}"; then
     # For backwards compatibility
     run_custom_scripts /docker-entrypoint-initdb.d
 
+    ##################################################################################
+    ##################################################################################
+    ########################## Setup Scripts done ####################################
+    ##################################################################################
+    ##################################################################################
+    # Delete container user setup scripts healthcheck file
+    rm -f /opt/oracle/hc-user-setup-scripts
+
   # Database already initialized
   else
-
     # Password was passed on for container start but DB is already initialized, ignoring.
     if [ -n "${ORACLE_PASSWORD:-}" ]; then
       echo "CONTAINER: WARNING: \$ORACLE_PASSWORD has been specified but the database is already initialized. The password will be ignored."
       echo "CONTAINER: WARNING: If you want to reset the password, please run the resetPassword command, e.g. 'docker|podman exec <container name|id> resetPassword <your password>'."
     fi;
+
+    # Delete container init healthcheck file and container user setup scripts healthcheck file
+    rm -f /opt/oracle/hc-container-init /opt/oracle/hc-user-setup-scripts
+
   fi;
 
   # Run custom database startup scripts
   run_custom_scripts /container-entrypoint-startdb.d
   # For backwards compatibility
   run_custom_scripts /docker-entrypoint-startdb.d
+
+  ##################################################################################
+  ##################################################################################
+  ########################## Startup Scripts done ##################################
+  ##################################################################################
+  ##################################################################################
+  # Delete container user startup scripts healthcheck file
+  rm -f /opt/oracle/hc-user-startup-scripts
 
   echo ""
   echo "#########################"
