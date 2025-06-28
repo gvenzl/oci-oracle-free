@@ -102,8 +102,8 @@ jobs:
           IMAGE_FLAVOR: ${{ steps.env_vars.outputs.IMAGE_FLAVOR }}
           IMAGE_ARCH: ${{ steps.env_vars.outputs.IMAGE_ARCH }}
         run: |
-          podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free-1:${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}"
-          podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free-1:${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}"
+          podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}"
+          podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}"
 
       - name: ⬆️ Upload image non-faststart image for deploy job
         uses: actions/upload-artifact@v4
@@ -130,7 +130,7 @@ jobs:
 
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}/oracle-free", "docker.io/${{ github.repository_owner }}/oracle-free" ]
+        repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
         versions: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
         arch: ${{ fromJSON(needs.set-constants.outputs.IMAGE_ARCH) }}
         flavor: [ "-full", "-slim", "" ] # "" is the "regular" image
@@ -194,7 +194,7 @@ jobs:
 
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}/oracle-free", "docker.io/${{ github.repository_owner }}/oracle-free" ]
+        repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
         arch: ${{ fromJSON(needs.set-constants.outputs.IMAGE_ARCH) }}
         flavor: [ "-full", "-slim", "" ] # "" is the "regular" image
 
@@ -293,7 +293,7 @@ jobs:
     needs: [ set-constants, upload-latest-version-tags ]
     strategy:
       matrix:
-        registry: [ "ghcr.io/${{ github.repository_owner }}/oracle-free", "docker.io/${{ github.repository_owner }}/oracle-free" ]
+        registry: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
         version: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
         image_flavor: [ "-full", "", "-slim" ]
         image_faststart: [ "", "-faststart" ]
@@ -340,7 +340,7 @@ jobs:
     needs: [ set-constants, upload-latest-version-tags ]
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}/oracle-free", "docker.io/${{ github.repository_owner }}/oracle-free" ]
+        repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
         image_flavor: [ "-full", "", "-slim" ]
         image_faststart: [ "", "-faststart" ]
 
@@ -386,7 +386,7 @@ jobs:
     needs: [ set-constants, upload-latest-version-tags ]
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}/oracle-free", "docker.io/${{ github.repository_owner }}/oracle-free" ]
+        repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
         image_flavor: [ "full", "latest", "slim" ]
         image_faststart: [ "", "-faststart" ]
 
