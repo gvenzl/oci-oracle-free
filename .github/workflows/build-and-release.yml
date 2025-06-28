@@ -125,8 +125,8 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [ set-constants, build-and-test-images ]
 
-    permissions:
-      packages: write
+    #permissions:
+    #  packages: write
 
     strategy:
       matrix:
@@ -186,6 +186,7 @@ jobs:
 
   upload-latest-version-tags:
     name: ⬆️ 📋 Upload latest images to registries
+    environment: upload
     runs-on: ubuntu-24.04
     needs: [ set-constants, upload-platform-images ]
 
@@ -289,6 +290,7 @@ jobs:
 
   upload-versioned-manifests-tags:
     name: ⬆️ 📋 Upload versioned manifests to registries
+    environment: upload
     runs-on: ubuntu-24.04
     needs: [ set-constants, upload-latest-version-tags ]
     strategy:
@@ -336,6 +338,7 @@ jobs:
 
   upload-23-manifests-tags:
     name: ⬆️ 📋 Upload 23 manifests to registries
+    environment: upload
     runs-on: ubuntu-24.04
     needs: [ set-constants, upload-latest-version-tags ]
     strategy:
@@ -382,6 +385,7 @@ jobs:
 
   upload-latest-manifests-tags:
     name: ⬆️ 📋 Upload latest manifests to registries
+    environment: upload
     runs-on: ubuntu-24.04
     needs: [ set-constants, upload-latest-version-tags ]
     strategy:
