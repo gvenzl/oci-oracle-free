@@ -481,10 +481,8 @@ if healthcheck.sh "${ORACLE_SID}" "container status ignore"; then
   echo "DATABASE IS READY TO USE!"
   echo "#########################"
 
-  if [[ $(cat /etc/oci-image-version) == "23.2" ||
-        $(cat /etc/oci-image-version) == "23.3" ||
-        $(cat /etc/oci-image-version) == "23.4" ||
-        $(cat /etc/oci-image-version) == "23.5" ]]; then
+  if [[ $(cat /etc/oci-image-version) != "23.8" &&
+        $(cat /etc/oci-image-version) != "23.7" ]]; then
     echo ""
     echo "################################################"
     echo "NOTICE: YOU ARE USING AN OLD IMAGE VERSION $(cat /etc/oci-image-version)!"

@@ -23,7 +23,7 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-VERSION="23.6"
+VERSION="23.8"
 IMAGE_FLAVOR="REGULAR"
 IMAGE_NAME="gvenzl/oracle-free"
 SKIP_CHECKSUM="false"
@@ -44,7 +44,7 @@ Parameters:
    -s: creates a 'slim' image
    -x: creates a 'faststart' image
    -v: version of Oracle Database Free to build
-       Choose one of: 23.6, 23.5, 23.4, 23.3, 23.2
+       Choose one of: 23.8, 23.7, 23.6, 23.5, 23.4, 23.3, 23.2
    -i: ignores checksum test
    -o: passes on container build option
 
@@ -58,7 +58,7 @@ EOF
 
 }
 
-while getopts "hfnsv:io:x" optname; do
+while getopts "hfrsv:io:x" optname; do
   case "${optname}" in
     "h")
       usage
@@ -115,7 +115,9 @@ if [ "${SKIP_CHECKSUM}" == "false" ]; then
         ( "${VERSION}" == "23.6"  &&    "${BUILDER_ARCH}" == "x86_64"  &&                                   "${SHASUM_RET%% *}" != "03ae958784e9443c0380e4d387cb0522016c72d029ab85cf55ee124489833e0e" ) ||
         ( "${VERSION}" == "23.6"  &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "64b84cdbd3331a4fee7a7bf56cdfd497a2531b05862bddae0f38e28c745dc8d6" ) ||
         ( "${VERSION}" == "23.7"  &&    "${BUILDER_ARCH}" == "x86_64"  &&                                   "${SHASUM_RET%% *}" != "af64450e1120e56dac43a447a2e109449c7590489003d830d6a32a9168e0469d" ) ||
-        ( "${VERSION}" == "23.7"  &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "b069d02c624ed63aa8bbdb0a6ae884e1b0fc8d60b315adedc0e781dea0607d2a" )
+        ( "${VERSION}" == "23.7"  &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "b069d02c624ed63aa8bbdb0a6ae884e1b0fc8d60b315adedc0e781dea0607d2a" ) ||
+        ( "${VERSION}" == "23.8"  &&    "${BUILDER_ARCH}" == "x86_64"  &&                                   "${SHASUM_RET%% *}" != "cd0d16939150e6ec5e70999a762a13687bfa99b05c4f310593e7ca3892e1d0ce" ) ||
+        ( "${VERSION}" == "23.8"  &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "c5cdd5d3b7017594899e8f13eb2d69f2ae6339ec3a78e647f18800ad7dc44346" )
       ]]; then
     echo "BUILDER: WARNING! SHA sum of RPM does not match with what's expected!"
     echo "BUILDER: WARNING! Verify that the .rpm file is not corrupt!"
