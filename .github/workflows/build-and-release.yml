@@ -340,7 +340,7 @@ jobs:
     name: ⬆️ 📋 Upload 23 manifests to registries
     environment: tag
     runs-on: ubuntu-24.04
-    needs: [ set-constants, create-latest-version-tags ]
+    needs: [ set-constants, create-versioned-manifests-tags, create-latest-version-tags ]
     strategy:
       matrix:
         repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
@@ -383,11 +383,11 @@ jobs:
             --template ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}-ARCH \
             --target ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}
 
-  upload-latest-manifests-tags:
+  create-latest-manifests-tags:
     name: ⬆️ 📋 Upload latest manifests to registries
     environment: tag
     runs-on: ubuntu-24.04
-    needs: [ set-constants, create-latest-version-tags ]
+    needs: [ set-constants, create-23-manifests-tags, create-versioned-manifests-tags, create-latest-version-tags ]
     strategy:
       matrix:
         repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
@@ -433,7 +433,7 @@ jobs:
   cleanup:
     name: Cleanup build leftovers
     runs-on: ubuntu-24.04
-    needs: [ upload-latest-manifests-tags, create-23-manifests-tags, create-versioned-manifests-tags ]
+    needs: [ create-latest-manifests-tags, create-23-manifests-tags, create-versioned-manifests-tags ]
     permissions:
       deployments: write
 
