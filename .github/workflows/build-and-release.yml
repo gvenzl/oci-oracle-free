@@ -304,10 +304,6 @@ jobs:
       packages: write
 
     steps:
-      - name: 🔧 Install manifest tool
-        run: |
-          wget https://github.com/estesp/manifest-tool/releases/download/v2.2.0/binaries-manifest-tool-2.2.0.tar.gz
-          tar --wildcards -zxvf binaries-manifest-tool-*tar.gz *linux*amd64*
 
       - name: 🔓 Login to GHCR registry
         uses: redhat-actions/podman-login@v1
@@ -325,16 +321,13 @@ jobs:
 
       - name: 🫸 Push multi-arch manifest
         run: |
-          ./manifest-tool-linux-amd64 push --type oci from-args \
-            --platforms linux/amd64,linux/arm64 \
-            --annotations org.opencontainers.image.title="Oracle Database Free Container images" \
-            --annotations org.opencontainers.image.description="Oracle Database Free for everyone!" \
-            --annotations org.opencontainers.image.authors="Gerald Venzl" \
-            --annotations org.opencontainers.image.source=https://github.com/gvenzl/oci-oracle-free \
-            --annotations org.opencontainers.image.licenses=Apache-2.0 \
-            --annotations org.opencontainers.image.documentation=https://github.com/gvenzl/oci-oracle-free/blob/main/README.md \
-            --template ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}-ARCH \
-            --target ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest create ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest add ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
+                              ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}-amd64
+          podman manifest add ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
+                              ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}-arm64
+          podman push ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest rm ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
 
   create-23-manifests-tags:
     name: 📋 Create 23 manifests to registries
@@ -351,10 +344,6 @@ jobs:
       packages: write
 
     steps:
-      - name: 🔧 Install manifest tool
-        run: |
-          wget https://github.com/estesp/manifest-tool/releases/download/v2.2.0/binaries-manifest-tool-2.2.0.tar.gz
-          tar --wildcards -zxvf binaries-manifest-tool-*tar.gz *linux*amd64*
 
       - name: 🔓 Login to GHCR registry
         uses: redhat-actions/podman-login@v1
@@ -372,16 +361,13 @@ jobs:
 
       - name: 🫸 Push multi-arch manifest
         run: |
-          ./manifest-tool-linux-amd64 push --type oci from-args \
-            --platforms linux/amd64,linux/arm64 \
-            --annotations org.opencontainers.image.title="Oracle Database Free Container images" \
-            --annotations org.opencontainers.image.description="Oracle Database Free for everyone!" \
-            --annotations org.opencontainers.image.authors="Gerald Venzl" \
-            --annotations org.opencontainers.image.source=https://github.com/gvenzl/oci-oracle-free \
-            --annotations org.opencontainers.image.licenses=Apache-2.0 \
-            --annotations org.opencontainers.image.documentation=https://github.com/gvenzl/oci-oracle-free/blob/main/README.md \
-            --template ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}-ARCH \
-            --target ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest create ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest add ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
+                              ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}-amd64
+          podman manifest add ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
+                              ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}-arm64
+          podman push ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest rm ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}
 
   create-latest-manifests-tags:
     name: 📋 Create latest manifests to registries
@@ -398,10 +384,6 @@ jobs:
       packages: write
 
     steps:
-      - name: 🔧 Install manifest tool
-        run: |
-          wget https://github.com/estesp/manifest-tool/releases/download/v2.2.0/binaries-manifest-tool-2.2.0.tar.gz
-          tar --wildcards -zxvf binaries-manifest-tool-*tar.gz *linux*amd64*
 
       - name: 🔓 Login to GHCR registry
         uses: redhat-actions/podman-login@v1
@@ -419,16 +401,13 @@ jobs:
 
       - name: 🫸 Push multi-arch manifest
         run: |
-          ./manifest-tool-linux-amd64 push --type oci from-args \
-            --platforms linux/amd64,linux/arm64 \
-            --annotations org.opencontainers.image.title="Oracle Database Free Container images" \
-            --annotations org.opencontainers.image.description="Oracle Database Free for everyone!" \
-            --annotations org.opencontainers.image.authors="Gerald Venzl" \
-            --annotations org.opencontainers.image.source=https://github.com/gvenzl/oci-oracle-free \
-            --annotations org.opencontainers.image.licenses=Apache-2.0 \
-            --annotations org.opencontainers.image.documentation=https://github.com/gvenzl/oci-oracle-free/blob/main/README.md \
-            --template ${{ matrix.repository }}:${{ matrix.image_flavor }}${{ matrix.image_faststart }}-ARCH \
-            --target ${{ matrix.repository }}:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest create ${{ matrix.repository }}:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest add ${{ matrix.repository }}:${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
+                              ${{ matrix.repository }}:${{ matrix.image_flavor }}${{ matrix.image_faststart }}-amd64
+          podman manifest add ${{ matrix.repository }}:${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
+                              ${{ matrix.repository }}:${{ matrix.image_flavor }}${{ matrix.image_faststart }}-arm64
+          podman push ${{ matrix.repository }}:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest rm ${{ matrix.repository }}:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
 
   cleanup:
     name: 🧹 Cleanup build leftovers
