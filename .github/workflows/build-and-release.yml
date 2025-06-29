@@ -289,7 +289,7 @@ jobs:
           tags: ${{ steps.tag-images.outputs.FLAVOR_NO_DASH }}-faststart-${{ matrix.arch }}
 
   create-versioned-manifests-tags:
-    name: ⬆️ 📋 Upload versioned manifests to registries
+    name: 📋 Create versioned manifests to registries
     environment: tag
     runs-on: ubuntu-24.04
     needs: [ set-constants, create-latest-version-tags ]
@@ -337,7 +337,7 @@ jobs:
             --target ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
 
   create-23-manifests-tags:
-    name: ⬆️ 📋 Upload 23 manifests to registries
+    name: 📋 Create 23 manifests to registries
     environment: tag
     runs-on: ubuntu-24.04
     needs: [ set-constants, create-versioned-manifests-tags, create-latest-version-tags ]
@@ -384,7 +384,7 @@ jobs:
             --target ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}
 
   create-latest-manifests-tags:
-    name: ⬆️ 📋 Upload latest manifests to registries
+    name: 📋 Create latest manifests to registries
     environment: tag
     runs-on: ubuntu-24.04
     needs: [ set-constants, create-23-manifests-tags, create-versioned-manifests-tags, create-latest-version-tags ]
@@ -431,7 +431,7 @@ jobs:
             --target ${{ matrix.repository }}:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
 
   cleanup:
-    name: Cleanup build leftovers
+    name: 🧹 Cleanup build leftovers
     runs-on: ubuntu-24.04
     needs: [ create-latest-manifests-tags, create-23-manifests-tags, create-versioned-manifests-tags ]
     permissions:
