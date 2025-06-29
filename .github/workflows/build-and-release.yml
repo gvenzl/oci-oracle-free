@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       FLAVORS: '[ "f", "r", "s" ]'
-      VERSIONS: '[ "23.8", "23.7" ]'
+      VERSIONS: '[ "23.7", "23.8" ]'
       LATEST_VERSION: "23.8"
       RPM_ARCH: '[ "aarch64", "x86_64" ]'
-      IMAGE_ARCH: '[ "arm64", "amd64" ]'
+      IMAGE_ARCH: '[ "amd64", "arm64" ]'
     steps:
       - run: echo "setting constants"
 
@@ -133,7 +133,7 @@ jobs:
         repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
         versions: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
         arch: ${{ fromJSON(needs.set-constants.outputs.IMAGE_ARCH) }}
-        flavor: [ "-full", "-slim", "" ] # "" is the "regular" image
+        flavor: [ "-full", "", "-slim" ] # "" is the "regular" image
 
     steps:
       - name: ⏬ Install build dependencies
@@ -197,7 +197,7 @@ jobs:
       matrix:
         repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
         arch: ${{ fromJSON(needs.set-constants.outputs.IMAGE_ARCH) }}
-        flavor: [ "-full", "-slim", "" ] # "" is the "regular" image
+        flavor: [ "-full", "", "-slim" ] # "" is the "regular" image
 
     steps:
       - name: ⏬ Install build dependencies
@@ -298,7 +298,7 @@ jobs:
         repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
         version: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
         image_flavor: [ "-full", "", "-slim" ]
-        image_faststart: [ "", "-faststart" ]
+        image_faststart: [ "-faststart", "" ]
 
     permissions:
       packages: write
@@ -338,7 +338,7 @@ jobs:
       matrix:
         repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
         image_flavor: [ "-full", "", "-slim" ]
-        image_faststart: [ "", "-faststart" ]
+        image_faststart: [ "-faststart", "" ]
 
     permissions:
       packages: write
@@ -378,7 +378,7 @@ jobs:
       matrix:
         repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
         image_flavor: [ "full", "latest", "slim" ]
-        image_faststart: [ "", "-faststart" ]
+        image_faststart: [ "-faststart", "" ]
 
     permissions:
       packages: write
@@ -429,4 +429,11 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: upload
+          onlyRemoveDeployments: true
+
+      - name: 🧹 Cleanup tag deployments
+        uses: strumwolf/delete-deployment-environment@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: tag
           onlyRemoveDeployments: true
