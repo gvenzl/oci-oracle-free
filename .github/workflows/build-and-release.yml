@@ -401,13 +401,13 @@ jobs:
 
       - name: 🫸 Push multi-arch manifest
         run: |
-          podman manifest create ${{ matrix.repository }}:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
-          podman manifest add ${{ matrix.repository }}:${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
-                              ${{ matrix.repository }}:${{ matrix.image_flavor }}${{ matrix.image_faststart }}-amd64
-          podman manifest add ${{ matrix.repository }}:${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
-                              ${{ matrix.repository }}:${{ matrix.image_flavor }}${{ matrix.image_faststart }}-arm64
-          podman push ${{ matrix.repository }}:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
-          podman manifest rm ${{ matrix.repository }}:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest create ${{ matrix.repository }}/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest add ${{ matrix.repository }}/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
+                              ${{ matrix.repository }}/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }}-amd64
+          podman manifest add ${{ matrix.repository }}/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
+                              ${{ matrix.repository }}/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }}-arm64
+          podman push ${{ matrix.repository }}/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest rm ${{ matrix.repository }}/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
 
   cleanup:
     name: 🧹 Cleanup build leftovers
