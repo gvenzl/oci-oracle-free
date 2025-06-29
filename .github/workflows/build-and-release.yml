@@ -184,9 +184,9 @@ jobs:
           image: oracle-free
           tags: ${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}
 
-  upload-latest-version-tags:
+  create-latest-version-tags:
     name: ⬆️ 📋 Upload latest images to registries
-    environment: upload
+    environment: tag
     runs-on: ubuntu-24.04
     needs: [ set-constants, upload-platform-images ]
 
@@ -288,11 +288,11 @@ jobs:
           image: oracle-free
           tags: ${{ steps.tag-images.outputs.FLAVOR_NO_DASH }}-faststart-${{ matrix.arch }}
 
-  upload-versioned-manifests-tags:
+  create-versioned-manifests-tags:
     name: ⬆️ 📋 Upload versioned manifests to registries
-    environment: upload
+    environment: tag
     runs-on: ubuntu-24.04
-    needs: [ set-constants, upload-latest-version-tags ]
+    needs: [ set-constants, create-latest-version-tags ]
     strategy:
       matrix:
         repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
@@ -336,11 +336,11 @@ jobs:
             --template ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}-ARCH \
             --target ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
 
-  upload-23-manifests-tags:
+  create-23-manifests-tags:
     name: ⬆️ 📋 Upload 23 manifests to registries
-    environment: upload
+    environment: tag
     runs-on: ubuntu-24.04
-    needs: [ set-constants, upload-latest-version-tags ]
+    needs: [ set-constants, create-latest-version-tags ]
     strategy:
       matrix:
         repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
@@ -385,9 +385,9 @@ jobs:
 
   upload-latest-manifests-tags:
     name: ⬆️ 📋 Upload latest manifests to registries
-    environment: upload
+    environment: tag
     runs-on: ubuntu-24.04
-    needs: [ set-constants, upload-latest-version-tags ]
+    needs: [ set-constants, create-latest-version-tags ]
     strategy:
       matrix:
         repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
@@ -433,7 +433,7 @@ jobs:
   cleanup:
     name: Cleanup build leftovers
     runs-on: ubuntu-24.04
-    needs: [ upload-latest-manifests-tags, upload-23-manifests-tags, upload-versioned-manifests-tags ]
+    needs: [ upload-latest-manifests-tags, create-23-manifests-tags, create-versioned-manifests-tags ]
     permissions:
       deployments: write
 
