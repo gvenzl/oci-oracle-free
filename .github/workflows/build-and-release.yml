@@ -295,7 +295,7 @@ jobs:
     needs: [ set-constants, upload-latest-version-tags ]
     strategy:
       matrix:
-        registry: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
+        repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
         version: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
         image_flavor: [ "-full", "", "-slim" ]
         image_faststart: [ "", "-faststart" ]
