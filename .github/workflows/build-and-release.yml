@@ -1,8 +1,5 @@
 name: 🛠️ Build and release all images
-on:
-  push:
-    branches:
-      - "dev"
+on: workflow_dispatch
 
 jobs:
 
