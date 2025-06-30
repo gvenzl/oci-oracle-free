@@ -93,6 +93,7 @@ function runContainerTest {
   APP_USER_PASSWORD_CMD=""
   ORA_PWD_CMD="${ORA_PWD_CMD:--e ORACLE_PASSWORD=LetsTest1}"
   ORACLE_DATABASE_CMD=""
+  VOLUME_CMD=""
 
   if [ -n "${APP_USER:-}" ]; then
     APP_USER_CMD="-e APP_USER=${APP_USER}"
@@ -106,13 +107,17 @@ function runContainerTest {
     ORACLE_DATABASE_CMD="-e ORACLE_DATABASE=${ORACLE_DATABASE}"
   fi;
 
+  if [ -n "${CONTAINER_VOLUME:-}" ]; then
+    VOLUME_CMD="-v ${CONTAINER_VOLUME}"
+  fi;
+
   echo "TEST ${TEST_NAME}: Started"
   echo ""
 
   TEST_START_TMS=$(date '+%s')
 
   # Run and start container
-  podman run -d --name ${CONTAINER_NAME} ${ORA_PWD_CMD} ${APP_USER_CMD} ${APP_USER_PASSWORD_CMD} ${ORACLE_DATABASE_CMD} ${IMAGE} >/dev/null
+  podman run -d --name ${CONTAINER_NAME} ${ORA_PWD_CMD} ${APP_USER_CMD} ${APP_USER_PASSWORD_CMD} ${ORACLE_DATABASE_CMD} ${VOLUME_CMD} ${IMAGE} >/dev/null
 
   # Check whether Oracle DB came up successfully
   if checkDB "${CONTAINER_NAME}"; then

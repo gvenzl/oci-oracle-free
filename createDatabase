@@ -4,7 +4,10 @@
 # Author: gvenzl
 # Name: createDatabase
 # Description: Creates a new pluggable database.
-#              Parameter 1: The pluggable database to create
+#              If a /pdb-plug/${NEW_PDB}.pdb file is found, it will be plugged in.
+#              Otherwise, a new pluggable database from PDBSEED will be created.
+#
+#   Parameter 1: The pluggable database to create
 #
 # Copyright 2023 Gerald Venzl
 #
@@ -26,20 +29,55 @@ set -Eeuo pipefail
 
 NEW_PDB="${1:-}"
 
+# Safeguard, if no PDB is provided, don't do anything
 if [ -n "${NEW_PDB}" ]; then
 
-  RANDOM_PDBADIN_PASSWORD=$(date +%s | sha256sum | base64 | head -c 8)
+  # Track script start time
+  PDB_CREATE_START_TMS=$(date '+%s')
 
+  # If .pdb file is provided, import PDB instead of creating from PDBSEED
+  if [ -f "/pdb-plug/${NEW_PDB}.pdb" ]; then
+
+    echo "CONTAINER: Plugging existing pluggable database '${NEW_PDB}' from '/pdb-plug/${NEW_PDB}.pdb'."
+
+    sqlplus -s / as sysdba <<EOF
+       -- Exit on any errors
+       WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+       CREATE PLUGGABLE DATABASE ${NEW_PDB} \
+        USING '/pdb-plug/${NEW_PDB}.pdb' COPY \
+         FILE_NAME_CONVERT=('/pdb-plug','${ORACLE_BASE}/oradata/${ORACLE_SID}/${NEW_PDB}');
+
+       exit;
+EOF
+
+  # No *.pdb file provided, create brand new PDB from PDBSEED
+  else
+
+    echo "CONTAINER: Creating new pluggable database '${NEW_PDB}'."
+
+    RANDOM_PDBADIN_PASSWORD=$(date +%s | sha256sum | base64 | head -c 8)
+    sqlplus -s / as sysdba <<EOF
+       -- Exit on any errors
+       WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+       CREATE PLUGGABLE DATABASE ${NEW_PDB} \
+        ADMIN USER PDBADMIN IDENTIFIED BY "${RANDOM_PDBADIN_PASSWORD}" \
+         FILE_NAME_CONVERT=('pdbseed','${NEW_PDB}') \
+          DEFAULT TABLESPACE USERS \
+           DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/${NEW_PDB}/users01.dbf' \
+            SIZE 1m AUTOEXTEND ON NEXT 10m MAXSIZE UNLIMITED;
+
+       exit;
+EOF
+    unset RANDOM_PDBADIN_PASSWORD
+  fi;
+
+
+  # Open new pluggable database and register state
   sqlplus -s / as sysdba <<EOF
      -- Exit on any errors
      WHENEVER SQLERROR EXIT SQL.SQLCODE
-
-     CREATE PLUGGABLE DATABASE ${NEW_PDB} \
-      ADMIN USER PDBADMIN IDENTIFIED BY "${RANDOM_PDBADIN_PASSWORD}" \
-       FILE_NAME_CONVERT=('pdbseed','${NEW_PDB}') \
-        DEFAULT TABLESPACE USERS \
-         DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/${NEW_PDB}/users01.dbf' \
-          SIZE 1m AUTOEXTEND ON NEXT 10m MAXSIZE UNLIMITED;
 
      -- Open PDB and save state
      ALTER PLUGGABLE DATABASE ${NEW_PDB} OPEN READ WRITE;
@@ -50,6 +88,9 @@ if [ -n "${NEW_PDB}" ]; then
      exit;
 EOF
 
-  unset RANDOM_PDBADIN_PASSWORD
+  PDB_CREATE_END_TMS=$(date '+%s')
+  PDB_CREATE_DURATION=$(( PDB_CREATE_END_TMS - PDB_CREATE_START_TMS ))
+
+  echo "CONTAINER: DONE: Pluggable database '${NEW_PDB}' available, duration: ${PDB_CREATE_DURATION} seconds."
 
 fi;

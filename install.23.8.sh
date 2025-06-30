@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# Since: April, 2023
+# Since: June, 2025
 # Author: gvenzl
-# Name: install.23.7.sh
-# Description: Install script for Oracle Database 23 Free
+# Name: install.23.8.sh
+# Description: Install script for Oracle Database 23ai Free
 #
 # Copyright 2025 Gerald Venzl
 #
@@ -1430,7 +1430,6 @@ rm -r "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/dpdump/*
 # Remove Oracle DB install logs
 rm    "${ORACLE_BASE}"/cfgtoollogs/dbca/FREE/*
 rm    "${ORACLE_BASE}"/cfgtoollogs/netca/*
-rm -r "${ORACLE_BASE_HOME}"/cfgtoollogs/sqlpatch/*
 rm    "${ORACLE_BASE}"/oraInventory/logs/*
 rm -r "${ORACLE_BASE_HOME}"/log/*
 rm -r "${ORACLE_BASE_HOME}"/rdbms/log/*
