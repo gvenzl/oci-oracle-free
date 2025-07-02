@@ -306,7 +306,6 @@ echo "CONTAINER: starting up..."
 
 # Create healthcheck status files
 touch /opt/oracle/hc-container-init
-touch /opt/oracle/hc-pdb-create
 touch /opt/oracle/hc-user-startup-scripts
 
 # Setup all required environment variables
@@ -318,6 +317,8 @@ check_minimum_memory
 # If database does not yet exist, create directory structure
 if [ -z "${DATABASE_ALREADY_EXISTS:-}" ]; then
   echo "CONTAINER: first database startup, initializing..."
+  # PDB creation and setup scripts are only run when the DB is not already initialized.
+  touch /opt/oracle/hc-pdb-create
   touch /opt/oracle/hc-user-setup-scripts
   create_dbconfig
 # Otherwise check that symlinks are in place
