@@ -1,0 +1,106 @@
+name: 🛠️ Build an image
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The image version"
+        required: true
+        default: "23.8"
+        type: choice
+        options:
+          - "23.8"
+          - "23.7"
+          - "23.6"
+          - "23.5"
+      flavor:
+        description: "The image flavor"
+        required: true
+        default: "-full"
+        type: choice
+        options:
+          - "-full"
+          - ""
+          - "-slim"
+      faststart:
+        description: "Build a faststart image"
+        required: true
+        default: ""
+        type: choice
+        options:
+          - ""
+          - "-faststart"
+      runner:
+        description: "Build runner"
+        required: true
+        default: "ubuntu-24.04-arm"
+        type: choice
+        options:
+          - "ubuntu-24.04"
+          - "ubuntu-24.04-arm"
+
+jobs:
+
+  build-image:
+    name: 🛠️ Build image
+    environment: build
+    runs-on: ${{ input.runner}}
+    steps:
+
+      - name: 🕵️ Get vars
+        run: |
+          OS_ARCH=$(uname -m)
+          echo "OS_ARCH=${OS_ARCH}" >> "$GITHUB_ENV"
+
+          if     [ "${OS_ARCH}" == "aarch64" ]; then IMAGE_ARCH="arm64";
+            elif [ "${OS_ARCH}" == "x86_64" ];  then IMAGE_ARCH="amd64";
+            else IMAGE_ARCH="";
+          fi;
+          echo "IMAGE_ARCH=${IMAGE_ARCH}" >> "$GITHUB_ENV"
+
+          if     [ "${{ input.flavor }}" == "-full" ]; then BUILD_FLAVOR="-f";
+            elif [ "${{ input.flavor }}" == "" ];      then BUILD_FLAVOR="-r";
+            elif [ "${{ input.flavor }}" == "-slim" ]; then BUILD_FLAVOR="-s";
+          fi;
+          echo "BUILD_FLAVOR=${BUILD_FLAVOR}" >> "$GITHUB_ENV"
+
+      - name: 📂 Checkout repo
+        uses: actions/checkout@v4
+
+      - name: ⏬ Install build dependencies
+        run: sudo apt-get install -y buildah podman
+
+      - name: ⬇️ Download install file from web
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan ${{ secrets.FILE_SERVER }} >> ~/.ssh/known_hosts 2>/dev/null
+          eval $(ssh-agent)
+          ssh-add - <<< "${{ secrets.FILE_USER_AUTH }}"
+          scp ${{ secrets.FILE_USER }}@${{ secrets.FILE_SERVER }}:"oracle-database-free-23ai-${{ input.version }}-1.0-1.el8.${{ env.OS_ARCH }}.rpm" .
+
+      - name: 🛠️ Build container image for ${{ input.version }}, flavor "${{ input.flavor }}"
+        run: ./buildContainerImage.sh -v "${{ input.version }}" ${{ env.BUILD_FLAVOR }} ${{ input.faststart }}
+
+      - name: 📤 Export images to local file system
+        run: podman save -o "oracle-free-${{ input.version }}${{ input.flavor }}${{ input.faststart }}-${{ env.IMAGE_ARCH }}.tar" "localhost/gvenzl/oracle-free:${{ input.version }}${{ input.flavor }}${{ input.faststart }}-${{ env.IMAGE_ARCH }}"
+
+      - name: ⬆️ Upload image
+        uses: actions/upload-artifact@v4
+        with:
+          retention-days: 3
+          name: oracle-free-${{ input.version }}${{ input.flavor }}${{ input.faststart }}-${{ env.IMAGE_ARCH }}
+          path: oracle-free-${{ input.version }}${{ input.flavor }}${{ input.faststart }}-${{ env.IMAGE_ARCH }}.tar
+
+  cleanup:
+    name: 🧹 Cleanup build leftovers
+    runs-on: ubuntu-24.04
+    needs: [ build-image ]
+    permissions:
+      deployments: write
+
+    steps:
+      - name: 🧹 Cleanup build deployments
+        uses: strumwolf/delete-deployment-environment@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: build
+          onlyRemoveDeployments: true
