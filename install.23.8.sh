@@ -235,6 +235,10 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- Exit on any errors
    WHENEVER SQLERROR EXIT SQL.SQLCODE
 
+   -- Drop FREEPDB1 (to recreate at the end)
+   ALTER PLUGGABLE DATABASE FREEPDB1 CLOSE;
+   DROP PLUGGABLE DATABASE FREEPDB1 INCLUDING DATAFILES;
+
    -- Enable remote HTTP access
    EXEC DBMS_XDB.SETLISTENERLOCALACCESS(FALSE);
 
@@ -266,12 +270,14 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- Set max job_queue_processes to 1
    ALTER SYSTEM SET JOB_QUEUE_PROCESSES=1;
 
-   -- Disable parallel terminated transactions recovery
+   -- Disable parallel terminated transactions recovery for all PDBs
+   -- Open PDB\$SEED to READ WRITE mode
+   ALTER PLUGGABLE DATABASE PDB\$SEED CLOSE;
+   ALTER PLUGGABLE DATABASE PDB\$SEED OPEN READ WRITE;
    ALTER SYSTEM SET FAST_START_PARALLEL_ROLLBACK=FALSE CONTAINER=ALL;
-
-   -- Drop FREEPDB1 (to recreate at the end)
-   ALTER PLUGGABLE DATABASE FREEPDB1 CLOSE;
-   DROP PLUGGABLE DATABASE FREEPDB1 INCLUDING DATAFILES;
+   -- Reinstantiate PDB\$SEED state
+   ALTER PLUGGABLE DATABASE PDB\$SEED CLOSE;
+   ALTER PLUGGABLE DATABASE PDB\$SEED OPEN READ ONLY;
 
    -- Reboot of DB
    SHUTDOWN IMMEDIATE;
