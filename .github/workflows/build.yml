@@ -21,14 +21,7 @@ on:
           - "-full"
           - ""
           - "-slim"
-      faststart:
-        description: "Build a faststart image"
-        required: true
-        default: ""
-        type: choice
-        options:
-          - ""
-          - "-faststart"
+
       runner:
         description: "Build runner"
         required: true
@@ -78,17 +71,17 @@ jobs:
           scp ${{ secrets.FILE_USER }}@${{ secrets.FILE_SERVER }}:"oracle-database-free-23ai-${{ input.version }}-1.0-1.el8.${{ env.OS_ARCH }}.rpm" .
 
       - name: 🛠️ Build container image for ${{ input.version }}, flavor "${{ input.flavor }}"
-        run: ./buildContainerImage.sh -v "${{ input.version }}" ${{ env.BUILD_FLAVOR }} ${{ input.faststart }}
+        run: ./buildContainerImage.sh -v "${{ input.version }}" ${{ env.BUILD_FLAVOR }}
 
       - name: 📤 Export images to local file system
-        run: podman save -o "oracle-free-${{ input.version }}${{ input.flavor }}${{ input.faststart }}-${{ env.IMAGE_ARCH }}.tar" "localhost/gvenzl/oracle-free:${{ input.version }}${{ input.flavor }}${{ input.faststart }}-${{ env.IMAGE_ARCH }}"
+        run: podman save -o "oracle-free-${{ input.version }}${{ input.flavor }}-${{ env.IMAGE_ARCH }}.tar" "localhost/gvenzl/oracle-free:${{ input.version }}${{ input.flavor }}-${{ env.IMAGE_ARCH }}"
 
       - name: ⬆️ Upload image
         uses: actions/upload-artifact@v4
         with:
           retention-days: 3
-          name: oracle-free-${{ input.version }}${{ input.flavor }}${{ input.faststart }}-${{ env.IMAGE_ARCH }}
-          path: oracle-free-${{ input.version }}${{ input.flavor }}${{ input.faststart }}-${{ env.IMAGE_ARCH }}.tar
+          name: oracle-free-${{ input.version }}${{ input.flavor }}-${{ env.IMAGE_ARCH }}
+          path: oracle-free-${{ input.version }}${{ input.flavor }}-${{ env.IMAGE_ARCH }}.tar
 
   cleanup:
     name: 🧹 Cleanup build leftovers
