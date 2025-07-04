@@ -270,6 +270,12 @@ function check_minimum_memory {
   # cgroups v2
   if [ -f /sys/fs/cgroup/memory.max ]; then
     container_memory=$(< /sys/fs/cgroup/memory.max)
+    # If there is no memory limit, i.e. "max", check that the OS has enough memory
+    if [ "${container_memory}" == "max" ]; then
+      # Meminfo holds memory in kB --> multiply by 1024
+      # (see https://superuser.com/questions/1737654/what-is-the-true-meaning-of-the-unit-kb-in-proc-meminfo)
+      container_memory=$(( $(grep "MemTotal" /proc/meminfo | awk '{print $2}') * 1024))
+    fi;
   # cgroups v1
   elif [ -f /sys/fs/cgroup/memory/memory.limit_in_bytes ]; then
     container_memory=$(< /sys/fs/cgroup/memory/memory.limit_in_bytes)
@@ -278,16 +284,16 @@ function check_minimum_memory {
     container_memory=2147483648
   fi;
 
-  # Check whether memory is not set to "max", i.e. unlimited and
-  # prevent integer overflow by checking whether container has
+  # Prevent integer overflow by checking whether container has
   # less than double digit GB of RAM.
-  if [[ ${container_memory} != "max" && ${#container_memory} -lt 11 ]]; then
+  if [ ${#container_memory} -lt 11 ]; then
     # Check memory per version
     # 11.2 >= 1 GB
     # 18c+ >= 2 GB
     if [[ ( ${container_memory} -lt 2147483648 ) ]]; then
       echo "CONTAINER: WARNING: The container has less than 2 GB memory available to run Oracle Database Free."
       echo "There are currently only $((container_memory/1024/1024)) MiB available inside the container."
+      echo "There have been known cases of Oracle Database Free not starting because of insufficient memory.'"
     fi;
   fi;
 
