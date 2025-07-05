@@ -271,13 +271,7 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    ALTER SYSTEM SET JOB_QUEUE_PROCESSES=1;
 
    -- Disable parallel terminated transactions recovery for all PDBs
-   -- Open PDB\$SEED to READ WRITE mode
-   ALTER PLUGGABLE DATABASE PDB\$SEED CLOSE;
-   ALTER PLUGGABLE DATABASE PDB\$SEED OPEN READ WRITE;
    ALTER SYSTEM SET FAST_START_PARALLEL_ROLLBACK=FALSE CONTAINER=ALL;
-   -- Reinstantiate PDB\$SEED state
-   ALTER PLUGGABLE DATABASE PDB\$SEED CLOSE;
-   ALTER PLUGGABLE DATABASE PDB\$SEED OPEN READ ONLY;
 
    -- Reboot of DB
    SHUTDOWN IMMEDIATE;
@@ -1371,6 +1365,20 @@ chmod a+rwx -R "${ORACLE_BASE}"/oradata
 echo "BUILDER: Create FREEPDB1"
 
 su -p oracle -c "${ORACLE_BASE}/createDatabase FREEPDB1"
+
+# Disable FAST_START_PARALLEL_ROLLBACK for FREEPDB1 (PDB$SEED doesn't persist FALSE)
+su -p oracle -c "sqlplus -s / as sysdba" << EOF
+   -- Exit on any errors
+   WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+   -- Switch to PDB
+   ALTER SESSION SET CONTAINER=FREEPDB1;
+
+   -- Disable parallel terminated transactions recovery for all PDBs
+   ALTER SYSTEM SET FAST_START_PARALLEL_ROLLBACK=FALSE;
+
+   exit;
+EOF
 
 ###################################
 ########### DB SHUTDOWN ###########
