@@ -235,6 +235,10 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- Exit on any errors
    WHENEVER SQLERROR EXIT SQL.SQLCODE
 
+   -- Drop FREEPDB1 (to recreate at the end)
+   ALTER PLUGGABLE DATABASE FREEPDB1 CLOSE;
+   DROP PLUGGABLE DATABASE FREEPDB1 INCLUDING DATAFILES;
+
    -- Enable remote HTTP access
    EXEC DBMS_XDB.SETLISTENERLOCALACCESS(FALSE);
 
@@ -266,12 +270,12 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- Set max job_queue_processes to 1
    ALTER SYSTEM SET JOB_QUEUE_PROCESSES=1;
 
-   -- Disable parallel terminated transactions recovery
+   -- Disable parallel terminated transactions recovery for all PDBs
    ALTER SYSTEM SET FAST_START_PARALLEL_ROLLBACK=FALSE CONTAINER=ALL;
-
-   -- Drop FREEPDB1 (to recreate at the end)
-   ALTER PLUGGABLE DATABASE FREEPDB1 CLOSE;
-   DROP PLUGGABLE DATABASE FREEPDB1 INCLUDING DATAFILES;
+   -- CONTAINER=ALL does not affect SEED, explicitly deactivate it for seed
+   ALTER SESSION SET CONTAINER=PDB\$SEED;
+   ALTER SYSTEM SET FAST_START_PARALLEL_ROLLBACK=FALSE;
+   ALTER SESSION SET CONTAINER=CDB\$ROOT;
 
    -- Reboot of DB
    SHUTDOWN IMMEDIATE;
@@ -281,7 +285,7 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    CREATE USER OPS\$ORACLE IDENTIFIED EXTERNALLY;
    GRANT CONNECT, SELECT_CATALOG_ROLE TO OPS\$ORACLE;
    -- Permissions to see entries in v\$pdbs
-   ALTER USER OPS\$ORACLE SET CONTAINER_DATA = ALL CONTAINER = CURRENT;
+   ALTER USER OPS\$ORACLE SET CONTAINER_DATA=ALL CONTAINER=CURRENT;
 
    exit;
 EOF
@@ -1033,19 +1037,13 @@ EOF
     # Change configuration for SLIM image
     echo "BUILDER: Change configuration for SLIM image"
 
-    if [[ "$(cat /etc/oci-image-version)" ==  "23.2" ]]; then
-      MLE_PARAM="MULTILINGUAL_ENGINE=DISABLE"
-    else
-      MLE_PARAM="MLE_PROG_LANGUAGES=OFF"
-    fi;
-
     su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
        -- Exit on any errors
        WHENEVER SQLERROR EXIT SQL.SQLCODE
 
        -- Disable Multilingual Engine
-       ALTER SYSTEM SET ${MLE_PARAM};
+       ALTER SYSTEM SET MLE_PROG_LANGUAGES=OFF;
 
        exit;
 EOF
