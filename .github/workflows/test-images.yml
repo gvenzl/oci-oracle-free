@@ -1,10 +1,13 @@
 name: 🛠️ Test images
 on:
+  # Don't test on pushes or pull requests to main.
+  # The build and release has its own set of tests.
   push:
-    branches:
-      # Don't test on pushes to main.
-      # The build and release has it's own set of tests.
-      - '!main'
+    branches-ignore:
+      - main
+  pull_request:
+    branches-ignore:
+      - main
 jobs:
 
   set-constants:
