@@ -5,13 +5,8 @@ on:
       version:
         description: "The image version"
         required: true
-        default: "23.8"
-        type: choice
-        options:
-          - "23.8"
-          - "23.7"
-          - "23.6"
-          - "23.5"
+        default: "23.9"
+        type: string
       flavor:
         description: "The image flavor"
         required: true
@@ -21,7 +16,6 @@ on:
           - "-full"
           - ""
           - "-slim"
-
       runner:
         description: "Build runner"
         required: true

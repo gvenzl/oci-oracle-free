@@ -117,7 +117,9 @@ if [ "${SKIP_CHECKSUM}" == "false" ]; then
         ( "${VERSION}" == "23.7"  &&    "${BUILDER_ARCH}" == "x86_64"  &&                                   "${SHASUM_RET%% *}" != "af64450e1120e56dac43a447a2e109449c7590489003d830d6a32a9168e0469d" ) ||
         ( "${VERSION}" == "23.7"  &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "b069d02c624ed63aa8bbdb0a6ae884e1b0fc8d60b315adedc0e781dea0607d2a" ) ||
         ( "${VERSION}" == "23.8"  &&    "${BUILDER_ARCH}" == "x86_64"  &&                                   "${SHASUM_RET%% *}" != "cd0d16939150e6ec5e70999a762a13687bfa99b05c4f310593e7ca3892e1d0ce" ) ||
-        ( "${VERSION}" == "23.8"  &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "c5cdd5d3b7017594899e8f13eb2d69f2ae6339ec3a78e647f18800ad7dc44346" )
+        ( "${VERSION}" == "23.8"  &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "c5cdd5d3b7017594899e8f13eb2d69f2ae6339ec3a78e647f18800ad7dc44346" ) ||
+        ( "${VERSION}" == "23.9"  &&    "${BUILDER_ARCH}" == "x86_64"  &&                                   "${SHASUM_RET%% *}" != "a6e64941ad940dd23e152e3d51213aeaea6d93b43688fbd030175935e0efe03d" ) ||
+        ( "${VERSION}" == "23.9"  &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "59faac204495cc6a08b6e99cd0997226c17fe4d7362e16b73ae5446b3e5b688e" )
       ]]; then
     echo "BUILDER: WARNING! SHA sum of RPM does not match with what's expected!"
     echo "BUILDER: WARNING! Verify that the .rpm file is not corrupt!"
