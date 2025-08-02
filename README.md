@@ -27,7 +27,7 @@ Oracle Database Free Container images.
 | `slim[-faststart]`                                                             | 🔵 Always Supported |
 | `full[-faststart]`                                                             | 🔵 Always Supported |
 | `23[-faststart]`<br/>`23[-slim][-faststart]`<br/>`23[-full][-faststart]`       | 🟢 Supported        |
-| `23.9[-faststart]`<br/>`23.8[-slim][-faststart]`<br/>`23.9[-full][-faststart]` | 🟢 Supported        |
+| `23.9[-faststart]`<br/>`23.9[-slim][-faststart]`<br/>`23.9[-full][-faststart]` | 🟢 Supported        |
 | `23.8[-faststart]`<br/>`23.8[-slim][-faststart]`<br/>`23.8[-full][-faststart]` | 🟡 Deprecated       |
 | `23.7[-faststart]`<br/>`23.7[-slim][-faststart]`<br/>`23.7[-full][-faststart]` | 🔴 Unsupported      |
 | `23.6[-faststart]`<br/>`23.6[-slim][-faststart]`<br/>`23.6[-full][-faststart]` | 🔴 Unsupported      |
