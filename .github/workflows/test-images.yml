@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       FLAVORS: '[ "f", "r", "s" ]'
-      VERSIONS: '[ "23.9", "23.8" ]'
+      VERSIONS: '[ "23.8", "23.9" ]'
       LATEST_VERSION: "23.9"
       RPM_ARCH: '[ "aarch64", "x86_64" ]'
       IMAGE_ARCH: '[ "arm64", "amd64" ]'

@@ -293,7 +293,7 @@ function check_minimum_memory {
     if [[ ( ${container_memory} -lt 2147483648 ) ]]; then
       echo "CONTAINER: WARNING: The container has less than 2 GB memory available to run Oracle Database Free."
       echo "There are currently only $((container_memory/1024/1024)) MiB available inside the container."
-      echo "There have been known cases of Oracle Database Free not starting because of insufficient memory.'"
+      echo "There have been known cases of Oracle Database Free not starting because of insufficient memory."
     fi;
   fi;
 

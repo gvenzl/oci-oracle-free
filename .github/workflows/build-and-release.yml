@@ -8,7 +8,9 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       FLAVORS: '[ "f", "r", "s" ]'
-      VERSIONS: '[ "23.9", "23.8" ]'
+      # Make sure that the latest version stays on the right so that it is built last
+      # This will ensure that the latest versions appear on top in GitHub and DockerHub.
+      VERSIONS: '[ "23.8", "23.9" ]'
       LATEST_VERSION: "23.9"
       RPM_ARCH: '[ "aarch64", "x86_64" ]'
       IMAGE_ARCH: '[ "amd64", "arm64" ]'
