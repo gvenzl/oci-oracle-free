@@ -1,5 +1,10 @@
 name: 🛠️ Test images
-on: push
+on:
+  push:
+    branches:
+      # Don't test on pushes to main.
+      # The build and release has it's own set of tests.
+      - '!main'
 jobs:
 
   set-constants:
