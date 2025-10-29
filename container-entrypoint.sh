@@ -357,12 +357,12 @@ if healthcheck.sh "${ORACLE_SID}" "container status ignore"; then
 
     # If password is specified
     if [ -n "${ORACLE_PASSWORD:-}" ]; then
-      resetPassword "${ORACLE_PASSWORD}"
+      resetPassword "${ORACLE_PASSWORD}" "${PASSWORD_INIT_TIMEOUTI:-}"
 
     # Generate random password
     elif [ -n "${ORACLE_RANDOM_PASSWORD:-}" ]; then
       RANDOM_PASSWORD=$(date +%s | sha256sum | base64 | head -c 8)
-      resetPassword "${RANDOM_PASSWORD}"
+      resetPassword "${RANDOM_PASSWORD}" "${PASSWORD_INIT_TIMEOUT:-}"
       echo "############################################"
       echo "ORACLE PASSWORD FOR SYS AND SYSTEM: ${RANDOM_PASSWORD}"
       echo "############################################"
