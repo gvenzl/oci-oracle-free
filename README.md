@@ -21,20 +21,21 @@ Oracle Database Free Container images.
 
 # Supported tags
 
-| Tag                                                                            | Status              |
-| ------------------------------------------------------------------------------ | ------------------- |
-| `latest[-faststart]`                                                           | 🔵 Always Supported |
-| `slim[-faststart]`                                                             | 🔵 Always Supported |
-| `full[-faststart]`                                                             | 🔵 Always Supported |
-| `23[-faststart]`<br/>`23[-slim][-faststart]`<br/>`23[-full][-faststart]`       | 🟢 Supported        |
-| `23.9[-faststart]`<br/>`23.9[-slim][-faststart]`<br/>`23.9[-full][-faststart]` | 🟢 Supported        |
-| `23.8[-faststart]`<br/>`23.8[-slim][-faststart]`<br/>`23.8[-full][-faststart]` | 🟡 Deprecated       |
-| `23.7[-faststart]`<br/>`23.7[-slim][-faststart]`<br/>`23.7[-full][-faststart]` | 🔴 Unsupported      |
-| `23.6[-faststart]`<br/>`23.6[-slim][-faststart]`<br/>`23.6[-full][-faststart]` | 🔴 Unsupported      |
-| `23.5[-faststart]`<br/>`23.5[-slim][-faststart]`<br/>`23.5[-full][-faststart]` | 🔴 Unsupported      |
-| `23.4[-faststart]`<br/>`23.4[-slim][-faststart]`<br/>`23.4[-full][-faststart]` | 🔴 Unsupported      |
-| `23.3[-faststart]`<br/>`23.3[-slim][-faststart]`<br/>`23.3[-full][-faststart]` | 🔴 Unsupported      |
-| `23.2[-faststart]`<br/>`23.2[-slim][-faststart]`<br/>`23.2[-full][-faststart]` | 🔴 Unsupported      |
+| Tag                                                                                     | Status              |
+| --------------------------------------------------------------------------------------- | ------------------- |
+| `latest[-faststart]`                                                                    | 🔵 Always Supported |
+| `slim[-faststart]`                                                                      | 🔵 Always Supported |
+| `full[-faststart]`                                                                      | 🔵 Always Supported |
+| `23[-faststart]`<br/>`23[-slim][-faststart]`<br/>`23[-full][-faststart]`                | 🟢 Supported        |
+| `23.26.0[-faststart]`<br/>`23.26.0[-slim][-faststart]`<br/>`23.26.0[-full][-faststart]` | 🟢 Supported        |
+| `23.9[-faststart]`<br/>`23.9[-slim][-faststart]`<br/>`23.9[-full][-faststart]`          | 🟡 Deprecated       |
+| `23.8[-faststart]`<br/>`23.8[-slim][-faststart]`<br/>`23.8[-full][-faststart]`          | 🔴 Unsupported      |
+| `23.7[-faststart]`<br/>`23.7[-slim][-faststart]`<br/>`23.7[-full][-faststart]`          | 🔴 Unsupported      |
+| `23.6[-faststart]`<br/>`23.6[-slim][-faststart]`<br/>`23.6[-full][-faststart]`          | 🔴 Unsupported      |
+| `23.5[-faststart]`<br/>`23.5[-slim][-faststart]`<br/>`23.5[-full][-faststart]`          | 🔴 Unsupported      |
+| `23.4[-faststart]`<br/>`23.4[-slim][-faststart]`<br/>`23.4[-full][-faststart]`          | 🔴 Unsupported      |
+| `23.3[-faststart]`<br/>`23.3[-slim][-faststart]`<br/>`23.3[-full][-faststart]`          | 🔴 Unsupported      |
+| `23.2[-faststart]`<br/>`23.2[-slim][-faststart]`<br/>`23.2[-full][-faststart]`          | 🔴 Unsupported      |
 
 ## Tags
 
