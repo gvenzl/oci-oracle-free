@@ -69,10 +69,13 @@ jobs:
           ssh-keyscan ${{ secrets.FILE_SERVER }} >> ~/.ssh/known_hosts 2>/dev/null
           eval $(ssh-agent)
           ssh-add - <<< "${{ secrets.FILE_USER_AUTH }}"
-          scp ${{ secrets.FILE_USER }}@${{ secrets.FILE_SERVER }}:"${{ env.DATABASE_NAME }}-${{ inputs.version }}-1.el8.${{ env.OS_ARCH }}.rpm" .
+          scp ${{ secrets.FILE_USER }}@${{ secrets.FILE_SERVER }}:${{ env.DATABASE_NAME }}-${{ inputs.version }}-1.el8.${{ env.OS_ARCH }}.rpm .
 
       - name: 🛠️ Build container image for ${{ inputs.version }}, flavor "${{ inputs.flavor }}"
         run: ./buildContainerImage.sh -v "${{ inputs.version }}" ${{ env.BUILD_FLAVOR }}
+
+      - name: 🧹 Cleanup build rpm
+        run: rm ${{ env.DATABASE_NAME }}-${{ inputs.version }}-1.el8.${{ env.OS_ARCH }}.rpm
 
       - name: 📤 Export images to local file system
         run: podman save -o "oracle-free-${{ inputs.version }}${{ inputs.flavor }}-${{ env.IMAGE_ARCH }}.tar" "localhost/gvenzl/oracle-free:${{ inputs.version }}${{ inputs.flavor }}-${{ env.IMAGE_ARCH }}"
