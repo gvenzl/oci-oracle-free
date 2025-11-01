@@ -1,10 +1,10 @@
 #
-# Since: September, 2023
+# Since: October, 2025
 # Author: gvenzl
-# Name: Dockerfile.23
-# Description: Dockerfile to build Oracle Database 23 Free
+# Name: Dockerfile.26
+# Description: Dockerfile to build Oracle AI Database 26 Free
 #
-# Copyright 2023 Gerald Venzl
+# Copyright 2025 Gerald Venzl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,14 +25,14 @@ ARG BUILD_MODE BUILD_VERSION DB_FLAVOR ARCH RPM_ARCH
 ENV OCI_IMAGE_VERSION=${BUILD_VERSION} \
     OCI_IMAGE_FLAVOR=${BUILD_MODE} \
     ORACLE_BASE=/opt/oracle \
-    ORACLE_BASE_CONFIG=/opt/oracle/product/23${DB_FLAVOR}/dbhomeFree \
-    ORACLE_BASE_HOME=/opt/oracle/product/23${DB_FLAVOR}/dbhomeFree \
-    ORACLE_HOME=/opt/oracle/product/23${DB_FLAVOR}/dbhomeFree \
+    ORACLE_BASE_CONFIG=/opt/oracle/product/26${DB_FLAVOR}/dbhomeFree \
+    ORACLE_BASE_HOME=/opt/oracle/product/26${DB_FLAVOR}/dbhomeFree \
+    ORACLE_HOME=/opt/oracle/product/26${DB_FLAVOR}/dbhomeFree \
     ORACLE_SID=FREE \
-    PATH=${PATH}:/opt/oracle/product/23${DB_FLAVOR}/dbhomeFree/bin:/opt/oracle \
+    PATH=${PATH}:/opt/oracle/product/26${DB_FLAVOR}/dbhomeFree/bin:/opt/oracle \
     NLS_LANG=.AL32UTF8
 
-COPY oracle-database-free-23${DB_FLAVOR}-${BUILD_VERSION}-1.el8.${RPM_ARCH}.rpm install.${BUILD_VERSION}.sh container-entrypoint.sh resetPassword createAppUser createDatabase healthcheck.sh /install/
+COPY oracle-ai-database-free-26${DB_FLAVOR}-${BUILD_VERSION}-1.el8.${RPM_ARCH}.rpm install.${BUILD_VERSION}.sh container-entrypoint.sh resetPassword createAppUser createDatabase healthcheck.sh /install/
 
 RUN /install/install.${BUILD_VERSION}.sh "${BUILD_MODE}"
 
@@ -46,11 +46,11 @@ ARG DB_FLAVOR
 
 # Redefine environment variables, etc. as we copied everything from an empty image (scratch)
 ENV ORACLE_BASE=/opt/oracle \
-    ORACLE_BASE_CONFIG=/opt/oracle/product/23${DB_FLAVOR}/dbhomeFree \
-    ORACLE_BASE_HOME=/opt/oracle/product/23${DB_FLAVOR}/dbhomeFree \
-    ORACLE_HOME=/opt/oracle/product/23${DB_FLAVOR}/dbhomeFree \
+    ORACLE_BASE_CONFIG=/opt/oracle/product/26${DB_FLAVOR}/dbhomeFree \
+    ORACLE_BASE_HOME=/opt/oracle/product/26${DB_FLAVOR}/dbhomeFree \
+    ORACLE_HOME=/opt/oracle/product/26${DB_FLAVOR}/dbhomeFree \
     ORACLE_SID=FREE \
-    PATH=${PATH}:/opt/oracle/product/23${DB_FLAVOR}/dbhomeFree/bin:/opt/oracle \
+    PATH=${PATH}:/opt/oracle/product/26${DB_FLAVOR}/dbhomeFree/bin:/opt/oracle \
     NLS_LANG=.AL32UTF8
 
 COPY --from=builder / /

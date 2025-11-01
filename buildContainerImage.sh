@@ -23,7 +23,7 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-VERSION="23.8"
+VERSION="23.26"
 IMAGE_FLAVOR="REGULAR"
 IMAGE_NAME="gvenzl/oracle-free"
 SKIP_CHECKSUM="false"
@@ -36,15 +36,15 @@ function usage() {
     cat << EOF
 
 Usage: buildContainerImage.sh [-f | -r | -s] [-x] [-v version] [-i] [-o] [container build option]
-Builds a container image for Oracle Database Free.
+Builds a container image for Oracle AI Database Free.
 
 Parameters:
    -f: creates a 'full' image
    -r: creates a regular image (default)
    -s: creates a 'slim' image
    -x: creates a 'faststart' image
-   -v: version of Oracle Database Free to build
-       Choose one of: 23.8, 23.7, 23.6, 23.5, 23.4, 23.3, 23.2
+   -v: version of Oracle AI Database Free to build
+       Choose one of: 23.26, 23.9, 23.8, 23.7, 23.6, 23.5, 23.4, 23.3, 23.2
    -i: ignores checksum test
    -o: passes on container build option
 
@@ -52,7 +52,7 @@ Parameters:
 
 Apache License, Version 2.0
 
-Copyright (c) 2024 Gerald Venzl
+Copyright (c) 2025 Gerald Venzl
 
 EOF
 
@@ -67,6 +67,7 @@ while getopts "hfrsv:io:x" optname; do
     "v")
       VERSION="${OPTARG}"
       # 23.2 and 23.3 are called 23c not 23ai
+      # 23.26.0 and beyond calls it 26ai
       if [[ ("${VERSION}" == "23.2") || ("${VERSION}" == "23.3") ]]; then
         DB_FLAVOR="c"
       fi;
@@ -107,19 +108,21 @@ if [ "${SKIP_CHECKSUM}" == "false" ]; then
 
   SHASUM_RET=$(sha256sum oracle*free*"${VERSION}"*.rpm)
 
-  if [[ ( "${VERSION}" == "23.2"  &&                                                                        "${SHASUM_RET%% *}" != "63b6c0ec9464682cfd9814e7e2a5d533139e5c6aeb9d3e7997a5f976d6677ca6" ) ||
-        ( "${VERSION}" == "23.3"  &&                                                                        "${SHASUM_RET%% *}" != "1319bcd7cb706cb727501cbd98abf3f3980a4fdabeb613a1abffc756925c7374" ) ||
-        ( "${VERSION}" == "23.4"  &&                                                                        "${SHASUM_RET%% *}" != "e6cccec7f101325c233f374c2aa86f77d62123edd3125450d79404c3eec30b65" ) ||
-        ( "${VERSION}" == "23.5"  &&    "${BUILDER_ARCH}" == "x86_64"  &&                                   "${SHASUM_RET%% *}" != "80c1ceae3b158cffe71fa4cfa8e4f540161659f79f777bcf48935f79031c054c" ) ||
-        ( "${VERSION}" == "23.5"  &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "9f82f22217db7c760d25956ca1590be996dbbe1ea397949726c68065524f69af" ) ||
-        ( "${VERSION}" == "23.6"  &&    "${BUILDER_ARCH}" == "x86_64"  &&                                   "${SHASUM_RET%% *}" != "03ae958784e9443c0380e4d387cb0522016c72d029ab85cf55ee124489833e0e" ) ||
-        ( "${VERSION}" == "23.6"  &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "64b84cdbd3331a4fee7a7bf56cdfd497a2531b05862bddae0f38e28c745dc8d6" ) ||
-        ( "${VERSION}" == "23.7"  &&    "${BUILDER_ARCH}" == "x86_64"  &&                                   "${SHASUM_RET%% *}" != "af64450e1120e56dac43a447a2e109449c7590489003d830d6a32a9168e0469d" ) ||
-        ( "${VERSION}" == "23.7"  &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "b069d02c624ed63aa8bbdb0a6ae884e1b0fc8d60b315adedc0e781dea0607d2a" ) ||
-        ( "${VERSION}" == "23.8"  &&    "${BUILDER_ARCH}" == "x86_64"  &&                                   "${SHASUM_RET%% *}" != "cd0d16939150e6ec5e70999a762a13687bfa99b05c4f310593e7ca3892e1d0ce" ) ||
-        ( "${VERSION}" == "23.8"  &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "c5cdd5d3b7017594899e8f13eb2d69f2ae6339ec3a78e647f18800ad7dc44346" ) ||
-        ( "${VERSION}" == "23.9"  &&    "${BUILDER_ARCH}" == "x86_64"  &&                                   "${SHASUM_RET%% *}" != "a6e64941ad940dd23e152e3d51213aeaea6d93b43688fbd030175935e0efe03d" ) ||
-        ( "${VERSION}" == "23.9"  &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "59faac204495cc6a08b6e99cd0997226c17fe4d7362e16b73ae5446b3e5b688e" )
+  if [[ ( "${VERSION}" == "23.2"     &&                                                                        "${SHASUM_RET%% *}" != "63b6c0ec9464682cfd9814e7e2a5d533139e5c6aeb9d3e7997a5f976d6677ca6" ) ||
+        ( "${VERSION}" == "23.3"     &&                                                                        "${SHASUM_RET%% *}" != "1319bcd7cb706cb727501cbd98abf3f3980a4fdabeb613a1abffc756925c7374" ) ||
+        ( "${VERSION}" == "23.4"     &&                                                                        "${SHASUM_RET%% *}" != "e6cccec7f101325c233f374c2aa86f77d62123edd3125450d79404c3eec30b65" ) ||
+        ( "${VERSION}" == "23.5"     &&    "${BUILDER_ARCH}" == "x86_64"  &&                                   "${SHASUM_RET%% *}" != "80c1ceae3b158cffe71fa4cfa8e4f540161659f79f777bcf48935f79031c054c" ) ||
+        ( "${VERSION}" == "23.5"     &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "9f82f22217db7c760d25956ca1590be996dbbe1ea397949726c68065524f69af" ) ||
+        ( "${VERSION}" == "23.6"     &&    "${BUILDER_ARCH}" == "x86_64"  &&                                   "${SHASUM_RET%% *}" != "03ae958784e9443c0380e4d387cb0522016c72d029ab85cf55ee124489833e0e" ) ||
+        ( "${VERSION}" == "23.6"     &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "64b84cdbd3331a4fee7a7bf56cdfd497a2531b05862bddae0f38e28c745dc8d6" ) ||
+        ( "${VERSION}" == "23.7"     &&    "${BUILDER_ARCH}" == "x86_64"  &&                                   "${SHASUM_RET%% *}" != "af64450e1120e56dac43a447a2e109449c7590489003d830d6a32a9168e0469d" ) ||
+        ( "${VERSION}" == "23.7"     &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "b069d02c624ed63aa8bbdb0a6ae884e1b0fc8d60b315adedc0e781dea0607d2a" ) ||
+        ( "${VERSION}" == "23.8"     &&    "${BUILDER_ARCH}" == "x86_64"  &&                                   "${SHASUM_RET%% *}" != "cd0d16939150e6ec5e70999a762a13687bfa99b05c4f310593e7ca3892e1d0ce" ) ||
+        ( "${VERSION}" == "23.8"     &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "c5cdd5d3b7017594899e8f13eb2d69f2ae6339ec3a78e647f18800ad7dc44346" ) ||
+        ( "${VERSION}" == "23.9"     &&    "${BUILDER_ARCH}" == "x86_64"  &&                                   "${SHASUM_RET%% *}" != "a6e64941ad940dd23e152e3d51213aeaea6d93b43688fbd030175935e0efe03d" ) ||
+        ( "${VERSION}" == "23.9"     &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "59faac204495cc6a08b6e99cd0997226c17fe4d7362e16b73ae5446b3e5b688e" ) ||
+        ( "${VERSION}" == "23.26.0"  &&    "${BUILDER_ARCH}" == "x86_64"  &&                                   "${SHASUM_RET%% *}" != "ed94f878d8b53ba6c2ffdaa1b3cc05e63c95b8076edfbd91cc7834a4c089828b" ) ||
+        ( "${VERSION}" == "23.26.0"  &&  ( "${BUILDER_ARCH}" == "aarch64" || "${BUILDER_ARCH}" == "arm64" ) && "${SHASUM_RET%% *}" != "7c6204ba6d8b51a163d016c14f69815e053312ae6b54ac2fa67db8a3fbb1d99b" )
       ]]; then
     echo "BUILDER: WARNING! SHA sum of RPM does not match with what's expected!"
     echo "BUILDER: WARNING! Verify that the .rpm file is not corrupt!"
@@ -130,8 +133,16 @@ else
   echo "BUILDER: checksum verification ignored"
 fi;
 
+# Version number is 2 digits ("23.n")
+if [ "${#VERSION}" == 4 ]; then
+  DOCKER_FILE_VERSION="${VERSION%??}"
+# Version number is more than 2 digits
+else
+  DOCKER_FILE_VERSION="${VERSION#*.}" # "23.26.0" --> "26.0"
+  DOCKER_FILE_VERSION="${DOCKER_FILE_VERSION%.*}" # "26.0" --> "26"
+fi;
 # Set Dockerfile name
-DOCKER_FILE="Dockerfile.${VERSION%??}"
+DOCKER_FILE="Dockerfile.${DOCKER_FILE_VERSION}"
 
 # Give image base tag
 IMAGE_NAME="${IMAGE_NAME}:${VERSION}"

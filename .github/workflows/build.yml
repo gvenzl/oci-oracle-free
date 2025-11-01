@@ -5,7 +5,7 @@ on:
       version:
         description: "The image version"
         required: true
-        default: "23.9"
+        default: "23.26.0"
         type: string
       flavor:
         description: "The image flavor"
@@ -49,6 +49,13 @@ jobs:
             elif [ "${{ inputs.flavor }}" == "-slim" ]; then BUILD_FLAVOR="-s";
           fi;
           echo "BUILD_FLAVOR=${BUILD_FLAVOR}" >> "$GITHUB_ENV"
+          VERSION="${{ inputs.version }}"
+          if [ "${#VERSION}" == 4 ]; then
+            DATABASE_NAME="oracle-database-free-23ai"
+          else
+            DATABASE_NAME="oracle-ai-database-free-26ai"
+          fi;
+          echo "DATABASE_NAME=${DATABASE_NAME}" >> "$GITHUB_ENV"
 
       - name: 📂 Checkout repo
         uses: actions/checkout@v4
@@ -62,7 +69,7 @@ jobs:
           ssh-keyscan ${{ secrets.FILE_SERVER }} >> ~/.ssh/known_hosts 2>/dev/null
           eval $(ssh-agent)
           ssh-add - <<< "${{ secrets.FILE_USER_AUTH }}"
-          scp ${{ secrets.FILE_USER }}@${{ secrets.FILE_SERVER }}:"oracle-database-free-23ai-${{ inputs.version }}-1.0-1.el8.${{ env.OS_ARCH }}.rpm" .
+          scp ${{ secrets.FILE_USER }}@${{ secrets.FILE_SERVER }}:"${{ env.DATABASE_NAME }}-${{ inputs.version }}-1.el8.${{ env.OS_ARCH }}.rpm" .
 
       - name: 🛠️ Build container image for ${{ inputs.version }}, flavor "${{ inputs.flavor }}"
         run: ./buildContainerImage.sh -v "${{ inputs.version }}" ${{ env.BUILD_FLAVOR }}
