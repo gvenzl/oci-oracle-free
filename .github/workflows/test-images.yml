@@ -116,7 +116,7 @@ jobs:
         run: rm ${{ env.DATABASE_NAME }}-${{ matrix.versions }}-1.el8.${{ steps.env_vars.outputs.OS_ARCH }}.rpm
 
       - name: 🛠️ Build faststart container image for ${{ matrix.versions }}, flavor "${{ matrix.flavors }}"
-        run: ./buildContainerImage.sh -v "${{ matrix.versions }}" -${{ matrix.flavors }} -x
+        run: ./buildContainerImage.sh -i -v "${{ matrix.versions }}" -${{ matrix.flavors }} -x
 
       - name: 🔬 Test images
         env:
