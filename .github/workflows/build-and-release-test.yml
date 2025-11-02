@@ -385,7 +385,7 @@ jobs:
     needs: [ set-constants, create-23-manifests-tags, create-versioned-manifests-tags, create-latest-version-tags ]
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}/test", ghcr.io/${{ github.repository_owner }}/test2" ]
+        repository: [ "ghcr.io/${{ github.repository_owner }}/test", "ghcr.io/${{ github.repository_owner }}/test2" ]
         image_flavor: [ "full", "latest", "slim" ]
         image_faststart: [ "-faststart", "" ]
 
