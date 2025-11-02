@@ -1,4 +1,5 @@
 name: 🛠️ Build and release all images
+on:
   push:
     paths:
       - '!.github/**'
