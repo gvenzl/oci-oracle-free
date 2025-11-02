@@ -65,12 +65,14 @@ jobs:
     # 3)  Delete RPM file to save space
     # 4)  Test regular image
     # 5)  Export regular image
-    # 6)  Upload regular image
-    # 7)  Delete regular image export to save space
+    # 6)  Compress regular image
+    # 7)  Upload regular image
+    # 8)  Delete regular image export to save space
     # 8)  Build faststart image (regular image could be deleted to save space, already uploaded)
     # 9)  Test faststart image
     # 10) Export faststart image
-    # 11) Upload faststart image
+    # 11) Compress faststart image
+    # 12) Upload faststart image
     
     name: 🛠️ 🔬 Build and test images
     runs-on: ${{ matrix.os }}
@@ -132,22 +134,24 @@ jobs:
           ./test-container.sh "gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}"
           cd ..
 
-      - name: 📤 Export regular image to local file system
+      - name: 📤 Export regular image to local file system & compress
         env:
           IMAGE_FLAVOR: ${{ steps.env_vars.outputs.IMAGE_FLAVOR }}
           IMAGE_ARCH: ${{ steps.env_vars.outputs.IMAGE_ARCH }}
-        run: podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}"
+        run: |
+          podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}"
+          gzip "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar"
 
       - name: ⬆️ Upload image non-faststart image for deploy job
         uses: actions/upload-artifact@v4
         with:
           retention-days: 1
           name: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-${{ steps.env_vars.outputs.IMAGE_ARCH }}
-          path: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar
+          path: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar.gz
 
       - name: 🧹 Cleanup non-faststart image export
         # Non-faststart image is no longer needed, save some space
-        run: rm oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar
+        run: rm oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar.gz
 
       - name: 🛠️ Build faststart container image for ${{ matrix.versions }}, flavor "${{ matrix.flavors }}"
         run: ./buildContainerImage.sh -i -v "${{ matrix.versions }}" -${{ matrix.flavors }} -x
@@ -161,18 +165,20 @@ jobs:
           ./test-container.sh "gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}"
           cd ..
 
-      - name: 📤 Export faststart image to local file system
+      - name: 📤 Export faststart image to local file system & compress
         env:
           IMAGE_FLAVOR: ${{ steps.env_vars.outputs.IMAGE_FLAVOR }}
           IMAGE_ARCH: ${{ steps.env_vars.outputs.IMAGE_ARCH }}
-        run: podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}"
+        run: |
+          podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}"
+          gzip "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar"
 
       - name: ⬆️ Upload image faststart image for deploy job
         uses: actions/upload-artifact@v4
         with:
           retention-days: 1
           name: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-faststart-${{ steps.env_vars.outputs.IMAGE_ARCH }}
-          path: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-faststart-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar
+          path: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-faststart-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar.gz
 
   upload-platform-images:
     name: ⬆️ 📋 Upload platform images to registries
@@ -198,7 +204,9 @@ jobs:
           name: oracle-free-${{ matrix.versions }}${{ matrix.flavor }}${{ matrix.type }}-${{ matrix.arch }}
 
       - name: 📥 Import image
-        run: podman load -i oracle-free-${{ matrix.versions }}${{ matrix.flavor }}${{ matrix.type }}-${{ matrix.arch }}.tar
+        run: |
+          zcat oracle-free-${{ matrix.versions }}${{ matrix.flavor }}${{ matrix.type }}-${{ matrix.arch }}.tar.gz | podman load
+          rm oracle-free-${{ matrix.versions }}${{ matrix.flavor }}${{ matrix.type }}-${{ matrix.arch }}.tar.gz
 
       - name: 🔓 Login to GHCR registry
         uses: redhat-actions/podman-login@v1
@@ -244,7 +252,9 @@ jobs:
           name: oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}${{ matrix.type }}-${{ matrix.arch }}
 
       - name: 📥 Import image
-        run: podman load -i oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}${{ matrix.type }}-${{ matrix.arch }}.tar
+        run: |
+          zcat oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}${{ matrix.type }}-${{ matrix.arch }}.tar.gz | podman load
+          rm oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}${{ matrix.type }}-${{ matrix.arch }}.tar.gz
 
       - name: 🏷️ Tag images
         id: tag-images
