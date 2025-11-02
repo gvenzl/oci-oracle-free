@@ -9,7 +9,6 @@ jobs:
     steps:
       - name: disk space
         run: |
-          sudo du -sh /* 2>/dev/null
           sudo du -sh /usr/share/dotnet
           sudo du -sh /usr/local/lib/android
           sudo du -sh /opt/ghc
