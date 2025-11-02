@@ -1,0 +1,22 @@
+name: Test runner
+on: push
+
+jobs:
+
+  inspect:
+    name: space
+    runs-on: ubuntu-24.04
+    steps:
+      - name: disk space
+        run: |
+          sudo du -sh /* 2>/dev/null
+          sudo du -sh /usr/share/dotnet
+          sudo du -sh /usr/local/lib/android
+          sudo du -sh /opt/ghc
+          echo "$AGENT_TOOLSDIRECTORY"
+          sudo du -sh "$AGENT_TOOLSDIRECTORY"
+          df -h
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY" || true
+          df -h
+          
