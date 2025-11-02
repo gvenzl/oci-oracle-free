@@ -2,9 +2,7 @@ name: 🛠️ Build and release all images
 on:
   push:
     paths:
-      - '!.github/**'
-      - '!config-scripts/**'
-      - '!README.md'
+      - '.github/**'
     branches-ignore:
       - main
 jobs:
