@@ -237,6 +237,7 @@ jobs:
         flavor: [ "-full", "", "-slim" ] # "" is the "regular" image
         type: [ "", "-faststart" ] # "" is the non-faststart image
 
+    steps:
       - name: ⬇️ Download image
         uses: actions/download-artifact@v4
         with:
