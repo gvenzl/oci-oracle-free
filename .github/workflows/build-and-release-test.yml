@@ -185,7 +185,7 @@ jobs:
 
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}/test" ]
+        repository: [ "ghcr.io/${{ github.repository_owner }}/test", "ghcr.io/${{ github.repository_owner }}/test2" ]
         versions: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
         arch: ${{ fromJSON(needs.set-constants.outputs.IMAGE_ARCH) }}
         flavor: [ "-full", "", "-slim" ] # "" is the "regular" image
@@ -232,7 +232,7 @@ jobs:
 
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}/test" ]
+        repository: [ "ghcr.io/${{ github.repository_owner }}/test", "ghcr.io/${{ github.repository_owner }}/test2" ]
         arch: ${{ fromJSON(needs.set-constants.outputs.IMAGE_ARCH) }}
         flavor: [ "-full", "", "-slim" ] # "" is the "regular" image
         type: [ "", "-faststart" ] # "" is the non-faststart image
@@ -303,7 +303,7 @@ jobs:
     needs: [ set-constants, create-latest-version-tags ]
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
+        repository: [ "ghcr.io/${{ github.repository_owner }}/test", "ghcr.io/${{ github.repository_owner }}/test2" ]
         version: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
         image_flavor: [ "-full", "", "-slim" ]
         image_faststart: [ "-faststart", "" ]
@@ -344,7 +344,7 @@ jobs:
     needs: [ set-constants, create-versioned-manifests-tags, create-latest-version-tags ]
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
+        repository: [ "ghcr.io/${{ github.repository_owner }}/test", "ghcr.io/${{ github.repository_owner }}/test2" ]
         image_flavor: [ "-full", "", "-slim" ]
         image_faststart: [ "-faststart", "" ]
 
@@ -384,7 +384,7 @@ jobs:
     needs: [ set-constants, create-23-manifests-tags, create-versioned-manifests-tags, create-latest-version-tags ]
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
+        repository: [ "ghcr.io/${{ github.repository_owner }}/test", ghcr.io/${{ github.repository_owner }}/test2" ]
         image_flavor: [ "full", "latest", "slim" ]
         image_faststart: [ "-faststart", "" ]
 
