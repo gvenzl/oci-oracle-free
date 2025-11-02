@@ -3,9 +3,17 @@ on:
   # Don't test on pushes or pull requests to main.
   # The build and release has its own set of tests.
   push:
+    paths:
+      - '!.github/**'
+      - '!config-scripts/**'
+      - '!README.md'
     branches-ignore:
       - main
   pull_request:
+    paths:
+      - '!.github/**'
+      - '!config-scripts/**'
+      - '!README.md'
     branches-ignore:
       - main
 jobs:
@@ -112,8 +120,11 @@ jobs:
       - name: 🛠️ Build container image for ${{ matrix.versions }}, flavor "${{ matrix.flavors }}"
         run: ./buildContainerImage.sh -v "${{ matrix.versions }}" -${{ matrix.flavors }}
 
+      - name: 🧹 Cleanup build rpm
+        run: rm ${{ env.DATABASE_NAME }}-${{ matrix.versions }}-1.el8.${{ steps.env_vars.outputs.OS_ARCH }}.rpm
+
       - name: 🛠️ Build faststart container image for ${{ matrix.versions }}, flavor "${{ matrix.flavors }}"
-        run: ./buildContainerImage.sh -v "${{ matrix.versions }}" -${{ matrix.flavors }} -x
+        run: ./buildContainerImage.sh -i -v "${{ matrix.versions }}" -${{ matrix.flavors }} -x
 
       - name: 🔬 Test images
         env:

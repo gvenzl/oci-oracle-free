@@ -14,11 +14,8 @@ on:
         type: choice
         options:
           - "-full"
-          - "-full-faststart"
           - ""
-          - "faststart"
           - "-slim"
-          - "-slim-faststart"
       runner:
         description: "Build runner"
         required: true
@@ -47,12 +44,9 @@ jobs:
           fi;
           echo "IMAGE_ARCH=${IMAGE_ARCH}" >> "$GITHUB_ENV"
 
-          if     [ "${{ inputs.flavor }}" == "-full" ];           then BUILD_FLAVOR="-f";
-            elif [ "${{ inputs.flavor }}" == "-full-faststart" ]; then BUILD_FLAVOR="-f -x";
-            elif [ "${{ inputs.flavor }}" == "" ];                then BUILD_FLAVOR="-r";
-            elif [ "${{ inputs.flavor }}" == "faststart" ];       then BUILD_FLAVOR="-r -x";
-            elif [ "${{ inputs.flavor }}" == "-slim" ];           then BUILD_FLAVOR="-s";
-            elif [ "${{ inputs.flavor }}" == "-slim-faststart" ]; then BUILD_FLAVOR="-s -x";
+          if     [ "${{ inputs.flavor }}" == "-full" ]; then BUILD_FLAVOR="-f";
+            elif [ "${{ inputs.flavor }}" == "" ];      then BUILD_FLAVOR="-r";
+            elif [ "${{ inputs.flavor }}" == "-slim" ]; then BUILD_FLAVOR="-s";
           fi;
           echo "BUILD_FLAVOR=${BUILD_FLAVOR}" >> "$GITHUB_ENV"
           VERSION="${{ inputs.version }}"
@@ -75,10 +69,13 @@ jobs:
           ssh-keyscan ${{ secrets.FILE_SERVER }} >> ~/.ssh/known_hosts 2>/dev/null
           eval $(ssh-agent)
           ssh-add - <<< "${{ secrets.FILE_USER_AUTH }}"
-          scp ${{ secrets.FILE_USER }}@${{ secrets.FILE_SERVER }}:"${{ env.DATABASE_NAME }}-${{ inputs.version }}-1.el8.${{ env.OS_ARCH }}.rpm" .
+          scp ${{ secrets.FILE_USER }}@${{ secrets.FILE_SERVER }}:${{ env.DATABASE_NAME }}-${{ inputs.version }}-1.el8.${{ env.OS_ARCH }}.rpm .
 
       - name: 🛠️ Build container image for ${{ inputs.version }}, flavor "${{ inputs.flavor }}"
         run: ./buildContainerImage.sh -v "${{ inputs.version }}" ${{ env.BUILD_FLAVOR }}
+
+      - name: 🧹 Cleanup build rpm
+        run: rm ${{ env.DATABASE_NAME }}-${{ inputs.version }}-1.el8.${{ env.OS_ARCH }}.rpm
 
       - name: 📤 Export images to local file system
         run: podman save -o "oracle-free-${{ inputs.version }}${{ inputs.flavor }}-${{ env.IMAGE_ARCH }}.tar" "localhost/gvenzl/oracle-free:${{ inputs.version }}${{ inputs.flavor }}-${{ env.IMAGE_ARCH }}"
