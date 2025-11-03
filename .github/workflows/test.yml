@@ -14,7 +14,7 @@ jobs:
       - name: Available space
         run: df -h
 
-      - name: Top level 1
+      - name: Top level
         run: sudo du -sh /*
 
       - name: Level 1
