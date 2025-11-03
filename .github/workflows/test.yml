@@ -15,7 +15,7 @@ jobs:
         run: df -h
 
       - name: Top level
-        run: sudo du -sh /*
+        run: sudo du -sh /* || true
 
       - name: Level 1
         run: sudo du -h -d1 / | sort -hr | head -n 20
