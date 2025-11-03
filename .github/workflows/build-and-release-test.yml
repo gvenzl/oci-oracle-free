@@ -153,9 +153,9 @@ jobs:
           IMAGE_ARCH: ${{ steps.env_vars.outputs.IMAGE_ARCH }}
         run: |
           podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}"
-          gzip "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar.gz"
+          gzip "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar"
           podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}"
-          gzip "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar.gz"
+          gzip "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar"
 
       - name: ⬆️ Upload image non-faststart image for deploy job
         uses: actions/upload-artifact@v4
