@@ -7,34 +7,35 @@ jobs:
     name: space
     runs-on: ubuntu-24.04
     steps:
-      - name: disk space
-        run: |
-          df -h
-          # Remove Java (JDKs)
-          sudo rm -rf /usr/lib/jvm
+      - name: Available space
+        run: df -h
 
-          # Remove .NET SDKs
-          sudo rm -rf /usr/share/dotnet
+      - name: Remove Java (JDKs)
+        run: sudo rm -rf /usr/lib/jvm
 
-          # Remove Swift toolchain
-          sudo rm -rf /usr/share/swift
+      - name: Remove .NET SDKs
+        run: sudo rm -rf /usr/share/dotnet
 
-          # Remove Haskell (GHC)
-          sudo rm -rf /usr/local/.ghcup
+      - name: Remove Swift toolchain
+        run: sudo rm -rf /usr/share/swift
 
-          # Remove Julia
-          sudo rm -rf /usr/local/julia*
+      - name: Remove Haskell (GHC)
+        run: sudo rm -rf /usr/local/.ghcup
 
-          # Remove Android SDKs
-          sudo rm -rf /usr/local/lib/android
+      - name: # Remove Julia
+        run: sudo rm -rf /usr/local/julia*
 
-          # Remove Chromium (optional if not using for browser tests)
-          sudo rm -rf /usr/local/share/chromium
+      - name: Remove Android SDKs
+        run: sudo rm -rf /usr/local/lib/android
 
-          # Remove Microsoft/Edge and Google Chrome builds
-          sudo rm -rf /opt/microsoft /opt/google
+      - name: Remove Chromium (optional if not using for browser tests)
+        run: sudo rm -rf /usr/local/share/chromium
 
-          # Remove Azure CLI
-          sudo rm -rf /opt/az
+      - name: Remove Microsoft/Edge and Google Chrome builds
+        run: ssudo rm -rf /opt/microsoft /opt/google
 
-          df -h
+      - name: Remove Azure CLI
+        run: sudo rm -rf /opt/az
+
+      - name: Available space
+        run: df -h
