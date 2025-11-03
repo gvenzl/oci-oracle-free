@@ -5,6 +5,7 @@ on:
       - '.github/**'
     branches-ignore:
       - main
+
 jobs:
 
   set-constants:
@@ -58,22 +59,6 @@ jobs:
           path: ${{ env.DATABASE_NAME }}-${{ matrix.versions }}-1.el8.${{ matrix.arch }}.rpm
 
   build-and-test-images:
-    # Faststart images are built from the same image layers as non-faststart so that layers can be shared
-    # Steps:
-    # 1)  Download RPM file
-    # 2)  Build regular image
-    # 3)  Delete RPM file to save space
-    # 4)  Test regular image
-    # 5)  Export regular image
-    # 6)  Compress regular image
-    # 7)  Upload regular image
-    # 8)  Delete regular image export to save space
-    # 8)  Build faststart image (regular image could be deleted to save space, already uploaded)
-    # 9)  Test faststart image
-    # 10) Export faststart image
-    # 11) Compress faststart image
-    # 12) Upload faststart image
-    
     name: 🛠️ 🔬 Build and test images
     runs-on: ${{ matrix.os }}
     environment: build
@@ -84,6 +69,32 @@ jobs:
         versions: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
         flavors: ${{ fromJSON(needs.set-constants.outputs.FLAVORS) }}
     steps:
+      - name: 🧹 Cleanup runner
+        run: |
+          # Remove Java (JDKs)
+          sudo rm -rf /usr/lib/jvm
+
+          # Remove .NET SDKs
+          sudo rm -rf /usr/share/dotnet
+
+          # Remove Swift toolchain
+          sudo rm -rf /usr/share/swift
+
+          # Remove Haskell (GHC)
+          sudo rm -rf /usr/local/.ghcup
+
+          # Remove Julia
+          sudo rm -rf /usr/local/julia*
+
+          # Remove Chromium (optional if not using for browser tests)
+          sudo rm -rf /usr/local/share/chromium
+
+          # Remove Microsoft/Edge and Google Chrome builds
+          sudo rm -rf /opt/microsoft /opt/google
+
+          # Remove Azure CLI
+          sudo rm -rf /opt/az
+
       - name: 📂 Checkout repo
         uses: actions/checkout@v4
 
@@ -122,25 +133,29 @@ jobs:
         run: ./buildContainerImage.sh -v "${{ matrix.versions }}" -${{ matrix.flavors }}
 
       - name: 🧹 Cleanup build rpm
-        # RPM file is no longer needed, save some space
         run: rm ${{ env.DATABASE_NAME }}-${{ matrix.versions }}-1.el8.${{ steps.env_vars.outputs.OS_ARCH }}.rpm
 
-      - name: 🔬 Test non-faststart image
+      - name: 🛠️ Build faststart container image for ${{ matrix.versions }}, flavor "${{ matrix.flavors }}"
+        run: ./buildContainerImage.sh -i -v "${{ matrix.versions }}" -${{ matrix.flavors }} -x
+
+      - name: 🔬 Test images
         env:
           IMAGE_FLAVOR: ${{ steps.env_vars.outputs.IMAGE_FLAVOR }}
           IMAGE_ARCH: ${{ steps.env_vars.outputs.IMAGE_ARCH }}
         run: |
           cd tests
           ./test-container.sh "gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}"
-          cd ..
+          ./test-container.sh "gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}"
 
-      - name: 📤 Export regular image to local file system & compress
+      - name: 📤 Export images to local file system
         env:
           IMAGE_FLAVOR: ${{ steps.env_vars.outputs.IMAGE_FLAVOR }}
           IMAGE_ARCH: ${{ steps.env_vars.outputs.IMAGE_ARCH }}
         run: |
           podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}"
-          gzip "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar"
+          gzip "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-${IMAGE_ARCH}.tar.gz"
+          podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}"
+          gzip "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar.gz"
 
       - name: ⬆️ Upload image non-faststart image for deploy job
         uses: actions/upload-artifact@v4
@@ -148,30 +163,6 @@ jobs:
           retention-days: 1
           name: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-${{ steps.env_vars.outputs.IMAGE_ARCH }}
           path: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar.gz
-
-      - name: 🧹 Cleanup non-faststart image export
-        # Non-faststart image is no longer needed, save some space
-        run: rm oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar.gz
-
-      - name: 🛠️ Build faststart container image for ${{ matrix.versions }}, flavor "${{ matrix.flavors }}"
-        run: ./buildContainerImage.sh -i -v "${{ matrix.versions }}" -${{ matrix.flavors }} -x
-
-      - name: 🔬 Test faststart image
-        env:
-          IMAGE_FLAVOR: ${{ steps.env_vars.outputs.IMAGE_FLAVOR }}
-          IMAGE_ARCH: ${{ steps.env_vars.outputs.IMAGE_ARCH }}
-        run: |
-          cd tests
-          ./test-container.sh "gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}"
-          cd ..
-
-      - name: 📤 Export faststart image to local file system & compress
-        env:
-          IMAGE_FLAVOR: ${{ steps.env_vars.outputs.IMAGE_FLAVOR }}
-          IMAGE_ARCH: ${{ steps.env_vars.outputs.IMAGE_ARCH }}
-        run: |
-          podman save -o "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar" "localhost/gvenzl/oracle-free:${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}"
-          gzip "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar"
 
       - name: ⬆️ Upload image faststart image for deploy job
         uses: actions/upload-artifact@v4
@@ -191,22 +182,54 @@ jobs:
 
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}/test", "ghcr.io/${{ github.repository_owner }}/test2" ]
+        repository: [ "ghcr.io/${{ github.repository_owner }}/test" ]
         versions: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
         arch: ${{ fromJSON(needs.set-constants.outputs.IMAGE_ARCH) }}
         flavor: [ "-full", "", "-slim" ] # "" is the "regular" image
-        type: [ "", "-faststart" ] # "" is the non-faststart image
 
     steps:
-      - name: ⬇️ Download image image
+      - name: 🧹 Cleanup runner
+        run: |
+          # Remove Java (JDKs)
+          sudo rm -rf /usr/lib/jvm
+
+          # Remove .NET SDKs
+          sudo rm -rf /usr/share/dotnet
+
+          # Remove Swift toolchain
+          sudo rm -rf /usr/share/swift
+
+          # Remove Haskell (GHC)
+          sudo rm -rf /usr/local/.ghcup
+
+          # Remove Julia
+          sudo rm -rf /usr/local/julia*
+
+          # Remove Chromium (optional if not using for browser tests)
+          sudo rm -rf /usr/local/share/chromium
+
+          # Remove Microsoft/Edge and Google Chrome builds
+          sudo rm -rf /opt/microsoft /opt/google
+
+          # Remove Azure CLI
+          sudo rm -rf /opt/az
+
+      - name: ⬇️ Download non-faststart image
         uses: actions/download-artifact@v4
         with:
-          name: oracle-free-${{ matrix.versions }}${{ matrix.flavor }}${{ matrix.type }}-${{ matrix.arch }}
+          name: oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}
 
-      - name: 📥 Import image
+      - name: ⬇️ Download faststart image
+        uses: actions/download-artifact@v4
+        with:
+          name: oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}
+
+      - name: 📥 Import images
         run: |
-          zcat oracle-free-${{ matrix.versions }}${{ matrix.flavor }}${{ matrix.type }}-${{ matrix.arch }}.tar.gz | podman load
-          rm oracle-free-${{ matrix.versions }}${{ matrix.flavor }}${{ matrix.type }}-${{ matrix.arch }}.tar.gz
+          zcat oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}.tar.gz           | podman load
+          rm oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}.tar.gz
+          zcat oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}.tar.gz | podman load
+          rm oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}.tar.gz
 
       - name: 🔓 Login to GHCR registry
         uses: redhat-actions/podman-login@v1
@@ -222,12 +245,19 @@ jobs:
           password: ${{ secrets.DH_PWD }}
           registry: docker.io
 
-      - name: 🫸 Push image to  Container Registry
+      - name: 🫸 Push non-faststart image to Container Registry
         uses: redhat-actions/push-to-registry@v2
         with:
           registry: ${{ matrix.repository }}
           image: oracle-free
-          tags: ${{ matrix.versions }}${{ matrix.flavor }}${{ matrix.type }}-${{ matrix.arch }}
+          tags: ${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}
+
+      - name: 🫸 Push faststart image to  Container Registry
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          registry: ${{ matrix.repository }}
+          image: oracle-free
+          tags: ${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}
 
   create-latest-version-tags:
     name: ⬆️ 📋 Upload latest images to registries
@@ -240,21 +270,28 @@ jobs:
 
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}/test", "ghcr.io/${{ github.repository_owner }}/test2" ]
+        repository: [ "ghcr.io/${{ github.repository_owner }}/test" ]
         arch: ${{ fromJSON(needs.set-constants.outputs.IMAGE_ARCH) }}
         flavor: [ "-full", "", "-slim" ] # "" is the "regular" image
-        type: [ "", "-faststart" ] # "" is the non-faststart image
 
     steps:
-      - name: ⬇️ Download image
+
+      - name: ⬇️ Download non-faststart image
         uses: actions/download-artifact@v4
         with:
-          name: oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}${{ matrix.type }}-${{ matrix.arch }}
+          name: oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}-${{ matrix.arch }}
 
-      - name: 📥 Import image
+      - name: ⬇️ Download faststart image
+        uses: actions/download-artifact@v4
+        with:
+          name: oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}
+
+      - name: 📥 Import images
         run: |
-          zcat oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}${{ matrix.type }}-${{ matrix.arch }}.tar.gz | podman load
-          rm oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}${{ matrix.type }}-${{ matrix.arch }}.tar.gz
+          zcat oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}-${{ matrix.arch }}.tar.gz           | podman load
+          rm oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}-${{ matrix.arch }}.tar.gz
+          zcat oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}.tar.gz | podman load
+          rm oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}.tar.gz
 
       - name: 🏷️ Tag images
         id: tag-images
@@ -262,18 +299,20 @@ jobs:
           LATEST_VERSION: ${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}
           FLAVOR: ${{ matrix.flavor }}
           ARCH: ${{ matrix.arch }}
-          TYPE: ${{ matrix.type }}
         run: |
           # Tag 23[-full | -slim][-faststart]
-          podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-faststart-${ARCH} oracle-free:23${FLAVOR}${TYPE}-${ARCH}
+          podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-${ARCH} oracle-free:23${FLAVOR}-${ARCH}
+          podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-faststart-${ARCH} oracle-free:23${FLAVOR}-faststart-${ARCH}
 
           # Tag [-latest] or [-slim | -full]
           if [[ "${FLAVOR}" == "" ]]; then # regular image
             FLAVOR_NO_DASH="latest"
-            podman tag gvenzl/oracle-free:${LATEST_VERSION}-faststart-${ARCH} oracle-free:${FLAVOR_NO_DASH}${TYPE}-${ARCH}
+            podman tag gvenzl/oracle-free:${LATEST_VERSION}-${ARCH} oracle-free:${FLAVOR_NO_DASH}-${ARCH}
+            podman tag gvenzl/oracle-free:${LATEST_VERSION}-faststart-${ARCH} oracle-free:${FLAVOR_NO_DASH}-faststart-${ARCH}
           else
             FLAVOR_NO_DASH=${FLAVOR:1}
-            podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-faststart-${ARCH} oracle-free:${FLAVOR_NO_DASH}${TYPE}-${ARCH}
+            podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-${ARCH} oracle-free:${FLAVOR_NO_DASH}-${ARCH}
+            podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-faststart-${ARCH} oracle-free:${FLAVOR_NO_DASH}-faststart-${ARCH}
           fi;
           # Store value for push
           echo "FLAVOR_NO_DASH=${FLAVOR_NO_DASH}" >> $GITHUB_OUTPUT
@@ -292,20 +331,33 @@ jobs:
           password: ${{ secrets.DH_PWD }}
           registry: docker.io
 
-      - name: 🫸 Push 23 image to Container Registry
+      - name: 🫸 Push 23 non-faststart image to Container Registry
         uses: redhat-actions/push-to-registry@v2
         with:
           registry: ${{ matrix.repository }}
           image: oracle-free
-          tags: 23${{ matrix.flavor }}${{ matrix.type }}-${{ matrix.arch }}
+          tags: 23${{ matrix.flavor }}-${{ matrix.arch }}
+
+      - name: 🫸 Push 23 faststart image to Container Registry
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          registry: ${{ matrix.repository }}
+          image: oracle-free
+          tags: 23${{ matrix.flavor }}-faststart-${{ matrix.arch }}
+
+      - name: 🫸 Push versionless image to GitHub Container Registry
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          registry: ${{ matrix.repository }}
+          image: oracle-free
+          tags: ${{ steps.tag-images.outputs.FLAVOR_NO_DASH }}-${{ matrix.arch }}
 
       - name: 🫸 Push versionless faststart image to GitHub Container Registry
-        id: push-versionless-faststart-to-ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
           registry: ${{ matrix.repository }}
           image: oracle-free
-          tags: ${{ steps.tag-images.outputs.FLAVOR_NO_DASH }}${{ matrix.type }}-${{ matrix.arch }}
+          tags: ${{ steps.tag-images.outputs.FLAVOR_NO_DASH }}-faststart-${{ matrix.arch }}
 
   create-versioned-manifests-tags:
     name: 📋 Create versioned manifests to registries
@@ -314,7 +366,7 @@ jobs:
     needs: [ set-constants, create-latest-version-tags ]
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}/test", "ghcr.io/${{ github.repository_owner }}/test2" ]
+        repository: [ "ghcr.io/${{ github.repository_owner }}/test" ]
         version: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
         image_flavor: [ "-full", "", "-slim" ]
         image_faststart: [ "-faststart", "" ]
@@ -355,7 +407,7 @@ jobs:
     needs: [ set-constants, create-versioned-manifests-tags, create-latest-version-tags ]
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}/test", "ghcr.io/${{ github.repository_owner }}/test2" ]
+        repository: [ "ghcr.io/${{ github.repository_owner }}/test" ]
         image_flavor: [ "-full", "", "-slim" ]
         image_faststart: [ "-faststart", "" ]
 
@@ -395,7 +447,7 @@ jobs:
     needs: [ set-constants, create-23-manifests-tags, create-versioned-manifests-tags, create-latest-version-tags ]
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}/test", "ghcr.io/${{ github.repository_owner }}/test2" ]
+        repository: [ "ghcr.io/${{ github.repository_owner }}/test" ]
         image_flavor: [ "full", "latest", "slim" ]
         image_faststart: [ "-faststart", "" ]
 
@@ -456,3 +508,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: tag
           onlyRemoveDeployments: true
+
