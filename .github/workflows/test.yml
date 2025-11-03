@@ -22,17 +22,14 @@ jobs:
       - name: Remove Haskell (GHC)
         run: sudo rm -rf /usr/local/.ghcup
 
-      - name: # Remove Julia
+      - name: Remove Julia
         run: sudo rm -rf /usr/local/julia*
-
-      - name: Remove Android SDKs
-        run: sudo rm -rf /usr/local/lib/android
 
       - name: Remove Chromium (optional if not using for browser tests)
         run: sudo rm -rf /usr/local/share/chromium
 
       - name: Remove Microsoft/Edge and Google Chrome builds
-        run: ssudo rm -rf /opt/microsoft /opt/google
+        run: sudo rm -rf /opt/microsoft /opt/google
 
       - name: Remove Azure CLI
         run: sudo rm -rf /opt/az
