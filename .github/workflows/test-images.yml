@@ -77,6 +77,32 @@ jobs:
         versions: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
         flavors: ${{ fromJSON(needs.set-constants.outputs.FLAVORS) }}
     steps:
+      - name: 🧹 Cleanup runner
+        run: |
+          # Remove Java (JDKs)
+          sudo rm -rf /usr/lib/jvm
+
+          # Remove .NET SDKs
+          sudo rm -rf /usr/share/dotnet
+
+          # Remove Swift toolchain
+          sudo rm -rf /usr/share/swift
+
+          # Remove Haskell (GHC)
+          sudo rm -rf /usr/local/.ghcup
+
+          # Remove Julia
+          sudo rm -rf /usr/local/julia*
+
+          # Remove Chromium (optional if not using for browser tests)
+          sudo rm -rf /usr/local/share/chromium
+
+          # Remove Microsoft/Edge and Google Chrome builds
+          sudo rm -rf /opt/microsoft /opt/google
+
+          # Remove Azure CLI
+          sudo rm -rf /opt/az
+
       - name: 📂 Checkout repo
         uses: actions/checkout@v4
 
@@ -105,12 +131,6 @@ jobs:
             DATABASE_NAME="oracle-ai-database-free-26ai"
           fi;
           echo "DATABASE_NAME=${DATABASE_NAME}" >> "$GITHUB_ENV"
-
-      - name: ⏬ Install build dependencies
-        run: |
-          sudo apt-get -y update
-          sudo apt-get install -y buildah podman
-          sudo apt upgrade -y buildah podman
 
       - name: ⬇️ Download stored install file
         uses: actions/download-artifact@v4
