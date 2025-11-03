@@ -10,6 +10,30 @@ jobs:
       - name: Available space
         run: df -h
 
+      - name: Top level 1
+        run: sudo du -sh /*
+
+      - name: Level 1
+        run: sudo du -h -d1 / | sort -hr | head -n 20
+
+      - name: Level 2
+        run: sudo du -h -d2 / | sort -hr | head -n 20
+
+      - name: Level 3
+        run: sudo du -h -d3 / | sort -hr | head -n 20
+
+      - name: Remove Haskell (GHC)
+        run: sudo rm -rf /usr/local/.ghcup
+
+      - name: Remove Julia
+        run: sudo rm -rf /usr/local/julia*
+
+      - name: Remove Android SDKs
+        run: sudo rm -rf /usr/local/lib/android
+
+      - name: Remove Chromium (optional if not using for browser tests)
+        run: sudo rm -rf /usr/local/share/chromium
+
       - name: Remove Java (JDKs)
         run: sudo rm -rf /usr/lib/jvm
 
@@ -18,15 +42,6 @@ jobs:
 
       - name: Remove Swift toolchain
         run: sudo rm -rf /usr/share/swift
-
-      - name: Remove Haskell (GHC)
-        run: sudo rm -rf /usr/local/.ghcup
-
-      - name: Remove Julia
-        run: sudo rm -rf /usr/local/julia*
-
-      - name: Remove Chromium (optional if not using for browser tests)
-        run: sudo rm -rf /usr/local/share/chromium
 
       - name: Remove Microsoft/Edge and Google Chrome builds
         run: sudo rm -rf /opt/microsoft /opt/google
