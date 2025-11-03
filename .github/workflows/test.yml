@@ -18,13 +18,13 @@ jobs:
         run: sudo du -sh /* || true
 
       - name: Level 1
-        run: sudo du -h -d1 / | sort -hr | head -n 20
+        run: sudo du -h --max-depth=1 / | sort -hr | head -n 20
 
       - name: Level 2
-        run: sudo du -h -d2 / | sort -hr | head -n 20
+        run: sudo du -h --max-depth=2 / | sort -hr | head -n 20
 
       - name: Level 3
-        run: sudo du -h -d3 / | sort -hr | head -n 20
+        run: sudo du -h --max-depth=3 / | sort -hr | head -n 20
 
       - name: Remove Haskell (GHC)
         run: sudo rm -rf /usr/local/.ghcup
