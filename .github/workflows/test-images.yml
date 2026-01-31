@@ -4,14 +4,12 @@ on:
   # The build and release has its own set of tests.
   push:
     paths-ignore:
-      - '.github/**'
       - 'config-scripts/**'
       - 'README.md'
     branches-ignore:
       - main
   pull_request:
     paths-ignore:
-      - '.github/**'
       - 'config-scripts/**'
       - 'README.md'
     branches-ignore:
