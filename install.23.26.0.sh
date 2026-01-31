@@ -134,22 +134,24 @@ echo "BUILDER: post config database steps"
 echo "BUILDER: creating network files"
 
 # listener.ora
+# Use HOST= to listen on all interfaces (IPv4 and IPv6), see issue #102
 echo \
 "LISTENER =
   (DESCRIPTION_LIST =
     (DESCRIPTION =
       (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC_FOR_${ORACLE_SID}))
-      (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+      (ADDRESS = (PROTOCOL = TCP)(HOST=)(PORT = 1521))
     )
   )
 
 DEFAULT_SERVICE_LISTENER = ${ORACLE_SID}" > "${ORACLE_BASE_HOME}"/network/admin/listener.ora
 
 # tnsnames.ora
+# Use HOST= to listen on all interfaces (IPv4 and IPv6), see issue #102
 echo \
 "${ORACLE_SID} =
   (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+    (ADDRESS = (PROTOCOL = TCP)(HOST=)(PORT = 1521))
     (CONNECT_DATA =
       (SERVER = DEDICATED)
       (SERVICE_NAME = ${ORACLE_SID})
@@ -158,7 +160,7 @@ echo \
 
 ${ORACLE_SID}PDB1 =
   (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+    (ADDRESS = (PROTOCOL = TCP)(HOST=)(PORT = 1521))
     (CONNECT_DATA =
       (SERVER = DEDICATED)
       (SERVICE_NAME = ${ORACLE_SID}PDB1)
