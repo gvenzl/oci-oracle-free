@@ -1,11 +1,11 @@
 #!/bin/bash
 #
-# Since: October, 2025
+# Since: February, 2026
 # Author: gvenzl
-# Name: install.23.26.0.sh
+# Name: install.23.26.1.sh
 # Description: Install script for Oracle AI Database 26ai Free
 #
-# Copyright 2025 Gerald Venzl
+# Copyright 2026 Gerald Venzl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
