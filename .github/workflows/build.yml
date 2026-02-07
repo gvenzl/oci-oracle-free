@@ -5,7 +5,7 @@ on:
       version:
         description: "The image version"
         required: true
-        default: "23.26.0"
+        default: "23.26.1"
         type: string
       flavor:
         description: "The image flavor"

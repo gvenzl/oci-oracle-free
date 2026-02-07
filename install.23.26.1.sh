@@ -1,11 +1,11 @@
 #!/bin/bash
 #
-# Since: October, 2025
+# Since: February, 2026
 # Author: gvenzl
-# Name: install.23.26.0.sh
+# Name: install.23.26.1.sh
 # Description: Install script for Oracle AI Database 26ai Free
 #
-# Copyright 2025 Gerald Venzl
+# Copyright 2026 Gerald Venzl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ microdnf -y install libnsl glibc glibc-devel libaio libgcc libstdc++ xz
 
 # Install Fortran runtime for libora_netlib.so (so that the Intel Math Kernel libraries are no longer needed, Intel only)
 if [[ "${ARCH}" == "amd64"  && ( "${BUILD_MODE}" == "REGULAR" || "${BUILD_MODE}" == "SLIM") ]]; then
-  microdnf -y install compat-libgfortran-48
+  microdnf -y install libgfortran-8.5.0
 fi;
 
 # ARM related packages
