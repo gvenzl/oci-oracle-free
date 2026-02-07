@@ -51,7 +51,7 @@ microdnf -y install libnsl glibc glibc-devel libaio libgcc libstdc++ xz
 
 # Install Fortran runtime for libora_netlib.so (so that the Intel Math Kernel libraries are no longer needed, Intel only)
 if [[ "${ARCH}" == "amd64"  && ( "${BUILD_MODE}" == "REGULAR" || "${BUILD_MODE}" == "SLIM") ]]; then
-  microdnf -y install compat-libgfortran-48
+  microdnf -y install libgfortran-8.5.0
 fi;
 
 # ARM related packages
