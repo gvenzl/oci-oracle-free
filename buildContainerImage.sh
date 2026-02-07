@@ -23,7 +23,7 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-VERSION="23.26.0"
+VERSION="23.26.1"
 IMAGE_FLAVOR="REGULAR"
 IMAGE_NAME="gvenzl/oracle-free"
 SKIP_CHECKSUM="false"
@@ -44,7 +44,7 @@ Parameters:
    -s: creates a 'slim' image
    -x: creates a 'faststart' image
    -v: version of Oracle AI Database Free to build
-       Choose one of: 23.26, 23.9, 23.8, 23.7, 23.6, 23.5, 23.4, 23.3, 23.2
+       Choose one of: 23.26.1, 23.26.0, 23.9, 23.8, 23.7, 23.6, 23.5, 23.4, 23.3, 23.2
    -i: ignores checksum test
    -o: passes on container build option
 
