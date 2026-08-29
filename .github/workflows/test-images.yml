@@ -39,7 +39,7 @@ jobs:
         id: constants
         env:
           INPUT_VERSIONS: ${{ inputs.versions }}
-      - run: |
+        run: |
           echo "setting constants"
           echo "versions=${INPUT_VERSIONS:-$DEFAULT_VERSIONS}" >> "$GITHUB_OUTPUT"
 
