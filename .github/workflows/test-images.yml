@@ -14,19 +14,34 @@ on:
       - 'README.md'
     branches-ignore:
       - main
+  workflow_dispatch:
+    inputs:
+      versions:
+        description: 'JSON array of versions to test'
+        required: false
+        type: string
+        default: &default_versions '[ "23.26.2", "23.26.3" ]'
+
 jobs:
 
   set-constants:
     name: 🔠 Setting workflow constants
     runs-on: ubuntu-24.04
+    env:
+      DEFAULT_VERSIONS: *default_versions
     outputs:
       FLAVORS: '[ "f", "r", "s" ]'
-      VERSIONS: '[ "23.26.2", "23.26.3" ]'
-      LATEST_VERSION: "23.26.3"
+      VERSIONS: ${{ steps.constants.outputs.versions }}
       RPM_ARCH: '[ "aarch64", "x86_64" ]'
       IMAGE_ARCH: '[ "arm64", "amd64" ]'
     steps:
-      - run: echo "setting constants"
+      - name: Set constants
+        id: constants
+        env:
+          INPUT_VERSIONS: ${{ inputs.versions }}
+      - run: |
+          echo "setting constants"
+          echo "versions=${INPUT_VERSIONS:-$DEFAULT_VERSIONS}" >> "$GITHUB_OUTPUT"
 
   download-install-files:
     name: ⬇️ Download install binaries
