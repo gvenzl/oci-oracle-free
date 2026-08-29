@@ -1,5 +1,18 @@
-name: 🛠️ Build and release all images
-on: workflow_dispatch
+name: 🛠️ Build and release images
+on:
+  workflow_dispatch:
+    inputs:
+      versions:
+        # Make sure that the latest version stays on the right so that it is built last
+        # This will ensure that the latest versions appear on top in GitHub and DockerHub.
+        description: 'JSON array of versions (latest on far right)'
+        default: '[ "23.XX.X", "23.YY.Y" ]'
+        required: true
+        type: string
+      latest_version:
+        description: 'Version for latest tag'
+        default: '"23.XX.Y"'
+        type: string
 
 jobs:
 
@@ -8,10 +21,6 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       FLAVORS: '[ "f", "r", "s" ]'
-      # Make sure that the latest version stays on the right so that it is built last
-      # This will ensure that the latest versions appear on top in GitHub and DockerHub.
-      VERSIONS: '[ "23.26.1", "23.26.2" ]'
-      LATEST_VERSION: '"23.26.2"'           # Single ' makes it a YAML string, double " makes it a JSON string
       RPM_ARCH: '[ "aarch64", "x86_64" ]'
       IMAGE_ARCH: '[ "amd64", "arm64" ]'
     steps:
@@ -24,14 +33,16 @@ jobs:
     needs: set-constants
     strategy:
       matrix:
-        versions: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
+        versions: ${{ fromJSON(inputs.versions) }}
         arch: ${{ fromJSON(needs.set-constants.outputs.RPM_ARCH) }}
     steps:
       - name: 🔍 Determine RPM file name
         run: |
           # Retrieve the version being built
           VERSION="${{ matrix.versions }}"
-          if [ "${#VERSION}" == 4 ]; then
+          if [[ "${VERSION}" == "23.2" || "${VERSION}" == "23.3" ]]; then
+            DATABASE_NAME="oracle-database-free-23c"
+          elif [[ "${#VERSION}" == 4 ]]; then
             DATABASE_NAME="oracle-database-free-23ai"
           else
             DATABASE_NAME="oracle-ai-database-free-26ai"
@@ -47,7 +58,7 @@ jobs:
           scp ${{ secrets.FILE_USER }}@${{ secrets.FILE_SERVER }}:"${{ env.DATABASE_NAME }}-${{ matrix.versions }}-1.el8.${{ matrix.arch }}.rpm" .
 
       - name: 💾 Store install file
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           retention-days: 1
           name: ${{ env.DATABASE_NAME }}-${{ matrix.versions }}-1.el8.${{ matrix.arch }}.rpm
@@ -61,7 +72,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-24.04, ubuntu-24.04-arm]
-        versions: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
+        versions: ${{ fromJSON(inputs.versions) }}
         flavors: ${{ fromJSON(needs.set-constants.outputs.FLAVORS) }}
     steps:
       - name: 🧹 Cleanup runner
@@ -91,7 +102,7 @@ jobs:
           sudo rm -rf /opt/az
 
       - name: 📂 Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: 🔄 Generate environment variables
         id: env_vars
@@ -120,7 +131,7 @@ jobs:
           echo "DATABASE_NAME=${DATABASE_NAME}" >> "$GITHUB_ENV"
 
       - name: ⬇️ Download stored install file
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ env.DATABASE_NAME }}-${{ matrix.versions }}-1.el8.${{ steps.env_vars.outputs.OS_ARCH }}.rpm
 
@@ -153,14 +164,14 @@ jobs:
           gzip "oracle-free-${{ matrix.versions }}${IMAGE_FLAVOR}-faststart-${IMAGE_ARCH}.tar"
 
       - name: ⬆️ Upload image non-faststart image for deploy job
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           retention-days: 1
           name: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-${{ steps.env_vars.outputs.IMAGE_ARCH }}
           path: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-${{ steps.env_vars.outputs.IMAGE_ARCH }}.tar.gz
 
       - name: ⬆️ Upload image faststart image for deploy job
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           retention-days: 1
           name: oracle-free-${{ matrix.versions }}${{ steps.env_vars.outputs.IMAGE_FLAVOR }}-faststart-${{ steps.env_vars.outputs.IMAGE_ARCH }}
@@ -178,7 +189,7 @@ jobs:
     strategy:
       matrix:
         repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
-        versions: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
+        versions: ${{ fromJSON(inputs.versions) }}
         arch: ${{ fromJSON(needs.set-constants.outputs.IMAGE_ARCH) }}
         flavor: [ "-full", "", "-slim" ] # "" is the "regular" image
 
@@ -210,12 +221,12 @@ jobs:
           sudo rm -rf /opt/az
 
       - name: ⬇️ Download non-faststart image
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}
 
       - name: ⬇️ Download faststart image
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}
 
@@ -227,34 +238,35 @@ jobs:
           rm oracle-free-${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}.tar.gz
 
       - name: 🔓 Login to GHCR registry
-        uses: redhat-actions/podman-login@v1
+        uses: redhat-actions/podman-login@v2
         with:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io
 
       - name: 🔓 Login to Docker.io registry
-        uses: redhat-actions/podman-login@v1
+        uses: redhat-actions/podman-login@v2
         with:
           username: ${{ secrets.DH_USER }}
           password: ${{ secrets.DH_PWD }}
           registry: docker.io
 
       - name: 🫸 Push non-faststart image to Container Registry
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           registry: ${{ matrix.repository }}
           image: oracle-free
           tags: ${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}
 
       - name: 🫸 Push faststart image to  Container Registry
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           registry: ${{ matrix.repository }}
           image: oracle-free
           tags: ${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}
 
   create-latest-version-tags:
+    if: ${{ inputs.latest_version != '' }}
     name: ⬆️ 📋 Upload latest images to registries
     environment: tag
     runs-on: ubuntu-24.04
@@ -297,89 +309,89 @@ jobs:
           sudo rm -rf /opt/az
 
       - name: ⬇️ Download non-faststart image
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
-          name: oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}-${{ matrix.arch }}
+          name: oracle-free-${{ inputs.latest_version }}${{ matrix.flavor }}-${{ matrix.arch }}
 
       - name: ⬇️ Download faststart image
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
-          name: oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}
+          name: oracle-free-${{ inputs.latest_version }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}
 
       - name: 📥 Import images
         run: |
-          zcat oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}-${{ matrix.arch }}.tar.gz           | podman load
-          rm oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}-${{ matrix.arch }}.tar.gz
-          zcat oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}.tar.gz | podman load
-          rm oracle-free-${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}.tar.gz
+          zcat oracle-free-${{ inputs.latest_version }}${{ matrix.flavor }}-${{ matrix.arch }}.tar.gz           | podman load
+          rm oracle-free-${{ inputs.latest_version }}${{ matrix.flavor }}-${{ matrix.arch }}.tar.gz
+          zcat oracle-free-${{ inputs.latest_version }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}.tar.gz | podman load
+          rm oracle-free-${{ inputs.latest_version }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}.tar.gz
 
       - name: 🏷️ Tag images
         id: tag-images
         env:
-          LATEST_VERSION: ${{ fromJSON(needs.set-constants.outputs.LATEST_VERSION) }}
           FLAVOR: ${{ matrix.flavor }}
           ARCH: ${{ matrix.arch }}
         run: |
           # Tag 23[-full | -slim][-faststart]
-          podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-${ARCH} oracle-free:23${FLAVOR}-${ARCH}
-          podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-faststart-${ARCH} oracle-free:23${FLAVOR}-faststart-${ARCH}
+          podman tag gvenzl/oracle-free:${{ inputs.latest_version }}${FLAVOR}-${ARCH} oracle-free:23${FLAVOR}-${ARCH}
+          podman tag gvenzl/oracle-free:${{ inputs.latest_version }}${FLAVOR}-faststart-${ARCH} oracle-free:23${FLAVOR}-faststart-${ARCH}
 
           # Tag [-latest] or [-slim | -full]
           if [[ "${FLAVOR}" == "" ]]; then # regular image
             FLAVOR_NO_DASH="latest"
-            podman tag gvenzl/oracle-free:${LATEST_VERSION}-${ARCH} oracle-free:${FLAVOR_NO_DASH}-${ARCH}
-            podman tag gvenzl/oracle-free:${LATEST_VERSION}-faststart-${ARCH} oracle-free:${FLAVOR_NO_DASH}-faststart-${ARCH}
+            podman tag gvenzl/oracle-free:${{ inputs.latest_version }}-${ARCH} oracle-free:${FLAVOR_NO_DASH}-${ARCH}
+            podman tag gvenzl/oracle-free:${{ inputs.latest_version }}-faststart-${ARCH} oracle-free:${FLAVOR_NO_DASH}-faststart-${ARCH}
           else
             FLAVOR_NO_DASH=${FLAVOR:1}
-            podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-${ARCH} oracle-free:${FLAVOR_NO_DASH}-${ARCH}
-            podman tag gvenzl/oracle-free:${LATEST_VERSION}${FLAVOR}-faststart-${ARCH} oracle-free:${FLAVOR_NO_DASH}-faststart-${ARCH}
+            podman tag gvenzl/oracle-free:${{ inputs.latest_version }}${FLAVOR}-${ARCH} oracle-free:${FLAVOR_NO_DASH}-${ARCH}
+            podman tag gvenzl/oracle-free:${{ inputs.latest_version }}${FLAVOR}-faststart-${ARCH} oracle-free:${FLAVOR_NO_DASH}-faststart-${ARCH}
           fi;
           # Store value for push
           echo "FLAVOR_NO_DASH=${FLAVOR_NO_DASH}" >> $GITHUB_OUTPUT
 
       - name: 🔓 Login to GHCR registry
-        uses: redhat-actions/podman-login@v1
+        uses: redhat-actions/podman-login@v2
         with:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io
 
       - name: 🔓 Login to Docker.io registry
-        uses: redhat-actions/podman-login@v1
+        uses: redhat-actions/podman-login@v2
         with:
           username: ${{ secrets.DH_USER }}
           password: ${{ secrets.DH_PWD }}
           registry: docker.io
 
       - name: 🫸 Push 23 non-faststart image to Container Registry
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           registry: ${{ matrix.repository }}
           image: oracle-free
           tags: 23${{ matrix.flavor }}-${{ matrix.arch }}
 
       - name: 🫸 Push 23 faststart image to Container Registry
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           registry: ${{ matrix.repository }}
           image: oracle-free
           tags: 23${{ matrix.flavor }}-faststart-${{ matrix.arch }}
 
       - name: 🫸 Push versionless image to GitHub Container Registry
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           registry: ${{ matrix.repository }}
           image: oracle-free
           tags: ${{ steps.tag-images.outputs.FLAVOR_NO_DASH }}-${{ matrix.arch }}
 
       - name: 🫸 Push versionless faststart image to GitHub Container Registry
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           registry: ${{ matrix.repository }}
           image: oracle-free
           tags: ${{ steps.tag-images.outputs.FLAVOR_NO_DASH }}-faststart-${{ matrix.arch }}
 
   create-versioned-manifests-tags:
+    if: ${{ inputs.latest_version != '' }}
     name: 📋 Create versioned manifests to registries
     environment: tag
     runs-on: ubuntu-24.04
@@ -387,7 +399,7 @@ jobs:
     strategy:
       matrix:
         repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
-        version: ${{ fromJSON(needs.set-constants.outputs.VERSIONS) }}
+        version: ${{ fromJSON(inputs.versions) }}
         image_flavor: [ "-full", "", "-slim" ]
         image_faststart: [ "-faststart", "" ]
 
@@ -397,14 +409,14 @@ jobs:
     steps:
 
       - name: 🔓 Login to GHCR registry
-        uses: redhat-actions/podman-login@v1
+        uses: redhat-actions/podman-login@v2
         with:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io
 
       - name: 🔓 Login to Docker.io registry
-        uses: redhat-actions/podman-login@v1
+        uses: redhat-actions/podman-login@v2
         with:
           username: ${{ secrets.DH_USER }}
           password: ${{ secrets.DH_PWD }}
@@ -421,6 +433,7 @@ jobs:
           podman manifest rm ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
 
   create-23-manifests-tags:
+    if: ${{ inputs.latest_version != '' }}
     name: 📋 Create 23 manifests to registries
     environment: tag
     runs-on: ubuntu-24.04
@@ -437,14 +450,14 @@ jobs:
     steps:
 
       - name: 🔓 Login to GHCR registry
-        uses: redhat-actions/podman-login@v1
+        uses: redhat-actions/podman-login@v2
         with:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io
 
       - name: 🔓 Login to Docker.io registry
-        uses: redhat-actions/podman-login@v1
+        uses: redhat-actions/podman-login@v2
         with:
           username: ${{ secrets.DH_USER }}
           password: ${{ secrets.DH_PWD }}
@@ -461,6 +474,7 @@ jobs:
           podman manifest rm ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}
 
   create-latest-manifests-tags:
+    if: ${{ inputs.latest_version != '' }}
     name: 📋 Create latest manifests to registries
     environment: tag
     runs-on: ubuntu-24.04
@@ -477,14 +491,14 @@ jobs:
     steps:
 
       - name: 🔓 Login to GHCR registry
-        uses: redhat-actions/podman-login@v1
+        uses: redhat-actions/podman-login@v2
         with:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io
 
       - name: 🔓 Login to Docker.io registry
-        uses: redhat-actions/podman-login@v1
+        uses: redhat-actions/podman-login@v2
         with:
           username: ${{ secrets.DH_USER }}
           password: ${{ secrets.DH_PWD }}
@@ -509,21 +523,21 @@ jobs:
 
     steps:
       - name: 🧹 Cleanup build deployments
-        uses: strumwolf/delete-deployment-environment@v2
+        uses: strumwolf/delete-deployment-environment@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: build
           onlyRemoveDeployments: true
 
       - name: 🧹 Cleanup upload deployments
-        uses: strumwolf/delete-deployment-environment@v2
+        uses: strumwolf/delete-deployment-environment@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: upload
           onlyRemoveDeployments: true
 
       - name: 🧹 Cleanup tag deployments
-        uses: strumwolf/delete-deployment-environment@v2
+        uses: strumwolf/delete-deployment-environment@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: tag

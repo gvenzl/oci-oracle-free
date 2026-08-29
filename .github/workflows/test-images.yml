@@ -14,19 +14,34 @@ on:
       - 'README.md'
     branches-ignore:
       - main
+  workflow_dispatch:
+    inputs:
+      versions:
+        description: 'JSON array of versions to test'
+        required: false
+        type: string
+        default: &default_versions '[ "23.26.2", "23.26.3" ]'
+
 jobs:
 
   set-constants:
     name: 🔠 Setting workflow constants
     runs-on: ubuntu-24.04
+    env:
+      DEFAULT_VERSIONS: *default_versions
     outputs:
       FLAVORS: '[ "f", "r", "s" ]'
-      VERSIONS: '[ "23.26.1", "23.26.2" ]'
-      LATEST_VERSION: "23.26.2"
+      VERSIONS: ${{ steps.constants.outputs.versions }}
       RPM_ARCH: '[ "aarch64", "x86_64" ]'
       IMAGE_ARCH: '[ "arm64", "amd64" ]'
     steps:
-      - run: echo "setting constants"
+      - name: Set constants
+        id: constants
+        env:
+          INPUT_VERSIONS: ${{ inputs.versions }}
+        run: |
+          echo "setting constants"
+          echo "versions=${INPUT_VERSIONS:-$DEFAULT_VERSIONS}" >> "$GITHUB_OUTPUT"
 
   download-install-files:
     name: ⬇️ Download install binaries
@@ -42,7 +57,9 @@ jobs:
         run: |
           # Retrieve the version being built
           VERSION="${{ matrix.versions }}"
-          if [ "${#VERSION}" == 4 ]; then
+          if [[ "${VERSION}" == "23.2" || "${#VERSION}" == "23.3" ]]; then
+            DATABASE_NAME="oracle-database-free-23c"
+          elif [[ "${#VERSION}" == 4 ]]; then
             DATABASE_NAME="oracle-database-free-23ai"
           else
             DATABASE_NAME="oracle-ai-database-free-26ai"
@@ -58,7 +75,7 @@ jobs:
           scp ${{ secrets.FILE_USER }}@${{ secrets.FILE_SERVER }}:"${{ env.DATABASE_NAME }}-${{ matrix.versions }}-1.el8.${{ matrix.arch }}.rpm" .
 
       - name: 💾 Store install file
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           retention-days: 1
           name: ${{ env.DATABASE_NAME }}-${{ matrix.versions }}-1.el8.${{ matrix.arch }}.rpm
@@ -102,7 +119,7 @@ jobs:
           sudo rm -rf /opt/az
 
       - name: 📂 Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: 🔄 Generate environment variables
         id: env_vars
@@ -131,7 +148,7 @@ jobs:
           echo "DATABASE_NAME=${DATABASE_NAME}" >> "$GITHUB_ENV"
 
       - name: ⬇️ Download stored install file
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ env.DATABASE_NAME }}-${{ matrix.versions }}-1.el8.${{ steps.env_vars.outputs.OS_ARCH }}.rpm
 

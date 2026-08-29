@@ -1,11 +1,11 @@
 #!/bin/bash
 #
-# Since: April, 2023
+# Since: August, 2026
 # Author: gvenzl
-# Name: install.23.4.sh
-# Description: Install script for Oracle Database 23 Free
+# Name: install.23.26.3.sh
+# Description: Install script for Oracle AI Database 26ai Free
 #
-# Copyright 2023 Gerald Venzl
+# Copyright 2026 Gerald Venzl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,19 +31,13 @@ BUILD_MODE=${1:-"REGULAR"}
 echo "BUILDER: BUILD_MODE=${BUILD_MODE}"
 
 # Set data file sizes (only executed for REGULAR and SLIM)
-SYSAUX_SIZE_CDB=536
-SYSAUX_SIZE_SEED=304
-SYSAUX_SIZE_PDB=327
-SYSTEM_SIZE_CDB=1052
-SYSTEM_SIZE_SEED=276
-SYSTEM_SIZE_PDB=277
-REDO_SIZE=20
 USERS_SIZE=10
 TEMP_SIZE=10
 # Overwrite REGULAR with SLIM sizes
 if [ "${BUILD_MODE}" == "SLIM" ]; then
   REDO_SIZE=10
-  SYSAUX_SIZE_CDB=560
+else
+  REDO_SIZE=20
 fi;
 
 echo "BUILDER: Installing OS dependencies"
@@ -57,7 +51,7 @@ microdnf -y install libnsl glibc glibc-devel libaio libgcc libstdc++ xz
 
 # Install Fortran runtime for libora_netlib.so (so that the Intel Math Kernel libraries are no longer needed, Intel only)
 if [[ "${ARCH}" == "amd64"  && ( "${BUILD_MODE}" == "REGULAR" || "${BUILD_MODE}" == "SLIM") ]]; then
-  microdnf -y install compat-libgfortran-48
+  microdnf -y install libgfortran-8.5.0
 fi;
 
 # ARM related packages
@@ -68,7 +62,7 @@ fi;
 # Install container runtime specific packages
 # (used by the entrypoint script, etc., not the database itself)
 # TODO: replace with 7zip
-microdnf -y install zip unzip gzip less findutils vim-minimal
+microdnf -y install zip unzip gzip less findutils vim-minimal sudo
 
 # Install 7zip
 echo "BUILDER: Installing 7-zip"
@@ -88,6 +82,13 @@ mv License.txt /usr/share/
 cd - 1> /dev/null
 rm -rf /tmp/7z
 
+echo "BUILDER: Setup oracle user for sudo privileges"
+
+# Setup oracle for sudoers
+chmod u+w /etc/sudoers
+echo "oracle   ALL=(ALL)   NOPASSWD: ALL" >> /etc/sudoers
+chmod u-w /etc/sudoers
+
 ##############################################
 ###### Install and configure Database ########
 ##############################################
@@ -95,7 +96,7 @@ rm -rf /tmp/7z
 echo "BUILDER: installing database binaries"
 
 # Install Oracle Free
-rpm -iv --nodeps /install/oracle-database-free-23*.rpm
+rpm -iv --nodeps /install/oracle-ai-database-free-26*.rpm
 
 # Set 'oracle' user home directory to ${ORACE_BASE}
 usermod -d "${ORACLE_BASE}" oracle
@@ -104,8 +105,8 @@ usermod -d "${ORACLE_BASE}" oracle
 echo "oracle" | passwd --stdin oracle
 
 # Add listener port and skip validations to conf file
-sed -i "s/LISTENER_PORT=/LISTENER_PORT=1521/g" /etc/sysconfig/oracle-free-23*.conf
-sed -i "s/SKIP_VALIDATIONS=false/SKIP_VALIDATIONS=true/g" /etc/sysconfig/oracle-free-23*.conf
+sed -i "s/LISTENER_PORT=/LISTENER_PORT=1521/g" /etc/sysconfig/oracle-free-26*.conf
+sed -i "s/SKIP_VALIDATIONS=false/SKIP_VALIDATIONS=true/g" /etc/sysconfig/oracle-free-26*.conf
 
 # Disable netca to avoid "No IP address found" issue
 mv "${ORACLE_HOME}"/bin/netca "${ORACLE_HOME}"/bin/netca.bak
@@ -139,7 +140,7 @@ chmod u+x "${ORACLE_HOME}"/cv/remenv/exectask.sh
 # Set random password
 ORACLE_PASSWORD=$(date '+%s' | sha256sum | base64 | head -c 8)
 # Configure the Oracle Database instance
-(echo "${ORACLE_PASSWORD}"; echo "${ORACLE_PASSWORD}";) | /etc/init.d/oracle-free-23* configure
+(echo "${ORACLE_PASSWORD}"; echo "${ORACLE_PASSWORD}";) | /etc/init.d/oracle-free-26* configure
 
 # Stop unconfigured listener
 su -p oracle -c "lsnrctl stop"
@@ -156,22 +157,24 @@ echo "BUILDER: post config database steps"
 echo "BUILDER: creating network files"
 
 # listener.ora
+# Use HOST= to listen on all interfaces (IPv4 and IPv6), see issue #102
 echo \
 "LISTENER =
   (DESCRIPTION_LIST =
     (DESCRIPTION =
       (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC_FOR_${ORACLE_SID}))
-      (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+      (ADDRESS = (PROTOCOL = TCP)(HOST=)(PORT = 1521))
     )
   )
 
 DEFAULT_SERVICE_LISTENER = ${ORACLE_SID}" > "${ORACLE_BASE_HOME}"/network/admin/listener.ora
 
 # tnsnames.ora
+# Use HOST= to listen on all interfaces (IPv4 and IPv6), see issue #102
 echo \
 "${ORACLE_SID} =
   (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+    (ADDRESS = (PROTOCOL = TCP)(HOST=)(PORT = 1521))
     (CONNECT_DATA =
       (SERVER = DEDICATED)
       (SERVICE_NAME = ${ORACLE_SID})
@@ -180,7 +183,7 @@ echo \
 
 ${ORACLE_SID}PDB1 =
   (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+    (ADDRESS = (PROTOCOL = TCP)(HOST=)(PORT = 1521))
     (CONNECT_DATA =
       (SERVER = DEDICATED)
       (SERVICE_NAME = ${ORACLE_SID}PDB1)
@@ -238,12 +241,15 @@ chown oracle:oinstall "${ORACLE_BASE}"/.bash_profile
 # is `oracle`, they can no longer create these folders.
 # Instead we provide them here already so that these folks can start putting files into
 # them directly, if they have to.
-
+echo "BUILDER: creating entrypoint folders"
 mkdir /container-entrypoint-initdb.d
 mkdir /container-entrypoint-startdb.d
 chown oracle:oinstall /container-entrypoint*
+mkdir /pdb-plug
+chown oracle:oinstall /pdb-plug
 
 # Store image information
+echo "BUILDER: storing image information"
 echo "${OCI_IMAGE_VERSION}" > /etc/oci-image-version
 echo "${OCI_IMAGE_FLAVOR}"  > /etc/oci-image-flavor
 
@@ -253,6 +259,10 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
    -- Exit on any errors
    WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+   -- Drop FREEPDB1 (to recreate at the end)
+   ALTER PLUGGABLE DATABASE FREEPDB1 CLOSE;
+   DROP PLUGGABLE DATABASE FREEPDB1 INCLUDING DATAFILES;
 
    -- Enable remote HTTP access
    EXEC DBMS_XDB.SETLISTENERLOCALACCESS(FALSE);
@@ -265,7 +275,7 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
    -- Remove local_listener entry (using default 1521)
    ALTER SYSTEM SET LOCAL_LISTENER='';
-   
+
    -- Explicitly set CPU_COUNT=2 to avoid memory miscalculation (#64)
    --
    -- This will cause the CPU_COUNT=2 to be written to the SPFILE and then
@@ -278,12 +288,19 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- beyond 2GB RAM, which cannot be set on FREE.
    ALTER SYSTEM SET CPU_COUNT=2 SCOPE=SPFILE;
 
+   -- Deactivate memory protection keys feature (#79)
+   -- Like with every underscore parameter, DO NOT SET THIS PARAMETER EVER UNLESS YOU KNOW WHAT THE HECK YOU ARE DOING!
+   ALTER SYSTEM SET "_enable_memory_protection_keys"=FALSE SCOPE=SPFILE;
+
    -- Set max job_queue_processes to 1
    ALTER SYSTEM SET JOB_QUEUE_PROCESSES=1;
 
-  -- Drop FREEPDB1 (to recreate at the end)
-  ALTER PLUGGABLE DATABASE FREEPDB1 CLOSE;
-  DROP PLUGGABLE DATABASE FREEPDB1 INCLUDING DATAFILES;
+   -- Disable parallel terminated transactions recovery for all PDBs
+   ALTER SYSTEM SET FAST_START_PARALLEL_ROLLBACK=FALSE CONTAINER=ALL;
+   -- CONTAINER=ALL does not affect SEED, explicitly deactivate it for seed
+   ALTER SESSION SET CONTAINER=PDB\$SEED;
+   ALTER SYSTEM SET FAST_START_PARALLEL_ROLLBACK=FALSE;
+   ALTER SESSION SET CONTAINER=CDB\$ROOT;
 
    -- Reboot of DB
    SHUTDOWN IMMEDIATE;
@@ -293,7 +310,23 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    CREATE USER OPS\$ORACLE IDENTIFIED EXTERNALLY;
    GRANT CONNECT, SELECT_CATALOG_ROLE TO OPS\$ORACLE;
    -- Permissions to see entries in v\$pdbs
-   ALTER USER OPS\$ORACLE SET CONTAINER_DATA = ALL CONTAINER = CURRENT;
+   ALTER USER OPS\$ORACLE SET CONTAINER_DATA=ALL CONTAINER=CURRENT;
+
+   -- Purge scheduler log
+   exec DBMS_SCHEDULER.PURGE_LOG();
+
+   -- Purge historical stats
+   DECLARE
+     v_history_retention   PLS_INTEGER := DBMS_STATS.GET_STATS_HISTORY_RETENTION();
+   BEGIN
+     -- Set retention to 0
+     DBMS_STATS.ALTER_STATS_HISTORY_RETENTION(0);
+     -- Purge all stats
+     DBMS_STATS.PURGE_STATS(systimestamp);
+     -- Reset retention
+     DBMS_STATS.ALTER_STATS_HISTORY_RETENTION(v_history_retention);
+   END;
+   /
 
    exit;
 EOF
@@ -528,8 +561,6 @@ EOF
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM DBMS_XDBT');
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE XDB.DBMS_XDBT');
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE SYS.VALIDATE_CONTEXT');
-       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM CTX_USER_AUTOSYNC_STATUS');
-       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM CTX_USER_AUTOSYNC_JOBS');
 
        -- Remove Spatial leftover components
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP USER MDDATA CASCADE');
@@ -545,8 +576,6 @@ EOF
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM DBMS_XDBT');
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE XDB.DBMS_XDBT');
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE SYS.VALIDATE_CONTEXT');
-       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM CTX_USER_AUTOSYNC_STATUS');
-       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM CTX_USER_AUTOSYNC_JOBS');
 
        -- Remove Spatial leftover components
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP USER MDDATA CASCADE');
@@ -1049,19 +1078,13 @@ EOF
     # Change configuration for SLIM image
     echo "BUILDER: Change configuration for SLIM image"
 
-    if [[ "$(cat /etc/oci-image-version)" ==  "23.2" ]]; then
-      MLE_PARAM="MULTILINGUAL_ENGINE=DISABLE"
-    else
-      MLE_PARAM="MLE_PROG_LANGUAGES=OFF"
-    fi;
-
     su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
        -- Exit on any errors
        WHENEVER SQLERROR EXIT SQL.SQLCODE
 
        -- Disable Multilingual Engine
-       ALTER SYSTEM SET ${MLE_PARAM};
+       ALTER SYSTEM SET MLE_PROG_LANGUAGES=OFF;
 
        exit;
 EOF
@@ -1176,7 +1199,7 @@ EOF
       -- CDB
       ALTER TABLESPACE TEMP SHRINK SPACE;
       ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp01.dbf' RESIZE ${TEMP_SIZE}M;
-     
+
       -- SEED
       ALTER SESSION SET CONTAINER=PDB\$SEED;
       ALTER TABLESPACE TEMP SHRINK SPACE;
@@ -1431,10 +1454,10 @@ rm -r /install
 rm -r /usr/share/doc/*
 
 # Cleanup database files not needed for being in a container but were installed by the rpm
-#/sbin/chkconfig --del oracle-free-23*
-rm /etc/init.d/oracle-free-23*
-rm /etc/sysconfig/oracle-free-23*.conf
-rm -r /var/log/oracle-database-free-23*
+#/sbin/chkconfig --del oracle-free-26*
+rm /etc/init.d/oracle-free-26*
+rm /etc/sysconfig/oracle-free-26*.conf
+rm -r /var/log/oracle-ai-database-free-26*
 rm -r /tmp/*
 
 # Remove SYS audit directories and files created during install
@@ -1446,7 +1469,6 @@ rm -r "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/dpdump/*
 # Remove Oracle DB install logs
 rm    "${ORACLE_BASE}"/cfgtoollogs/dbca/FREE/*
 rm    "${ORACLE_BASE}"/cfgtoollogs/netca/*
-rm -r "${ORACLE_BASE_HOME}"/cfgtoollogs/sqlpatch/*
 rm    "${ORACLE_BASE}"/oraInventory/logs/*
 rm -r "${ORACLE_BASE_HOME}"/log/*
 rm -r "${ORACLE_BASE_HOME}"/rdbms/log/*
@@ -1497,11 +1519,13 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm "${ORACLE_HOME}"/lib/*.jar
 
   # Remove unnecessary timezone information
+  ### BUG 23.26.3: the CDB still uses timezone file 43 and the PDB$SEED timezone file cannot be changed
+  ### Hence, just use timezone file 43 instead of trying to being clever.
   # Create temporary folder
   mkdir "${ORACLE_HOME}"/oracore/tmp_current_tz
-  # Copy timelrg*.dat with the highest number to temporary folder (don't "mv" it in case it's a symlink)
-  cp    $(ls -v "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg* | tail -n 1) \
-           "${ORACLE_HOME}"/oracore/tmp_current_tz/
+  # Copy timelrg_43.dat to temporary folder (don't "mv" it in case it's a symlink)
+  cp "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg_43.dat "${ORACLE_HOME}"/oracore/tmp_current_tz/
+
   # Delete all remaining folders and files in "zoneinfo"
   rm -r "${ORACLE_HOME}"/oracore/zoneinfo/*
   # Move current timelrg*.dat file back into place
@@ -1564,7 +1588,6 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm "${ORACLE_HOME}"/bin/acfs*           # ACFS File system components
   rm "${ORACLE_HOME}"/bin/adapters        # Protocol Adapters shell script
   rm "${ORACLE_HOME}"/bin/adrci           # Automatic Diagnostic Repository Command Interpreter
-  rm "${ORACLE_HOME}"/bin/afd*            # ASM Filter Drive components
   rm "${ORACLE_HOME}"/bin/agtctl          # Multi-Threaded extproc agent control utility
   rm "${ORACLE_HOME}"/bin/ahfctl          # Autonomous Health Framework Control Utility
   rm "${ORACLE_HOME}"/bin/amdu            # ASM Disk Utility
@@ -1675,10 +1698,6 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     # Remove unnecessary libraries
     rm "${ORACLE_HOME}"/lib/asm*       # Oracle Automatic Storage Management
     rm -f "${ORACLE_HOME}"/lib/ore.so  # Oracle R Enterprise
-
-    # Remove not needed packages for SLIM image
-    # Use rpm instad of microdnf to allow removing packages regardless of their dependencies
-    rpm -e --nodeps findutils less vim-minimal
 
   fi;
 

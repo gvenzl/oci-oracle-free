@@ -5,7 +5,7 @@ on:
       version:
         description: "The image version"
         required: true
-        default: "23.26.2"
+        default: "23.26.3"
         type: string
       flavor:
         description: "The image flavor"
@@ -61,21 +61,24 @@ jobs:
       - name: 🕵️ Get vars
         run: |
           OS_ARCH=$(uname -m)
+
           echo "OS_ARCH=${OS_ARCH}" >> "$GITHUB_ENV"
 
-          if     [ "${OS_ARCH}" == "aarch64" ]; then IMAGE_ARCH="arm64";
-            elif [ "${OS_ARCH}" == "x86_64" ];  then IMAGE_ARCH="amd64";
+          if     [[ "${OS_ARCH}" == "aarch64" ]]; then IMAGE_ARCH="arm64";
+            elif [[ "${OS_ARCH}" == "x86_64"  ]]; then IMAGE_ARCH="amd64";
             else IMAGE_ARCH="";
           fi;
           echo "IMAGE_ARCH=${IMAGE_ARCH}" >> "$GITHUB_ENV"
 
-          if     [ "${{ inputs.flavor }}" == "-full" ]; then BUILD_FLAVOR="-f";
-            elif [ "${{ inputs.flavor }}" == "" ];      then BUILD_FLAVOR="-r";
-            elif [ "${{ inputs.flavor }}" == "-slim" ]; then BUILD_FLAVOR="-s";
+          if     [[ "${{ inputs.flavor }}" == "-full" ]]; then BUILD_FLAVOR="-f";
+            elif [[ "${{ inputs.flavor }}" == "" ]];      then BUILD_FLAVOR="-r";
+            elif [[ "${{ inputs.flavor }}" == "-slim" ]]; then BUILD_FLAVOR="-s";
           fi;
           echo "BUILD_FLAVOR=${BUILD_FLAVOR}" >> "$GITHUB_ENV"
           VERSION="${{ inputs.version }}"
-          if [ "${#VERSION}" == 4 ]; then
+          if [[ "${VERSION}" == "23.2" || "${VERSION}" == "23.3" ]]; then
+            DATABASE_NAME="oracle-database-free-23c"
+          elif [[ "${#VERSION}" == 4 ]]; then
             DATABASE_NAME="oracle-database-free-23ai"
           else
             DATABASE_NAME="oracle-ai-database-free-26ai"
@@ -83,7 +86,7 @@ jobs:
           echo "DATABASE_NAME=${DATABASE_NAME}" >> "$GITHUB_ENV"
 
       - name: 📂 Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: ⬇️ Download install file from web
         run: |
@@ -103,7 +106,7 @@ jobs:
         run: podman save -o "oracle-free-${{ inputs.version }}${{ inputs.flavor }}-${{ env.IMAGE_ARCH }}.tar" "localhost/gvenzl/oracle-free:${{ inputs.version }}${{ inputs.flavor }}-${{ env.IMAGE_ARCH }}"
 
       - name: ⬆️ Upload image
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           retention-days: 3
           name: oracle-free-${{ inputs.version }}${{ inputs.flavor }}-${{ env.IMAGE_ARCH }}
@@ -118,7 +121,7 @@ jobs:
 
     steps:
       - name: 🧹 Cleanup build deployments
-        uses: strumwolf/delete-deployment-environment@v2
+        uses: strumwolf/delete-deployment-environment@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: build

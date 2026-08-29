@@ -21,32 +21,32 @@ Oracle Database Free Container images.
 
 # Supported tags
 
-| Tag                                                                                     | Status              |
-| --------------------------------------------------------------------------------------- | ------------------- |
-| `latest[-faststart]`                                                                    | 🔵 Always Supported |
-| `slim[-faststart]`                                                                      | 🔵 Always Supported |
-| `full[-faststart]`                                                                      | 🔵 Always Supported |
-| `23[-faststart]`<br/>`23[-slim][-faststart]`<br/>`23[-full][-faststart]`                | 🟢 Supported        |
-| `23.26.2[-faststart]`<br/>`23.26.2[-slim][-faststart]`<br/>`23.26.2[-full][-faststart]` | 🟢 Supported        |
-| `23.26.1[-faststart]`<br/>`23.26.1[-slim][-faststart]`<br/>`23.26.1[-full][-faststart]` | 🟡 Deprecated       |
-| `23.26.0[-faststart]`<br/>`23.26.0[-slim][-faststart]`<br/>`23.26.0[-full][-faststart]` | 🔴 Unsupported      |
-| `23.9[-faststart]`<br/>`23.9[-slim][-faststart]`<br/>`23.9[-full][-faststart]`          | 🔴 Unsupported      |
-| `23.8[-faststart]`<br/>`23.8[-slim][-faststart]`<br/>`23.8[-full][-faststart]`          | 🔴 Unsupported      |
-| `23.7[-faststart]`<br/>`23.7[-slim][-faststart]`<br/>`23.7[-full][-faststart]`          | 🔴 Unsupported      |
-| `23.6[-faststart]`<br/>`23.6[-slim][-faststart]`<br/>`23.6[-full][-faststart]`          | 🔴 Unsupported      |
-| `23.5[-faststart]`<br/>`23.5[-slim][-faststart]`<br/>`23.5[-full][-faststart]`          | 🔴 Unsupported      |
-| `23.4[-faststart]`<br/>`23.4[-slim][-faststart]`<br/>`23.4[-full][-faststart]`          | 🔴 Unsupported      |
-| `23.3[-faststart]`<br/>`23.3[-slim][-faststart]`<br/>`23.3[-full][-faststart]`          | 🔴 Unsupported      |
-| `23.2[-faststart]`<br/>`23.2[-slim][-faststart]`<br/>`23.2[-full][-faststart]`          | 🔴 Unsupported      |
+| Tags                 | Status              |
+| ---------------------| ------------------- |
+| `latest[-faststart]` | 🔵 Always Supported |
+| `slim[-faststart]`   | 🔵 Always Supported |
+| `full[-faststart]`   | 🔵 Always Supported |
+| `23*`                | 🟢 Supported        |
+| `23.26.3*`           | 🟢 Supported        |
+| `23.26.2*`           | 🟡 Deprecated       |
+| `23.26.1*`           | 🔴 Unsupported      |
+| `23.26.0*`           | 🔴 Unsupported      |
+| `23.9*`              | 🔴 Unsupported      |
+| `23.8*`              | 🔴 Unsupported      |
+| `23.7*`              | 🔴 Unsupported      |
+| `23.6*`              | 🔴 Unsupported      |
+| `23.5*`              | 🔴 Unsupported      |
+| `23.4*`              | 🔴 Unsupported      |
+| `23.3*`              | 🔴 Unsupported      |
+| `23.2*`              | 🔴 Unsupported      |
 
-## Tags
+**Note:** `*` denotes the availability of multiple additional images:
 
-Tags in `[]` denote tag options, for example, `23[-slim][-faststart]` means there are the following tags:
-
-* `23`
-* `23-slim`
-* `23-faststart`
-* `23-slim-faststart`
+* `-full`
+* `-full-faststart`
+* `-faststart`
+* `-slim`
+* `-slim-faststart`
 
 ## Support status
 

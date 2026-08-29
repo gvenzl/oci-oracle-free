@@ -65,13 +65,14 @@ fi;
 microdnf -y install zip unzip gzip less findutils vim-minimal sudo
 
 # Install 7zip
+echo "BUILDER: Installing 7-zip"
 mkdir /tmp/7z
 cd /tmp/7z
 
 if [ "${ARCH}" == "arm64" ]; then
-  download_location="https://7zip.org/a/7z2408-linux-arm64.tar.xz"
+  download_location="https://github.com/ip7z/7zip/releases/download/26.02/7z2602-linux-arm64.tar.xz"
 else
-  download_location="https://7zip.org/a/7z2408-linux-x64.tar.xz"
+  download_location="https://github.com/ip7z/7zip/releases/download/26.02/7z2602-linux-x64.tar.xz"
 fi;
 
 curl -s -L -k -O "${download_location}"
@@ -113,6 +114,28 @@ echo "exit 0" > "${ORACLE_HOME}"/bin/netca
 chmod a+x "${ORACLE_HOME}"/bin/netca
 
 echo "BUILDER: configuring database"
+
+### Bypass memory check
+# On the GitHub Ubuntu runners something changes taht /sys/fs/cgroup/memory.max is no longer available
+# Unfortunately, unlike good software, the Oracle installer just fails over with a random (contact Oracle Support) message
+# because it runs into an ArrayOutOfBoundException...
+# This just overwrites the invocation of the underlying binary that returns NULL back
+head -n -3 "${ORACLE_HOME}"/cv/remenv/exectask.sh > "${ORACLE_HOME}"/cv/remenv/exectask.sh.tmp
+echo \
+'elif [ "-getavailmemory" = "$1" ] &&
+     { [ ! -r /sys/fs/cgroup/memory.max ] ||
+       [ ! -r /sys/fs/cgroup/memory.current ]; }
+then
+  host_kb=$(/bin/awk "/^MemTotal:/ {print \$2}" /proc/meminfo)
+  available_kb=$(/bin/awk "/^MemAvailable:/ {print \$2}" /proc/meminfo)
+  total_bytes=$((host_kb * 1024))
+  used_bytes=$(((host_kb - available_kb) * 1024))
+  echo "<CV_VAL>CONTAINER: TOTAL=${total_bytes},USED=${used_bytes},HOST_TOTAL=${host_kb} kB</CV_VAL><CV_VRES>0</CV_VRES><CV_ERES>0</CV_ERES><INITCMD>$0 $*</INITCMD><HOST>$(hostname)</HOST>"
+else
+  exec $DIRNAME/exectask "$@"
+fi' >> "${ORACLE_HOME}"/cv/remenv/exectask.sh.tmp
+mv "${ORACLE_HOME}"/cv/remenv/exectask.sh.tmp "${ORACLE_HOME}"/cv/remenv/exectask.sh
+chmod u+x "${ORACLE_HOME}"/cv/remenv/exectask.sh
 
 # Set random password
 ORACLE_PASSWORD=$(date '+%s' | sha256sum | base64 | head -c 8)

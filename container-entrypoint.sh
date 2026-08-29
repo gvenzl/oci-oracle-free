@@ -274,11 +274,17 @@ function check_minimum_memory {
     if [ "${container_memory}" == "max" ]; then
       # Meminfo holds memory in kB --> multiply by 1024
       # (see https://superuser.com/questions/1737654/what-is-the-true-meaning-of-the-unit-kb-in-proc-meminfo)
-      container_memory=$(( $(grep "MemTotal" /proc/meminfo | awk '{print $2}') * 1024))
+      container_memory=$(( $(grep "MemTotal" /proc/meminfo | awk '{print $2}') * 1024 ))
     fi;
   # cgroups v1
   elif [ -f /sys/fs/cgroup/memory/memory.limit_in_bytes ]; then
     container_memory=$(< /sys/fs/cgroup/memory/memory.limit_in_bytes)
+  # cgroups v2 - some environments no longer enforce any memory restrictions, fall back to /proc/meminfo
+  elif [ -f /proc/meminfo ]; then
+    echo "CONTAINER: INFO: CGroup imposed limit not found, assuming total memory of machine."
+    # Meminfo holds memory in kB --> multiply by 1024
+    # (see https://superuser.com/questions/1737654/what-is-the-true-meaning-of-the-unit-kb-in-proc-meminfo)
+    container_memory=$(( $(grep "MemTotal" /proc/meminfo | awk '{print $2}') * 1024 ))
   else
     echo "CONTAINER: INFO: Cannot determine memory, assuming default of 2 GB."
     container_memory=2147483648
@@ -342,6 +348,10 @@ sqlplus -s / as sysdba << EOF
    WHENEVER SQLERROR EXIT SQL.SQLCODE
 
    startup;
+
+   -- Print Oracle Database version for the log
+   SELECT banner AS "ORACLE DATABASE VERSION" FROM v\$version;
+
    exit;
 EOF
 echo ""
@@ -488,8 +498,8 @@ if healthcheck.sh "${ORACLE_SID}" "container status ignore"; then
   echo "DATABASE IS READY TO USE!"
   echo "#########################"
 
-  if [[ $(cat /etc/oci-image-version) != "23.26.2" &&
-        $(cat /etc/oci-image-version) != "23.26.1" ]]; then
+  if [[ $(cat /etc/oci-image-version) != "23.26.3" &&
+        $(cat /etc/oci-image-version) != "23.26.2" ]]; then
     echo ""
     echo "################################################"
     echo "NOTICE: YOU ARE USING AN OLD IMAGE VERSION $(cat /etc/oci-image-version)!"
