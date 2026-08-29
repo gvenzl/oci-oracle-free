@@ -10,8 +10,8 @@ jobs:
       FLAVORS: '[ "f", "r", "s" ]'
       # Make sure that the latest version stays on the right so that it is built last
       # This will ensure that the latest versions appear on top in GitHub and DockerHub.
-      VERSIONS: '[ "23.26.1", "23.26.2" ]'
-      LATEST_VERSION: '"23.26.2"'           # Single ' makes it a YAML string, double " makes it a JSON string
+      VERSIONS: '[ "23.26.2", "23.26.3" ]'
+      LATEST_VERSION: '"23.26.3"' # Single ' makes it a YAML string, double " makes it a JSON string
       RPM_ARCH: '[ "aarch64", "x86_64" ]'
       IMAGE_ARCH: '[ "amd64", "arm64" ]'
     steps:

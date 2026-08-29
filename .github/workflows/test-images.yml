@@ -21,8 +21,8 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       FLAVORS: '[ "f", "r", "s" ]'
-      VERSIONS: '[ "23.26.1", "23.26.2" ]'
-      LATEST_VERSION: "23.26.2"
+      VERSIONS: '[ "23.26.2", "23.26.3" ]'
+      LATEST_VERSION: "23.26.3"
       RPM_ARCH: '[ "aarch64", "x86_64" ]'
       IMAGE_ARCH: '[ "arm64", "amd64" ]'
     steps:
