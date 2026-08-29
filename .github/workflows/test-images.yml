@@ -60,7 +60,7 @@ jobs:
           scp ${{ secrets.FILE_USER }}@${{ secrets.FILE_SERVER }}:"${{ env.DATABASE_NAME }}-${{ matrix.versions }}-1.el8.${{ matrix.arch }}.rpm" .
 
       - name: 💾 Store install file
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           retention-days: 1
           name: ${{ env.DATABASE_NAME }}-${{ matrix.versions }}-1.el8.${{ matrix.arch }}.rpm
@@ -133,7 +133,7 @@ jobs:
           echo "DATABASE_NAME=${DATABASE_NAME}" >> "$GITHUB_ENV"
 
       - name: ⬇️ Download stored install file
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ env.DATABASE_NAME }}-${{ matrix.versions }}-1.el8.${{ steps.env_vars.outputs.OS_ARCH }}.rpm
 
