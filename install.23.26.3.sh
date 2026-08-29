@@ -328,10 +328,6 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    END;
    /
 
-   -- Potentially upgrade database timezone file (will bounce database twice)
-   @${ORACLE_HOME}/rdbms/admin/utltz_upg_check.sql
-   @${ORACLE_HOME}/rdbms/admin/utltz_upg_apply.sql
-
    exit;
 EOF
 
@@ -1523,11 +1519,13 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm "${ORACLE_HOME}"/lib/*.jar
 
   # Remove unnecessary timezone information
+  ### BUG 23.26.3: the CDB still uses timezone file 43 and the PDB$SEED timezone file cannot be changed
+  ### Hence, just use timezone file 43 instead of trying to being clever.
   # Create temporary folder
   mkdir "${ORACLE_HOME}"/oracore/tmp_current_tz
-  # Copy timelrg*.dat with the highest number to temporary folder (don't "mv" it in case it's a symlink)
-  cp    $(ls -v "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg* | tail -n 1) \
-           "${ORACLE_HOME}"/oracore/tmp_current_tz/
+  # Copy timelrg_43.dat to temporary folder (don't "mv" it in case it's a symlink)
+  cp "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg_43.dat "${ORACLE_HOME}"/oracore/tmp_current_tz/
+
   # Delete all remaining folders and files in "zoneinfo"
   rm -r "${ORACLE_HOME}"/oracore/zoneinfo/*
   # Move current timelrg*.dat file back into place
