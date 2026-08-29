@@ -255,14 +255,14 @@ jobs:
         uses: redhat-actions/push-to-registry@v3
         with:
           registry: ${{ matrix.repository }}
-          image: oracle-free
+          image: gvenzl/oracle-free
           tags: ${{ matrix.versions }}${{ matrix.flavor }}-${{ matrix.arch }}
 
       - name: 🫸 Push faststart image to  Container Registry
         uses: redhat-actions/push-to-registry@v3
         with:
           registry: ${{ matrix.repository }}
-          image: oracle-free
+          image: gvenzl/oracle-free
           tags: ${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}
 
   create-latest-version-tags:
@@ -366,28 +366,28 @@ jobs:
         uses: redhat-actions/push-to-registry@v3
         with:
           registry: ${{ matrix.repository }}
-          image: oracle-free
+          image: gvenzl/oracle-free
           tags: 23${{ matrix.flavor }}-${{ matrix.arch }}
 
       - name: 🫸 Push 23 faststart image to Container Registry
         uses: redhat-actions/push-to-registry@v3
         with:
           registry: ${{ matrix.repository }}
-          image: oracle-free
+          image: gvenzl/oracle-free
           tags: 23${{ matrix.flavor }}-faststart-${{ matrix.arch }}
 
       - name: 🫸 Push versionless image to GitHub Container Registry
         uses: redhat-actions/push-to-registry@v3
         with:
           registry: ${{ matrix.repository }}
-          image: oracle-free
+          image: gvenzl/oracle-free
           tags: ${{ steps.tag-images.outputs.FLAVOR_NO_DASH }}-${{ matrix.arch }}
 
       - name: 🫸 Push versionless faststart image to GitHub Container Registry
         uses: redhat-actions/push-to-registry@v3
         with:
           registry: ${{ matrix.repository }}
-          image: oracle-free
+          image: gvenzl/oracle-free
           tags: ${{ steps.tag-images.outputs.FLAVOR_NO_DASH }}-faststart-${{ matrix.arch }}
 
   create-versioned-manifests-tags:
