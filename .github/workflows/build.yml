@@ -86,7 +86,7 @@ jobs:
           echo "DATABASE_NAME=${DATABASE_NAME}" >> "$GITHUB_ENV"
 
       - name: 📂 Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: ⬇️ Download install file from web
         run: |
@@ -106,7 +106,7 @@ jobs:
         run: podman save -o "oracle-free-${{ inputs.version }}${{ inputs.flavor }}-${{ env.IMAGE_ARCH }}.tar" "localhost/gvenzl/oracle-free:${{ inputs.version }}${{ inputs.flavor }}-${{ env.IMAGE_ARCH }}"
 
       - name: ⬆️ Upload image
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           retention-days: 3
           name: oracle-free-${{ inputs.version }}${{ inputs.flavor }}-${{ env.IMAGE_ARCH }}
@@ -121,7 +121,7 @@ jobs:
 
     steps:
       - name: 🧹 Cleanup build deployments
-        uses: strumwolf/delete-deployment-environment@v2
+        uses: strumwolf/delete-deployment-environment@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: build
