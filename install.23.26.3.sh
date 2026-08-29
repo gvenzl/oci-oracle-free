@@ -65,6 +65,7 @@ fi;
 microdnf -y install zip unzip gzip less findutils vim-minimal sudo
 
 # Install 7zip
+echo "BUILDER: Installing 7-zip"
 mkdir /tmp/7z
 cd /tmp/7z
 

@@ -65,13 +65,14 @@ fi;
 microdnf -y install zip unzip gzip less findutils vim-minimal
 
 # Install 7zip
+echo "BUILDER: Installing 7-zip"
 mkdir /tmp/7z
 cd /tmp/7z
 
 if [ "${ARCH}" == "arm64" ]; then
-  download_location="https://7zip.org/a/7z2408-linux-arm64.tar.xz"
+  download_location="https://github.com/ip7z/7zip/releases/download/26.02/7z2602-linux-arm64.tar.xz"
 else
-  download_location="https://7zip.org/a/7z2408-linux-x64.tar.xz"
+  download_location="https://github.com/ip7z/7zip/releases/download/26.02/7z2602-linux-x64.tar.xz"
 fi;
 
 curl -s -L -k -O "${download_location}"
