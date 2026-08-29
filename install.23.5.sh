@@ -108,6 +108,28 @@ chmod a+x "${ORACLE_HOME}"/bin/netca
 
 echo "BUILDER: configuring database"
 
+### Bypass memory check
+# On the GitHub Ubuntu runners something changes taht /sys/fs/cgroup/memory.max is no longer available
+# Unfortunately, unlike good software, the Oracle installer just fails over with a random (contact Oracle Support) message
+# because it runs into an ArrayOutOfBoundException...
+# This just overwrites the invocation of the underlying binary that returns NULL back
+head -n -3 "${ORACLE_HOME}"/cv/remenv/exectask.sh > "${ORACLE_HOME}"/cv/remenv/exectask.sh.tmp
+echo \
+'elif [ "-getavailmemory" = "$1" ] &&
+     { [ ! -r /sys/fs/cgroup/memory.max ] ||
+       [ ! -r /sys/fs/cgroup/memory.current ]; }
+then
+  host_kb=$(/bin/awk "/^MemTotal:/ {print \$2}" /proc/meminfo)
+  available_kb=$(/bin/awk "/^MemAvailable:/ {print \$2}" /proc/meminfo)
+  total_bytes=$((host_kb * 1024))
+  used_bytes=$(((host_kb - available_kb) * 1024))
+  echo "<CV_VAL>CONTAINER: TOTAL=${total_bytes},USED=${used_bytes},HOST_TOTAL=${host_kb} kB</CV_VAL><CV_VRES>0</CV_VRES><CV_ERES>0</CV_ERES><INITCMD>$0 $*</INITCMD><HOST>$(hostname)</HOST>"
+else
+  exec $DIRNAME/exectask "$@"
+fi' >> "${ORACLE_HOME}"/cv/remenv/exectask.sh.tmp
+mv "${ORACLE_HOME}"/cv/remenv/exectask.sh.tmp "${ORACLE_HOME}"/cv/remenv/exectask.sh
+chmod u+x "${ORACLE_HOME}"/cv/remenv/exectask.sh
+
 # Set random password
 ORACLE_PASSWORD=$(date '+%s' | sha256sum | base64 | head -c 8)
 # Configure the Oracle Database instance
