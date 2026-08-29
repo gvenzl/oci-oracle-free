@@ -348,6 +348,10 @@ sqlplus -s / as sysdba << EOF
    WHENEVER SQLERROR EXIT SQL.SQLCODE
 
    startup;
+
+   -- Print Oracle Database version for the log
+   SELECT banner AS "ORACLE DATABASE VERSION" FROM v\$version;
+
    exit;
 EOF
 echo ""
