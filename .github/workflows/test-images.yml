@@ -42,7 +42,9 @@ jobs:
         run: |
           # Retrieve the version being built
           VERSION="${{ matrix.versions }}"
-          if [ "${#VERSION}" == 4 ]; then
+          if [[ "${VERSION}" == "23.2" || "${#VERSION}" == "23.3" ]]; then
+            DATABASE_NAME="oracle-database-free-23c"
+          elif [[ "${#VERSION}" == 4 ]]; then
             DATABASE_NAME="oracle-database-free-23ai"
           else
             DATABASE_NAME="oracle-ai-database-free-26ai"
