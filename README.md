@@ -40,6 +40,14 @@ Oracle Database Free Container images.
 | `23.3*`              | 🔴 Unsupported      |
 | `23.2*`              | 🔴 Unsupported      |
 
+**Note:** `*` denotes the availability of multiple additional images:
+
+* `-full`
+* `-full-faststart`
+* `-faststart`
+* `-slim`
+* `-slim-faststart`
+
 ## Support status
 
 | Status              | Meaning |
