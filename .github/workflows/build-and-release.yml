@@ -10,7 +10,7 @@ on:
         required: true
         type: string
       latest_version:
-        description: 'Version for latest tag ("23.XX.Y")'
+        description: 'Version for latest tag (23.XX.Y)'
         type: string
 
 jobs:
