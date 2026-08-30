@@ -373,18 +373,18 @@ jobs:
           ARCH: ${{ matrix.arch }}
         run: |
           # Tag 23[-full | -slim][-faststart]
-          podman tag gvenzl/oracle-free:${{ inputs.latest_version }}${FLAVOR}-${ARCH} oracle-free:23${FLAVOR}-${ARCH}
-          podman tag gvenzl/oracle-free:${{ inputs.latest_version }}${FLAVOR}-faststart-${ARCH} oracle-free:23${FLAVOR}-faststart-${ARCH}
+          podman tag gvenzl/oracle-free:${{ inputs.latest_version }}${FLAVOR}-${ARCH}             gvenzl/oracle-free:23${FLAVOR}-${ARCH}
+          podman tag gvenzl/oracle-free:${{ inputs.latest_version }}${FLAVOR}-faststart-${ARCH}   gvenzl/oracle-free:23${FLAVOR}-faststart-${ARCH}
 
           # Tag [-latest] or [-slim | -full]
           if [[ "${FLAVOR}" == "" ]]; then # regular image
             FLAVOR_NO_DASH="latest"
-            podman tag gvenzl/oracle-free:${{ inputs.latest_version }}-${ARCH} oracle-free:${FLAVOR_NO_DASH}-${ARCH}
-            podman tag gvenzl/oracle-free:${{ inputs.latest_version }}-faststart-${ARCH} oracle-free:${FLAVOR_NO_DASH}-faststart-${ARCH}
+            podman tag gvenzl/oracle-free:${{ inputs.latest_version }}-${ARCH}                    gvenzl/oracle-free:${FLAVOR_NO_DASH}-${ARCH}
+            podman tag gvenzl/oracle-free:${{ inputs.latest_version }}-faststart-${ARCH}          gvenzl/oracle-free:${FLAVOR_NO_DASH}-faststart-${ARCH}
           else
             FLAVOR_NO_DASH=${FLAVOR:1}
-            podman tag gvenzl/oracle-free:${{ inputs.latest_version }}${FLAVOR}-${ARCH} oracle-free:${FLAVOR_NO_DASH}-${ARCH}
-            podman tag gvenzl/oracle-free:${{ inputs.latest_version }}${FLAVOR}-faststart-${ARCH} oracle-free:${FLAVOR_NO_DASH}-faststart-${ARCH}
+            podman tag gvenzl/oracle-free:${{ inputs.latest_version }}${FLAVOR}-${ARCH}           gvenzl/oracle-free:${FLAVOR_NO_DASH}-${ARCH}
+            podman tag gvenzl/oracle-free:${{ inputs.latest_version }}${FLAVOR}-faststart-${ARCH} gvenzl/oracle-free:${FLAVOR_NO_DASH}-faststart-${ARCH}
           fi;
           # Store value for push
           echo "FLAVOR_NO_DASH=${FLAVOR_NO_DASH}" >> $GITHUB_OUTPUT
