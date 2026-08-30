@@ -10,8 +10,7 @@ on:
         required: true
         type: string
       latest_version:
-        description: 'Version for latest tag'
-        default: '"23.XX.Y"'
+        description: 'Version for latest tag ("23.XX.Y")'
         type: string
 
 jobs:
@@ -391,7 +390,6 @@ jobs:
           tags: ${{ steps.tag-images.outputs.FLAVOR_NO_DASH }}-faststart-${{ matrix.arch }}
 
   create-versioned-manifests-tags:
-    if: ${{ inputs.latest_version != '' }}
     name: 📋 Create versioned manifests to registries
     environment: tag
     runs-on: ubuntu-24.04
@@ -517,7 +515,7 @@ jobs:
   cleanup:
     name: 🧹 Cleanup build leftovers
     runs-on: ubuntu-24.04
-    needs: [ create-latest-manifests-tags, create-23-manifests-tags, create-versioned-manifests-tags ]
+    needs: [ create-versioned-manifests-tags ]
     permissions:
       deployments: write
 
