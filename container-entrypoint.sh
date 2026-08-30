@@ -350,7 +350,7 @@ sqlplus -s / as sysdba << EOF
    startup;
 
    -- Print Oracle Database version for the log
-   SELECT banner AS "ORACLE DATABASE VERSION" FROM v\$version;
+   SELECT banner_full AS "ORACLE DATABASE VERSION" FROM v\$version;
 
    exit;
 EOF
