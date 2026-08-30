@@ -264,6 +264,48 @@ jobs:
           image: gvenzl/oracle-free
           tags: ${{ matrix.versions }}${{ matrix.flavor }}-faststart-${{ matrix.arch }}
 
+  create-versioned-manifests-tags:
+    name: 📋 Create versioned manifests to registries
+    environment: tag
+    runs-on: ubuntu-24.04
+    needs: [ set-constants ]
+    strategy:
+      matrix:
+        repository: [ "ghcr.io", "docker.io" ]
+        version: ${{ fromJSON(inputs.versions) }}
+        image_flavor: [ "-full", "", "-slim" ]
+        image_faststart: [ "-faststart", "" ]
+
+    permissions:
+      packages: write
+
+    steps:
+
+      - name: 🔓 Login to GHCR registry
+        uses: redhat-actions/podman-login@v2
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+
+      - name: 🔓 Login to Docker.io registry
+        uses: redhat-actions/podman-login@v2
+        with:
+          username: ${{ secrets.DH_USER }}
+          password: ${{ secrets.DH_PWD }}
+          registry: docker.io
+
+      - name: 🫸 Push multi-arch manifest
+        run: |
+          podman manifest create ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest add ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
+                              ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}-amd64
+          podman manifest add ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
+                              ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}-arm64
+          podman push ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest rm ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+
+
   create-latest-version-tags:
     if: ${{ inputs.latest_version != '' }}
     name: ⬆️ 📋 Upload latest images to registries
@@ -389,53 +431,12 @@ jobs:
           image: gvenzl/oracle-free
           tags: ${{ steps.tag-images.outputs.FLAVOR_NO_DASH }}-faststart-${{ matrix.arch }}
 
-  create-versioned-manifests-tags:
-    name: 📋 Create versioned manifests to registries
-    environment: tag
-    runs-on: ubuntu-24.04
-    needs: [ set-constants, create-latest-version-tags ]
-    strategy:
-      matrix:
-        repository: [ "ghcr.io", "docker.io" ]
-        version: ${{ fromJSON(inputs.versions) }}
-        image_flavor: [ "-full", "", "-slim" ]
-        image_faststart: [ "-faststart", "" ]
-
-    permissions:
-      packages: write
-
-    steps:
-
-      - name: 🔓 Login to GHCR registry
-        uses: redhat-actions/podman-login@v2
-        with:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          registry: ghcr.io
-
-      - name: 🔓 Login to Docker.io registry
-        uses: redhat-actions/podman-login@v2
-        with:
-          username: ${{ secrets.DH_USER }}
-          password: ${{ secrets.DH_PWD }}
-          registry: docker.io
-
-      - name: 🫸 Push multi-arch manifest
-        run: |
-          podman manifest create ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
-          podman manifest add ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
-                              ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}-amd64
-          podman manifest add ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
-                              ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}-arm64
-          podman push ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
-          podman manifest rm ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
-
   create-23-manifests-tags:
     if: ${{ inputs.latest_version != '' }}
     name: 📋 Create 23 manifests to registries
     environment: tag
     runs-on: ubuntu-24.04
-    needs: [ set-constants, create-versioned-manifests-tags, create-latest-version-tags ]
+    needs: [ set-constants, create-latest-version-tags ]
     strategy:
       matrix:
         repository: [ "ghcr.io", "docker.io" ]
@@ -513,9 +514,11 @@ jobs:
           podman manifest rm ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
 
   cleanup:
+    # Ignore result.skipped from optional jobs above but not failure or cancelled
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
     name: 🧹 Cleanup build leftovers
     runs-on: ubuntu-24.04
-    needs: [ create-versioned-manifests-tags ]
+    needs: [ create-versioned-manifests-tags, create-latest-manifests-tags, create-23-manifests-tags  ]
     permissions:
       deployments: write
 
