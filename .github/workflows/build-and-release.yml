@@ -477,7 +477,7 @@ jobs:
     name: 📋 Create latest manifests to registries
     environment: tag
     runs-on: ubuntu-24.04
-    needs: [ set-constants, create-23-manifests-tags, create-versioned-manifests-tags, create-latest-version-tags ]
+    needs: [ set-constants, create-versioned-manifests-tags, create-latest-version-tags ]
     strategy:
       matrix:
         repository: [ "ghcr.io", "docker.io" ]
