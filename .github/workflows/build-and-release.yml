@@ -188,7 +188,7 @@ jobs:
 
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
+        repository: [ "ghcr.io", "docker.io" ]
         versions: ${{ fromJSON(inputs.versions) }}
         arch: ${{ fromJSON(needs.set-constants.outputs.IMAGE_ARCH) }}
         flavor: [ "-full", "", "-slim" ] # "" is the "regular" image
@@ -277,7 +277,7 @@ jobs:
 
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
+        repository: [ "ghcr.io", "docker.io" ]
         arch: ${{ fromJSON(needs.set-constants.outputs.IMAGE_ARCH) }}
         flavor: [ "-full", "", "-slim" ] # "" is the "regular" image
 
@@ -398,7 +398,7 @@ jobs:
     needs: [ set-constants, create-latest-version-tags ]
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
+        repository: [ "ghcr.io", "docker.io" ]
         version: ${{ fromJSON(inputs.versions) }}
         image_flavor: [ "-full", "", "-slim" ]
         image_faststart: [ "-faststart", "" ]
@@ -424,13 +424,13 @@ jobs:
 
       - name: 🫸 Push multi-arch manifest
         run: |
-          podman manifest create ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
-          podman manifest add ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
-                              ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}-amd64
-          podman manifest add ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
-                              ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}-arm64
-          podman push ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
-          podman manifest rm ${{ matrix.repository }}/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest create ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest add ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
+                              ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}-amd64
+          podman manifest add ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
+                              ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}-arm64
+          podman push ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest rm ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.version }}${{ matrix.image_flavor }}${{ matrix.image_faststart }}
 
   create-23-manifests-tags:
     if: ${{ inputs.latest_version != '' }}
@@ -440,7 +440,7 @@ jobs:
     needs: [ set-constants, create-versioned-manifests-tags, create-latest-version-tags ]
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
+        repository: [ "ghcr.io", "docker.io" ]
         image_flavor: [ "-full", "", "-slim" ]
         image_faststart: [ "-faststart", "" ]
 
@@ -465,13 +465,13 @@ jobs:
 
       - name: 🫸 Push multi-arch manifest
         run: |
-          podman manifest create ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}
-          podman manifest add ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
-                              ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}-amd64
-          podman manifest add ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
-                              ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}-arm64
-          podman push ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}
-          podman manifest rm ${{ matrix.repository }}/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest create ${{ matrix.repository }}/gvenzl/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest add ${{ matrix.repository }}/gvenzl/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
+                              ${{ matrix.repository }}/gvenzl/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}-amd64
+          podman manifest add ${{ matrix.repository }}/gvenzl/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
+                              ${{ matrix.repository }}/gvenzl/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}-arm64
+          podman push ${{ matrix.repository }}/gvenzl/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest rm ${{ matrix.repository }}/gvenzl/oracle-free:23${{ matrix.image_flavor }}${{ matrix.image_faststart }}
 
   create-latest-manifests-tags:
     if: ${{ inputs.latest_version != '' }}
@@ -481,7 +481,7 @@ jobs:
     needs: [ set-constants, create-23-manifests-tags, create-versioned-manifests-tags, create-latest-version-tags ]
     strategy:
       matrix:
-        repository: [ "ghcr.io/${{ github.repository_owner }}", "docker.io/${{ github.repository_owner }}" ]
+        repository: [ "ghcr.io", "docker.io" ]
         image_flavor: [ "full", "latest", "slim" ]
         image_faststart: [ "-faststart", "" ]
 
@@ -506,13 +506,13 @@ jobs:
 
       - name: 🫸 Push multi-arch manifest
         run: |
-          podman manifest create ${{ matrix.repository }}/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
-          podman manifest add ${{ matrix.repository }}/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
-                              ${{ matrix.repository }}/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }}-amd64
-          podman manifest add ${{ matrix.repository }}/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
-                              ${{ matrix.repository }}/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }}-arm64
-          podman push ${{ matrix.repository }}/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
-          podman manifest rm ${{ matrix.repository }}/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest create ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest add ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
+                              ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }}-amd64
+          podman manifest add ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }} \
+                              ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }}-arm64
+          podman push ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
+          podman manifest rm ${{ matrix.repository }}/gvenzl/oracle-free:${{ matrix.image_flavor }}${{ matrix.image_faststart }}
 
   cleanup:
     name: 🧹 Cleanup build leftovers
