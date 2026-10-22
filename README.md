@@ -27,8 +27,9 @@ Oracle Database Free Container images.
 | `slim[-faststart]`   | 🔵 Always Supported |
 | `full[-faststart]`   | 🔵 Always Supported |
 | `23*`                | 🟢 Supported        |
-| `23.26.3*`           | 🟢 Supported        |
-| `23.26.2*`           | 🟡 Deprecated       |
+| `23.26.4*`           | 🟢 Supported        |
+| `23.26.3*`           | 🟡 Deprecated       |
+| `23.26.2*`           | 🔴 Unsupported      |
 | `23.26.1*`           | 🔴 Unsupported      |
 | `23.26.0*`           | 🔴 Unsupported      |
 | `23.9*`              | 🔴 Unsupported      |
