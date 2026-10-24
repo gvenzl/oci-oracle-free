@@ -406,7 +406,7 @@ if healthcheck.sh "${ORACLE_SID}" "container status ignore"; then
         createDatabase "${new_pdb}"
 
         if ! healthcheck.sh "${new_pdb}" "container status ignore"; then
-           echo "CONTAINER: pluggable database not ready for service, aborting container start!"
+           echo "CONTAINER: Pluggable database not ready for service, aborting container start!"
            exit 1;
         fi;
       done
@@ -430,11 +430,35 @@ if healthcheck.sh "${ORACLE_SID}" "container status ignore"; then
     if [ -n "${APP_USER:-}" ]; then
 
       echo "CONTAINER: Creating app user for default pluggable database."
+
+      # Check whether default PDB is already open (bug #137)
+      # Not required for app PDBs as there the ALTER PDB READ/WRITE is synchronous
+      pdb_check_try=1
+      pdb_max_check_try=10
+      pdb_ready=1;
+      while [[ $pdb_check_try -le $pdb_max_check_try ]]; do
+        if ! healthcheck.sh "FREEPDB1" "container status ignore"; then
+          echo "CONTAINER: Pluggable database FREEPDB1 not yet ready, sleeping 1 sec."
+          sleep 1;
+        else
+          # PDB is ready
+          pdb_ready=0;
+          break;
+        fi;
+        ((pdb_check_try++))
+      done;
+
+      if ! $pdb_ready; then
+        echo "CONTAINER: Pluggable database FREEPDB1 not ready for service, aborting container start!"
+        exit 1;
+      fi;
+      # End: Check whether default PDB is already open (bug #137)
+
       # Create app user for default database
       createAppUser "${APP_USER}" "${APP_USER_PASSWORD}"
       echo "CONTAINER: DONE: Creating app user for default pluggable database."
 
-      # If ORACLE_DATABASE is specified, also create user in app PDB (only applicable >=18c)
+      # If ORACLE_DATABASE is specified, also create user in app PDB
       if [ -n "${ORACLE_DATABASE:-}" ]; then
 
         OIFS="${IFS}"
