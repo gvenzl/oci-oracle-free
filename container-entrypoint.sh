@@ -350,6 +350,7 @@ sqlplus -s / as sysdba << EOF
    startup;
 
    -- Print Oracle Database version for the log
+   set linesize 84
    SELECT banner_full AS "ORACLE DATABASE VERSION" FROM v\$version;
 
    exit;
@@ -501,10 +502,10 @@ if healthcheck.sh "${ORACLE_SID}" "container status ignore"; then
   if [[ $(cat /etc/oci-image-version) != "23.26.3" &&
         $(cat /etc/oci-image-version) != "23.26.2" ]]; then
     echo ""
-    echo "################################################"
+    echo "####################################################"
     echo "NOTICE: YOU ARE USING AN OLD IMAGE VERSION $(cat /etc/oci-image-version)!"
     echo "PLEASE CONSIDER UPGRADING TO THE LATEST VERSION!"
-    echo "################################################"
+    echo "####################################################"
   fi;
 
 else
