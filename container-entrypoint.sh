@@ -448,7 +448,8 @@ if healthcheck.sh "${ORACLE_SID}" "container status ignore"; then
         ((pdb_check_try++))
       done;
 
-      if ! $pdb_ready; then
+      # Check whether FREEPDB1 did open in time
+      if [[ ! $pdb_ready ]]; then
         echo "CONTAINER: Pluggable database FREEPDB1 not ready for service, aborting container start!"
         exit 1;
       fi;
