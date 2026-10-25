@@ -1519,7 +1519,7 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm "${ORACLE_HOME}"/lib/*.jar
 
   # Remove unnecessary timezone information
-  ### BUG 23.26.3: the CDB still uses timezone file 43 and the PDB$SEED timezone file cannot be changed
+  ### BUG 23.26.4: the CDB still uses timezone file 43 and the PDB$SEED timezone file cannot be changed
   ### Hence, just use timezone file 43 instead of trying to being clever.
   # Create temporary folder
   mkdir "${ORACLE_HOME}"/oracore/tmp_current_tz
