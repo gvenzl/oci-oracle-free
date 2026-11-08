@@ -239,7 +239,7 @@ function run_custom_scripts_recursive {
         if [ -x "${f}" ]; then
                     echo -e "\nCONTAINER: running ${f} ...";     "${f}";     echo "CONTAINER: DONE: running ${f}"
         else
-                    echo -e "\nCONTAINER: sourcing ${f} ...";    . "${f}"    echo "CONTAINER: DONE: sourcing ${f}"
+                    echo -e "\nCONTAINER: sourcing ${f} ...";    . "${f}";   echo "CONTAINER: DONE: sourcing ${f}"
         fi;
         ;;
 
