@@ -384,6 +384,59 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
 EOF
 
+# Update timezone for database if outdated
+# Get latest timezone file version
+latest_file=$(ls -1v "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg_*.dat | tail -n 1)
+latest_version=${latest_file##*timezlrg_}
+latest_version=${latest_version%.dat}
+# Get Database version
+
+db_version=$(
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
+    WHENEVER SQLERROR EXIST SQL.SQLCODE
+    SET HEADING OFF FEEDBACK OFF PAGESIZE 0 VERIFY OFF ECHO OFF
+
+    SELECT version FROM v\$timezone_file;
+
+    exit;
+EOF
+)
+
+echo "BUILDER: Latest available timezone version file: $latest_file (version $latest_version)"
+echo "BUILDER: Database time zone version: $db_version"
+
+# Check versions whether they need updating
+if (( latest_version > db_version )); then
+
+  echo "BUILDER: Upgrading timezone version file..."
+
+  # Upgrade the CDB
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
+    @?/rdbms/admin/utltz_upg_check.sql
+    @?/rdbms/admin/utltz_upg_apply.sql
+EOF
+
+  # Upgrade PDB\$SEED
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
+    ALTER SESSION SET "_oracle_script"=TRUE;
+
+    ALTER PLUGGABLE DATABASE PDB\$SEED CLOSE IMMEDIATE;
+    ALTER PLUGGABLE DATABASE PDB\$SEED OPEN READ WRITE;
+
+    ALTER SESSION SET CONTAINER = PDB\$SEED;
+    @?/rdbms/admin/utltz_upg_check.sql
+    @?/rdbms/admin/utltz_upg_apply.sql
+
+    ALTER SESSION SET CONTAINER = CDB\$ROOT;
+   -- Reinstantiate PDB\$SEED state
+   ALTER PLUGGABLE DATABASE PDB\$SEED CLOSE;
+   ALTER PLUGGABLE DATABASE PDB\$SEED OPEN READ ONLY;
+EOF
+
+  echo "BUILDER: Upgraidng timezone version file done."
+
+fi;
+
 ###################################
 ######## FULL INSTALL DONE ########
 ###################################
@@ -1519,12 +1572,17 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm "${ORACLE_HOME}"/lib/*.jar
 
   # Remove unnecessary timezone information
-  ### BUG 23.26.3: the CDB still uses timezone file 43 and the PDB$SEED timezone file cannot be changed
-  ### Hence, just use timezone file 43 instead of trying to being clever.
   # Create temporary folder
   mkdir "${ORACLE_HOME}"/oracore/tmp_current_tz
-  # Copy timelrg_43.dat to temporary folder (don't "mv" it in case it's a symlink)
-  cp "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg_43.dat "${ORACLE_HOME}"/oracore/tmp_current_tz/
+  # Copy timelrg*.dat with the highest number to temporary folder (don't "mv" it in case it's a symlink)
+  cp    $(ls -v "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg* | tail -n 1) \
+           "${ORACLE_HOME}"/oracore/tmp_current_tz/
+  # Delete all remaining folders and files in "zoneinfo"
+  rm -r "${ORACLE_HOME}"/oracore/zoneinfo/*
+  # Move current timelrg*.dat file back into place
+  mv    "${ORACLE_HOME}"/oracore/tmp_current_tz/* "${ORACLE_HOME}"/oracore/zoneinfo/
+  # Remove temporary folder
+  rm -r "${ORACLE_HOME}"/oracore/tmp_current_tz
 
   # Delete all remaining folders and files in "zoneinfo"
   rm -r "${ORACLE_HOME}"/oracore/zoneinfo/*
