@@ -1584,13 +1584,6 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove temporary folder
   rm -r "${ORACLE_HOME}"/oracore/tmp_current_tz
 
-  # Delete all remaining folders and files in "zoneinfo"
-  rm -r "${ORACLE_HOME}"/oracore/zoneinfo/*
-  # Move current timelrg*.dat file back into place
-  mv    "${ORACLE_HOME}"/oracore/tmp_current_tz/* "${ORACLE_HOME}"/oracore/zoneinfo/
-  # Remove temporary folder
-  rm -r "${ORACLE_HOME}"/oracore/tmp_current_tz
-
   # Remove Multimedia
   rm -r "${ORACLE_HOME}"/ord/im
 
