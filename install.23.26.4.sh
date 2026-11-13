@@ -393,7 +393,7 @@ latest_version=${latest_version%.dat}
 
 db_version=$(
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
-    WHENEVER SQLERROR EXIST SQL.SQLCODE
+    WHENEVER SQLERROR EXIT SQL.SQLCODE
     SET HEADING OFF FEEDBACK OFF PAGESIZE 0 VERIFY OFF ECHO OFF
 
     SELECT version FROM v\$timezone_file;
@@ -433,7 +433,7 @@ EOF
    ALTER PLUGGABLE DATABASE PDB\$SEED OPEN READ ONLY;
 EOF
 
-  echo "BUILDER: Upgraidng timezone version file done."
+  echo "BUILDER: Upgrading timezone version file done."
 
 fi;
 
