@@ -20,7 +20,7 @@ on:
         description: 'JSON array of versions to test'
         required: false
         type: string
-        default: &default_versions '[ "23.26.2", "23.26.3" ]'
+        default: &default_versions '[ "23.26.3", "23.26.4" ]'
 
 jobs:
 
